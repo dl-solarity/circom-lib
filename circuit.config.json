@@ -1,0 +1,27 @@
+{
+  "projectName": "Circuits",
+  "outputDir": "./zk-out",
+  "build": {
+    "inputDir": "./circuits",
+    "circuits": [
+      {
+        "cID": "mul2",
+        "fileName": "Mul2.circom",
+        "compilationMode": "wasm",
+        "proofType": "groth16"
+      },
+      {
+        "cID": "sum2",
+        "fileName": "Sum2.circom",
+        "compilationMode": "wasm",
+        "proofType": "groth16"
+      },
+      {
+        "cID": "smt",
+        "fileName": "Smt.circom",
+        "compilationMode": "wasm",
+        "proofType": "groth16"
+      }
+    ]
+  }
+}

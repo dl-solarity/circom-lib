@@ -1,0 +1,26 @@
+{
+  "name": "@solarity/circom-lib",
+  "version": "0.0.1",
+  "license": "MIT",
+  "author": "Distributed Lab",
+  "description": "Circom Library by Distributed Lab",
+  "scripts": {
+    "compile": "npx hardhat compile --force",
+    "circom-compile": "npx hardhat circom:compile",
+    "circom-verifier": "npx hardhat circom:verifier",
+    "test": "npx hardhat test"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "hardhat": "^2.20.1",
+    "@iden3/js-crypto": "^1.0.3",
+    "circomlib": "2.0.5",
+    "circomlibjs": "0.1.7",
+    "logplease": "^1.2.15"
+  },
+  "dependencies": {
+    "@iden3/contracts": "^1.4.7",
+    "@solarity/solidity-lib": "^2.6.18",
+    "@zefi/circomjs": "^1.0.6"
+  }
+}
