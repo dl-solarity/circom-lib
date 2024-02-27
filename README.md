@@ -13,37 +13,37 @@ $ npm install
 ### Compile all circuits
 
 ```console
-$ npm run circuits-compile
+$ npm run circom-compile
 ```
 
 or
 
 ```console
-$ npx hardhat circuits:compile
+$ npx hardhat circom:compile
 ```
 
 ### Compile circuit by ID
 
 ```console
-$ npx hardhat circuits:compile "mul2"
+$ npx hardhat circom:compile "smt"
 ```
 
 ### Create verifier contracts for all circuits
 
 ```console
-$ npm run circuits-verifier
+$ npm run circom-verifier
 ```
 
 or
 
 ```console
-$ npx hardhat circuits:verifier
+$ npx hardhat circom:verifier
 ```
 
 ### Create verifier contract by circuit ID
 
 ```console
-$ npx hardhat circuits:verifier "mul2"
+$ npx hardhat circom:verifier "smt"
 ```
 
 #
