@@ -48,7 +48,7 @@ describe("SMT test", () => {
     let leaves: string[] = [];
 
     for (let i = 0; i < 10; i++) {
-      const rand = ethers.hexlify(ethers.zeroPadValue(`0x${i + 10}`, 32));
+      const rand = ethers.hexlify(ethers.randomBytes(30));
 
       await smtChecker.addElement(rand, rand);
 
