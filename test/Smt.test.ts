@@ -1,17 +1,13 @@
-// @ts-ignore
-import * as snarkjs from "snarkjs";
-
-import { expect } from "chai";
-
-import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { CircomJS } from "@zefi/circomjs";
+import { expect } from "chai";
 import { ethers } from "hardhat";
+import { groth16 } from "snarkjs";
+
 import { deployPoseidonFacade } from "./helpers/poseidon/poseidon-deployer";
 import { Reverter } from "./helpers/reverter";
-
-import { SmtMock, SmtMock__factory, SmtVerifier } from "../typechain-types";
-
 import { Calldata, ProofStruct } from "./helpers/types";
+
+import { SmtMock, SmtVerifier } from "../typechain-types";
 
 describe("SMT test", () => {
   const reverter = new Reverter();
@@ -19,23 +15,22 @@ describe("SMT test", () => {
 
   const smtCircuit = circom.getCircuit("smt");
 
-  let smtChecker: SmtMock;
+  let smtMock: SmtMock;
   let smtVerifier: SmtVerifier;
-  let owner: SignerWithAddress;
 
   before("setup", async () => {
-    [owner] = await ethers.getSigners();
-
     const poseidonFacade = await deployPoseidonFacade();
 
-    smtVerifier = await ethers.deployContract("SmtVerifier");
+    const SmtVerifier = await ethers.getContractFactory("SmtVerifier");
+    smtVerifier = await SmtVerifier.deploy();
 
-    const SMTChecker = new SmtMock__factory({
-      ["@iden3/contracts/lib/Poseidon.sol:PoseidonFacade"]:
-        await poseidonFacade.getAddress(),
+    const SmtMock = await ethers.getContractFactory("SmtMock", {
+      libraries: {
+        PoseidonFacade: poseidonFacade,
+      },
     });
 
-    smtChecker = await SMTChecker.connect(owner).deploy();
+    smtMock = await SmtMock.deploy();
 
     reverter.snapshot();
   });
@@ -44,34 +39,131 @@ describe("SMT test", () => {
     await reverter.revert();
   });
 
-  it("should prove the tree", async () => {
+  it("should prove the tree inclusion", async () => {
     let leaves: string[] = [];
 
     for (let i = 0; i < 10; i++) {
       const rand = ethers.hexlify(ethers.randomBytes(30));
 
-      await smtChecker.addElement(rand, rand);
+      await smtMock.addElement(rand, rand);
 
       leaves.push(rand);
     }
 
-    const merkleProof = await smtChecker.getProof(leaves[5]);
+    const merkleProof = await smtMock.getProof(leaves[5]);
+
+    const proofStruct: ProofStruct = await smtCircuit.genProof({
+      root: merkleProof.root,
+      siblings: merkleProof.siblings,
+      key: merkleProof.key,
+      value: merkleProof.value,
+      auxKey: 0,
+      auxValue: 0,
+      auxIsEmpty: 0,
+      isExclusion: 0,
+    });
+
+    const calldataString = await groth16.exportSolidityCallData(
+      proofStruct.proof,
+      proofStruct.publicSignals
+    );
+
+    const calldata: Calldata = JSON.parse(`[${calldataString}]`);
+    const [pA, pB, pC, publicSignals] = calldata;
+
+    expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
+  });
+
+  it("should prove the tree exclusion", async () => {
+    for (let i = 0; i < 10; i++) {
+      const rand = ethers.hexlify(ethers.randomBytes(30));
+
+      await smtMock.addElement(rand, rand);
+    }
+
+    const nonExistentLeaf = ethers.hexlify(ethers.randomBytes(30));
+
+    const merkleProof = await smtMock.getProof(nonExistentLeaf);
+
+    const auxIsEmpty = merkleProof.auxKey ? 0 : 1;
 
     let proofStruct = (await smtCircuit.genProof({
       root: merkleProof.root,
       siblings: merkleProof.siblings,
       key: merkleProof.key,
-      value: merkleProof.value,
+      value: 0,
+      auxKey: merkleProof.auxKey,
+      auxValue: merkleProof.auxValue,
+      auxIsEmpty: auxIsEmpty,
+      isExclusion: 1,
     })) as ProofStruct;
 
-    let calldata = await snarkjs.groth16.exportSolidityCallData(
+    const calldataString = await groth16.exportSolidityCallData(
       proofStruct.proof,
       proofStruct.publicSignals
     );
 
-    calldata = JSON.parse(`[${calldata}]`) as Calldata;
+    const calldata: Calldata = JSON.parse(`[${calldataString}]`);
     const [pA, pB, pC, publicSignals] = calldata;
 
     expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
+  });
+
+  it("should revert an incorrect tree inclusion", async () => {
+    let leaves: string[] = [];
+
+    for (let i = 0; i < 10; i++) {
+      const rand = ethers.hexlify(ethers.randomBytes(30));
+
+      await smtMock.addElement(rand, rand);
+
+      leaves.push(rand);
+    }
+
+    const merkleProof = await smtMock.getProof(leaves[5]);
+
+    const incorrectValue = merkleProof.value + 1n;
+
+    await expect(
+      smtCircuit.genProof({
+        root: merkleProof.root,
+        siblings: merkleProof.siblings,
+        key: merkleProof.key,
+        value: incorrectValue,
+        auxKey: 0,
+        auxValue: 0,
+        auxIsEmpty: 0,
+        isExclusion: 0,
+      })
+    ).to.be.rejected;
+  });
+
+  it("should revert an incorrect tree exclusion", async () => {
+    for (let i = 0; i < 10; i++) {
+      const rand = ethers.hexlify(ethers.randomBytes(30));
+
+      await smtMock.addElement(rand, rand);
+    }
+
+    const nonExistentLeaf = ethers.hexlify(ethers.randomBytes(30));
+
+    const merkleProof = await smtMock.getProof(nonExistentLeaf);
+
+    const auxIsEmpty = merkleProof.auxKey ? 0 : 1;
+
+    const incorrectValue = merkleProof.auxValue + 1n;
+
+    await expect(
+      smtCircuit.genProof({
+        root: merkleProof.root,
+        siblings: merkleProof.siblings,
+        key: merkleProof.key,
+        value: 0,
+        auxKey: merkleProof.auxKey,
+        auxValue: incorrectValue,
+        auxIsEmpty: auxIsEmpty,
+        isExclusion: 1,
+      })
+    ).to.be.rejected;
   });
 });

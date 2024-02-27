@@ -6,7 +6,7 @@
     "circuits": [
       {
         "cID": "smt",
-        "fileName": "Smt.circom",
+        "fileName": "mock/Smt.circom",
         "compilationMode": "wasm",
         "proofType": "groth16"
       }

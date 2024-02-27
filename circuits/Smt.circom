@@ -1,167 +1,255 @@
-// LICENSE: GPL-3.0
 pragma circom 2.0.0;
 
-include "../node_modules/circomlib/circuits/bitify.circom";
-include "../node_modules/circomlib/circuits/comparators.circom";
-include "../node_modules/circomlib/circuits/switcher.circom";
 include "../node_modules/circomlib/circuits/poseidon.circom";
+include "../node_modules/circomlib/circuits/switcher.circom";
+include "../node_modules/circomlib/circuits/gates.circom";
+include "../node_modules/circomlib/circuits/bitify.circom";
 
-template SMTHash1() {
-    signal input key;
-    signal input value;
-    signal output out;
-
-    component h = Poseidon(3);
-    h.inputs[0] <== key;
-    h.inputs[1] <== value;
-    h.inputs[2] <== 1;
-
-    out <== h.out;
+function inverse(a) {
+    return 1 - a;
 }
 
-template SMTHash2() {
-    signal input L;
-    signal input R;
+/*
+ * Hash2 = Poseidon(H_L | H_R)
+ */
+template Hash2() {
+    signal input a;
+    signal input b;
+
     signal output out;
 
     component h = Poseidon(2);
-    h.inputs[0] <== L;
-    h.inputs[1] <== R;
+    h.inputs[0] <== a;
+    h.inputs[1] <== b;
 
     out <== h.out;
 }
 
-// siblings: 0x123 0x456 0 0 0 0 0 0 0 0 0 0 0
-// isZero:   1     1     0 0 0 0 0 0 0 0 0 0 0
-// levIns:   0     0     1 0 0 0 0 0 0 0 0 0 0
-// done:     1     1     0 0 0 0 0 0 0 0 0 0 0
-template SMTLevIns(nLevels) {
-    signal input siblings[nLevels];
-    signal output levIns[nLevels];
+/*
+ * Hash2 = Poseidon(key | value | 1)
+ */
+template Hash3() {
+    signal input a;
+    signal input b;
+    signal input c;
 
-    signal done[nLevels - 1];
+    signal output out;
 
-    var i;
+    c === 1;
 
-    component isZero[nLevels];
+    component h = Poseidon(3);
+    h.inputs[0] <== a;
+    h.inputs[1] <== b;
+    h.inputs[2] <== c;
 
-    for (i = 0; i < nLevels; i++) {
+    out <== h.out;
+}
+
+/*
+* Returns an array of bits, where the index of `1` bit 
+* is the current depth of the tree
+*/
+template DepthDeterminer(depth) {
+    assert(depth > 1); // Do we need this?
+
+    signal input siblings[depth];
+    signal output desiredDepth[depth];
+
+    signal done[depth - 1];
+    
+    component isZero[depth];
+
+    for (var i = 0; i < depth; i++) {
         isZero[i] = IsZero();
         isZero[i].in <== siblings[i];
     }
 
-    (isZero[nLevels-1].out - 1) === 0;
+    // TODO: Proove that the following is redundant
+    // If we can omit `na` from the state machine
+    isZero[depth - 1].out === 1;
 
-    levIns[nLevels - 1] <== (1 - isZero[nLevels - 2].out);
-    done[nLevels - 2] <== levIns[nLevels - 1];
-    
-    for (i = nLevels - 2; i > 0; i--) {
-        levIns[i] <== (1 - done[i]) * (1 - isZero[i - 1].out);
-        done[i - 1] <== levIns[i] + done[i];
+    desiredDepth[depth - 1] <== inverse(isZero[depth - 2].out);
+    done[depth - 2] <== desiredDepth[depth - 1];
+
+    for (var i = depth - 2; i > 0; i--) {
+        desiredDepth[i] <== inverse(done[i]) * inverse(isZero[i - 1].out);
+        done[i - 1] <== desiredDepth[i] + done[i];
     }
 
-    levIns[0] <== (1 - done[0]);
+    desiredDepth[0] <== inverse(done[0]);
 }
 
-// siblings: 0x123 0x456 0 0 0 0 0 0 0 0 0 0 0
-// levIns:   0     0     1 0 0 0 0 0 0 0 0 0 0
-// st_top:   1     1     0 0 0 0 0 0 0 0 0 0 0
-// st_inew:  0     0     1 0 0 0 0 0 0 0 0 0 0
-template SMTVerifierSM() {
-    signal input levIns;
-    signal input prev_top;
+// Determines the type of the node
+template NodeTypeDeterminer() {
+    signal input auxIsEmpty;
+    signal input isDesiredDepth;
+    signal input isExclusion;
 
-    signal output st_top;
-    signal output st_inew;
+    signal input previousMiddle;
+    signal input previousEmpty;
+    signal input previousAuxLeaf;
+    signal input previousLeaf;
+    signal input previous_na; // TODO: Should we remove this?
 
-    st_inew <== prev_top * levIns;
-    st_top <== prev_top - st_inew;
+    signal output middle;
+    signal output empty;
+    signal output auxLeaf;
+    signal output leaf;
+    signal output current_na;
+
+    signal previous_is_middle_lev_ins;
+    signal previous_is_middle_lev_ins_fnc;
+
+    // Check when previousMiddle == 0 & isDesiredDepth == 1
+    // If useless, then remove
+    previous_is_middle_lev_ins <== previousMiddle * isDesiredDepth;
+    // TODO: Give a good name to this variable
+    previous_is_middle_lev_ins_fnc <== previous_is_middle_lev_ins * isExclusion;
+
+    // Determine the node as a middle, until get to the desired depth
+    middle <== previousMiddle - previous_is_middle_lev_ins;
+
+    // Determine the node as a leaf, when we are at the desired depth and ...
+    leaf <== previous_is_middle_lev_ins - previous_is_middle_lev_ins_fnc;
+
+    // Determine the node as an auxLeaf, when we are at the desired depth and ...
+    auxLeaf <== previous_is_middle_lev_ins_fnc * inverse(auxIsEmpty);
+
+    // Determine the node as an empty, when we are at the desired depth and
+    // we check for exclusion with an empty node
+    empty <== previous_is_middle_lev_ins * auxIsEmpty;
+
+    // To ensure that only one node determined as a leaf or empty
+    current_na <== previous_na + previousLeaf + previousAuxLeaf + previousEmpty;
 }
 
-template SMTVerifierLevel() {
-    signal input st_top;
-    signal input st_inew;
+// Get hash at the current depth, based on the type of the node
+// If the mode is a empty, then the hash is 0
+template DepthHash() {
+    signal input isMiddle;
+    signal input isAuxLeaf;
+    signal input isLeaf;
 
-    signal output root;
     signal input sibling;
-    signal input new1leaf;
-    signal input lrbit;
+    signal input auxLeaf;
+    signal input leaf;
+    signal input currentKeyBit;
     signal input child;
 
-    signal fromProof;
+    signal output root;
 
-    component proofHash = SMTHash2();
     component switcher = Switcher();
-
     switcher.L <== child;
     switcher.R <== sibling;
+    // Based on the current key bit, we understand which order to use
+    switcher.sel <== currentKeyBit;
 
-    switcher.sel <== lrbit;
-    proofHash.L <== switcher.outL;
-    proofHash.R <== switcher.outR;
+    component proofHash = Hash2();
+    proofHash.a <== switcher.outL;
+    proofHash.b <== switcher.outR;
 
-    fromProof <== proofHash.out * st_top;
+    signal res[3];
+    // hash of the middle node
+    res[0] <== proofHash.out * isMiddle;
+    // hash of the aux leaf node for the exclusion proof
+    res[1] <== auxLeaf * isAuxLeaf;
+    // hash of the leaf node for the inclusion proof
+    res[2] <== leaf * isLeaf;
 
-    root <== fromProof + (new1leaf * st_inew);
+    // only one of the following will be non-zero
+    root <== res[0] + res[1] + res[2];
 }
 
-template SMTVerifier(nLevels) {
+
+template SMTVerifier(depth) {
     signal input root;
-    signal input siblings[nLevels];
+    signal input siblings[depth];
+
+    signal input auxKey;
+    signal input auxValue;
+    signal input auxIsEmpty;
 
     signal input key;
     signal input value;
 
-    var i;
+    signal input isExclusion;
 
-    component hash1New = SMTHash1();
-    hash1New.key <== key;
-    hash1New.value <== value;
+    component auxHash = Hash3();
+    auxHash.a <== auxKey;
+    auxHash.b <== auxValue;
+    auxHash.c <== 1;
 
-    component n2bNew = Num2Bits_strict();
-    n2bNew.in <== key;
+    component hash = Hash3();
+    hash.a <== key;
+    hash.b <== value;
+    hash.c <== 1;
 
-    component smtLevIns = SMTLevIns(nLevels);
+    component keyBits = Num2Bits_strict();
+    keyBits.in <== key;
 
-    for (i = 0; i < nLevels; i++) {
-        smtLevIns.siblings[i] <== siblings[i];
+    component depths = DepthDeterminer(depth);
+    for (var i = 0; i < depth; i++) {
+        depths.siblings[i] <== siblings[i];
     }
 
-    component sm[nLevels];
-
-    for (i = 0; i < nLevels; i++) {
-        sm[i] = SMTVerifierSM();
+    component nodeType[depth];
+    for (var i = 0; i < depth; i++) {
+        nodeType[i] = NodeTypeDeterminer();
 
         if (i == 0) {
-            sm[i].prev_top <== 1;
+            nodeType[i].previousMiddle <== 1;
+            nodeType[i].previousEmpty <== 0;
+            nodeType[i].previousLeaf <== 0;
+            nodeType[i].previousAuxLeaf <== 0;
+            nodeType[i].previous_na <== 0;
         } else {
-            sm[i].prev_top <== sm[i - 1].st_top;
+            nodeType[i].previousMiddle <== nodeType[i - 1].middle;
+            nodeType[i].previousEmpty <== nodeType[i - 1].empty;
+            nodeType[i].previousLeaf <== nodeType[i - 1].leaf;
+            nodeType[i].previousAuxLeaf <== nodeType[i - 1].auxLeaf;
+            nodeType[i].previous_na <== nodeType[i - 1].current_na;
         }
 
-        sm[i].levIns <== smtLevIns.levIns[i];
+        nodeType[i].auxIsEmpty <== auxIsEmpty;
+        nodeType[i].isExclusion <== isExclusion;
+        nodeType[i].isDesiredDepth <== depths.desiredDepth[i];
     }
 
-    component levels[nLevels];
+    // When isExclusion=0 & auxIsEmpty=1
+    nodeType[depth-1].current_na + nodeType[depth-1].auxLeaf + nodeType[depth-1].leaf + nodeType[depth-1].empty === 1;
 
-    for (i = nLevels - 1; i != -1; i--) {
-        levels[i] = SMTVerifierLevel();
+    component depthHash[depth];
+    for (var i = depth - 1; i >= 0; i--) {
+        depthHash[i] = DepthHash();
 
-        levels[i].st_top <== sm[i].st_top;
-        levels[i].st_inew <== sm[i].st_inew;
+        depthHash[i].isMiddle <== nodeType[i].middle;
+        depthHash[i].isLeaf <== nodeType[i].leaf;
+        depthHash[i].isAuxLeaf <== nodeType[i].auxLeaf;
 
-        levels[i].sibling <== siblings[i];
-        levels[i].new1leaf <== hash1New.out;
+        depthHash[i].sibling <== siblings[i];
+        depthHash[i].auxLeaf <== auxHash.out;
+        depthHash[i].leaf <== hash.out;
 
-        levels[i].lrbit <== n2bNew.out[i];
+        depthHash[i].currentKeyBit <== keyBits.out[i];
 
-        if (i == nLevels - 1) {
-            levels[i].child <== 0;
+        if (i == depth - 1) {
+            depthHash[i].child <== 0;
         } else {
-            levels[i].child <== levels[i + 1].root;
+            depthHash[i].child <== depthHash[i + 1].root;
         }
     }
 
-    levels[0].root === root;
+
+    // Check that if checking for exclusion and auxIsEmpty==0 then key!=auxKey
+    component areKeyEquals = IsEqual();
+    areKeyEquals.in[0] <== auxKey;
+    areKeyEquals.in[1] <== key;
+
+    component keysOk = MultiAND(3);
+    keysOk.in[0] <== isExclusion;
+    keysOk.in[1] <== inverse(auxIsEmpty);
+    keysOk.in[2] <== areKeyEquals.out;
+    keysOk.out === 0;
+
+    depthHash[0].root === root;
 }
-
-component main {public [root]} = SMTVerifier(10);
