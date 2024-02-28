@@ -1,20 +1,20 @@
-import { BigNumberish } from "ethers";
+import { NumericString } from "snarkjs";
 
-export type PublicSignals = [BigNumberish];
+export type PublicSignals = [NumericString];
 
 export type Groth16Proof = {
-  pi_a: [BigNumberish, BigNumberish];
-  pi_b: [[BigNumberish, BigNumberish], [BigNumberish, BigNumberish]];
-  pi_c: [BigNumberish, BigNumberish];
+  pi_a: [NumericString, NumericString];
+  pi_b: [[NumericString, NumericString], [NumericString, NumericString]];
+  pi_c: [NumericString, NumericString];
   protocol: string;
   curve: string;
 };
 
 export type Calldata = [
-  [BigNumberish, BigNumberish],
-  [[BigNumberish, BigNumberish], [BigNumberish, BigNumberish]],
-  [BigNumberish, BigNumberish],
-  [BigNumberish]
+  [NumericString, NumericString],
+  [[NumericString, NumericString], [NumericString, NumericString]],
+  [NumericString, NumericString],
+  [NumericString]
 ];
 
 export type ProofStruct = {

@@ -1,6 +1,3 @@
-// @ts-ignore
-import * as snarkjs from "snarkjs";
-
 import { expect } from "chai";
 
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
@@ -11,7 +8,8 @@ import { Reverter } from "./helpers/reverter";
 
 import { SmtMock, SmtMock__factory, SmtVerifier } from "../typechain-types";
 
-import { Calldata, ProofStruct } from "./helpers/types";
+import { ProofStruct } from "./helpers/types";
+import { generateCallData } from "./helpers/zkHelper";
 
 describe("SMT test", () => {
   const reverter = new Reverter();
@@ -64,13 +62,7 @@ describe("SMT test", () => {
       value: merkleProof.value,
     })) as ProofStruct;
 
-    let calldata = await snarkjs.groth16.exportSolidityCallData(
-      proofStruct.proof,
-      proofStruct.publicSignals
-    );
-
-    calldata = JSON.parse(`[${calldata}]`) as Calldata;
-    const [pA, pB, pC, publicSignals] = calldata;
+    const [pA, pB, pC, publicSignals] = await generateCallData(proofStruct);
 
     expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
   });
