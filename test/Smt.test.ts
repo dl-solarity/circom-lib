@@ -69,6 +69,72 @@ describe("SMT test", () => {
     );
 
     const calldata: Calldata = JSON.parse(`[${calldataString}]`);
+
+    const [pA, pB, pC, publicSignals] = calldata;
+
+    expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
+  });
+
+  it("should prove the tree inclusion for bamboo", async () => {
+    let leaves: string[] = [];
+
+    for (let i = 0; i < 9; i++) {
+      const rand = parseInt("1".repeat(i + 1), 2).toString();
+
+      await smtMock.addElement(rand, rand);
+
+      leaves.push(rand);
+    }
+
+    const merkleProof = await smtMock.getProof(leaves[8]);
+
+    const proofStruct: ProofStruct = await smtCircuit.genProof({
+      root: merkleProof.root,
+      siblings: merkleProof.siblings,
+      key: merkleProof.key,
+      value: merkleProof.value,
+      auxKey: 0,
+      auxValue: 0,
+      auxIsEmpty: 0,
+      isExclusion: 0,
+    });
+
+    const calldataString = await groth16.exportSolidityCallData(
+      proofStruct.proof,
+      proofStruct.publicSignals
+    );
+
+    const calldata: Calldata = JSON.parse(`[${calldataString}]`);
+
+    const [pA, pB, pC, publicSignals] = calldata;
+
+    expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
+  });
+
+  it("should prove the tree inclusion for max depth", async () => {
+    await smtMock.addElement(255, 255);
+    await smtMock.addElement(511, 511);
+
+    const merkleProof = await smtMock.getProof(511);
+
+    const proofStruct: ProofStruct = await smtCircuit.genProof({
+      root: merkleProof.root,
+      siblings: merkleProof.siblings,
+      key: merkleProof.key,
+      value: merkleProof.value,
+      auxKey: 0,
+      auxValue: 0,
+      auxIsEmpty: 0,
+      isExclusion: 0,
+    });
+
+    const calldataString = await groth16.exportSolidityCallData(
+      proofStruct.proof,
+      proofStruct.publicSignals
+    );
+
+    const calldata: Calldata = JSON.parse(`[${calldataString}]`);
+
     const [pA, pB, pC, publicSignals] = calldata;
 
     expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;

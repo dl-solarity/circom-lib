@@ -64,8 +64,6 @@ template DepthDeterminer(depth) {
         isZero[i].in <== siblings[i];
     }
 
-    // TODO: Proove that the following is redundant
-    // If we can omit `na` from the state machine
     isZero[depth - 1].out === 1;
 
     desiredDepth[depth - 1] <== inverse(isZero[depth - 2].out);
@@ -89,38 +87,30 @@ template NodeTypeDeterminer() {
     signal input previousEmpty;
     signal input previousAuxLeaf;
     signal input previousLeaf;
-    signal input previous_na; // TODO: Should we remove this?
 
     signal output middle;
     signal output empty;
     signal output auxLeaf;
     signal output leaf;
-    signal output current_na;
 
-    signal previous_is_middle_lev_ins;
-    signal previous_is_middle_lev_ins_fnc;
+    signal leafForExclusionCheck;
 
-    // Check when previousMiddle == 0 & isDesiredDepth == 1
-    // If useless, then remove
-    previous_is_middle_lev_ins <== previousMiddle * isDesiredDepth;
-    // TODO: Give a good name to this variable
-    previous_is_middle_lev_ins_fnc <== previous_is_middle_lev_ins * isExclusion;
+    leafForExclusionCheck <== isDesiredDepth * isExclusion;
 
     // Determine the node as a middle, until get to the desired depth
-    middle <== previousMiddle - previous_is_middle_lev_ins;
+    middle <== previousMiddle - isDesiredDepth;
 
-    // Determine the node as a leaf, when we are at the desired depth and ...
-    leaf <== previous_is_middle_lev_ins - previous_is_middle_lev_ins_fnc;
+    // Determine the node as a leaf, when we are at the desired depth and
+    // we check for inclusion
+    leaf <== isDesiredDepth - leafForExclusionCheck;
 
-    // Determine the node as an auxLeaf, when we are at the desired depth and ...
-    auxLeaf <== previous_is_middle_lev_ins_fnc * inverse(auxIsEmpty);
+    // Determine the node as an auxLeaf, when we are at the desired depth and
+    // we check for exclusion
+    auxLeaf <== leafForExclusionCheck * inverse(auxIsEmpty);
 
     // Determine the node as an empty, when we are at the desired depth and
     // we check for exclusion with an empty node
-    empty <== previous_is_middle_lev_ins * auxIsEmpty;
-
-    // To ensure that only one node determined as a leaf or empty
-    current_na <== previous_na + previousLeaf + previousAuxLeaf + previousEmpty;
+    empty <== isDesiredDepth * auxIsEmpty;
 }
 
 // Get hash at the current depth, based on the type of the node
@@ -174,6 +164,23 @@ template SMTVerifier(depth) {
 
     signal input isExclusion;
 
+    // Check that the auxIsEmpty is 0 if we are checking for inclusion
+    component exclusiveCase = AND();
+    exclusiveCase.a <== inverse(isExclusion);
+    exclusiveCase.b <== auxIsEmpty;
+    exclusiveCase.out === 0;
+
+    // Check that the key != auxKey if we are checking for exclusion and the auxIsEmpty is 0
+    component areKeyEquals = IsEqual();
+    areKeyEquals.in[0] <== auxKey;
+    areKeyEquals.in[1] <== key;
+
+    component keysOk = MultiAND(3);
+    keysOk.in[0] <== isExclusion;
+    keysOk.in[1] <== inverse(auxIsEmpty);
+    keysOk.in[2] <== areKeyEquals.out;
+    keysOk.out === 0;
+
     component auxHash = Hash3();
     auxHash.a <== auxKey;
     auxHash.b <== auxValue;
@@ -201,22 +208,17 @@ template SMTVerifier(depth) {
             nodeType[i].previousEmpty <== 0;
             nodeType[i].previousLeaf <== 0;
             nodeType[i].previousAuxLeaf <== 0;
-            nodeType[i].previous_na <== 0;
         } else {
             nodeType[i].previousMiddle <== nodeType[i - 1].middle;
             nodeType[i].previousEmpty <== nodeType[i - 1].empty;
             nodeType[i].previousLeaf <== nodeType[i - 1].leaf;
             nodeType[i].previousAuxLeaf <== nodeType[i - 1].auxLeaf;
-            nodeType[i].previous_na <== nodeType[i - 1].current_na;
         }
 
         nodeType[i].auxIsEmpty <== auxIsEmpty;
         nodeType[i].isExclusion <== isExclusion;
         nodeType[i].isDesiredDepth <== depths.desiredDepth[i];
     }
-
-    // When isExclusion=0 & auxIsEmpty=1
-    nodeType[depth-1].current_na + nodeType[depth-1].auxLeaf + nodeType[depth-1].leaf + nodeType[depth-1].empty === 1;
 
     component depthHash[depth];
     for (var i = depth - 1; i >= 0; i--) {
@@ -238,18 +240,6 @@ template SMTVerifier(depth) {
             depthHash[i].child <== depthHash[i + 1].root;
         }
     }
-
-
-    // Check that if checking for exclusion and auxIsEmpty==0 then key!=auxKey
-    component areKeyEquals = IsEqual();
-    areKeyEquals.in[0] <== auxKey;
-    areKeyEquals.in[1] <== key;
-
-    component keysOk = MultiAND(3);
-    keysOk.in[0] <== isExclusion;
-    keysOk.in[1] <== inverse(auxIsEmpty);
-    keysOk.in[2] <== areKeyEquals.out;
-    keysOk.out === 0;
 
     depthHash[0].root === root;
 }
