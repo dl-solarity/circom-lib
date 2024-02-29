@@ -57,7 +57,7 @@ describe("SMT test", () => {
 
     const merkleProof = await smtMock.getProof(leaves[5]);
 
-    const proofStruct: ProofStruct = await smtCircuit.genProof({
+    const proofStruct = (await smtCircuit.genProof({
       root: merkleProof.root,
       siblings: merkleProof.siblings,
       key: merkleProof.key,
@@ -66,16 +66,9 @@ describe("SMT test", () => {
       auxValue: 0,
       auxIsEmpty: 0,
       isExclusion: 0,
-    });
+    })) as ProofStruct;
 
-    const calldataString = await groth16.exportSolidityCallData(
-      proofStruct.proof,
-      proofStruct.publicSignals
-    );
-
-    const calldata: Calldata = JSON.parse(`[${calldataString}]`);
-
-    const [pA, pB, pC, publicSignals] = calldata;
+    const [pA, pB, pC, publicSignals] = await generateCallData(proofStruct);
 
     expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
   });
@@ -93,7 +86,7 @@ describe("SMT test", () => {
 
     const merkleProof = await smtMock.getProof(leaves[8]);
 
-    const proofStruct: ProofStruct = await smtCircuit.genProof({
+    const proofStruct = (await smtCircuit.genProof({
       root: merkleProof.root,
       siblings: merkleProof.siblings,
       key: merkleProof.key,
@@ -102,16 +95,9 @@ describe("SMT test", () => {
       auxValue: 0,
       auxIsEmpty: 0,
       isExclusion: 0,
-    });
+    })) as ProofStruct;
 
-    const calldataString = await groth16.exportSolidityCallData(
-      proofStruct.proof,
-      proofStruct.publicSignals
-    );
-
-    const calldata: Calldata = JSON.parse(`[${calldataString}]`);
-
-    const [pA, pB, pC, publicSignals] = calldata;
+    const [pA, pB, pC, publicSignals] = await generateCallData(proofStruct);
 
     expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
   });
@@ -122,7 +108,7 @@ describe("SMT test", () => {
 
     const merkleProof = await smtMock.getProof(511);
 
-    const proofStruct: ProofStruct = await smtCircuit.genProof({
+    const proofStruct = (await smtCircuit.genProof({
       root: merkleProof.root,
       siblings: merkleProof.siblings,
       key: merkleProof.key,
@@ -131,16 +117,9 @@ describe("SMT test", () => {
       auxValue: 0,
       auxIsEmpty: 0,
       isExclusion: 0,
-    });
+    })) as ProofStruct;
 
-    const calldataString = await groth16.exportSolidityCallData(
-      proofStruct.proof,
-      proofStruct.publicSignals
-    );
-
-    const calldata: Calldata = JSON.parse(`[${calldataString}]`);
-
-    const [pA, pB, pC, publicSignals] = calldata;
+    const [pA, pB, pC, publicSignals] = await generateCallData(proofStruct);
 
     expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
   });
@@ -158,7 +137,7 @@ describe("SMT test", () => {
 
     const auxIsEmpty = merkleProof.auxKey ? 0 : 1;
 
-    let proofStruct = (await smtCircuit.genProof({
+    const proofStruct = (await smtCircuit.genProof({
       root: merkleProof.root,
       siblings: merkleProof.siblings,
       key: merkleProof.key,
