@@ -1,3 +1,6 @@
+import { expect } from "chai";
+
+import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { CircomJS } from "@zefi/circomjs";
 import { expect } from "chai";
 import { ethers } from "hardhat";
@@ -5,9 +8,11 @@ import { groth16 } from "snarkjs";
 
 import { deployPoseidonFacade } from "./helpers/poseidon/poseidon-deployer";
 import { Reverter } from "./helpers/reverter";
-import { Calldata, ProofStruct } from "./helpers/types";
 
-import { SmtMock, SmtVerifier } from "../typechain-types";
+import { SmtMock, SmtMock__factory, SmtVerifier } from "../typechain-types";
+
+import { ProofStruct } from "./helpers/types";
+import { generateCallData } from "./helpers/zkHelper";
 
 describe("SMT test", () => {
   const reverter = new Reverter();
@@ -164,13 +169,7 @@ describe("SMT test", () => {
       isExclusion: 1,
     })) as ProofStruct;
 
-    const calldataString = await groth16.exportSolidityCallData(
-      proofStruct.proof,
-      proofStruct.publicSignals
-    );
-
-    const calldata: Calldata = JSON.parse(`[${calldataString}]`);
-    const [pA, pB, pC, publicSignals] = calldata;
+    const [pA, pB, pC, publicSignals] = await generateCallData(proofStruct);
 
     expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
   });
