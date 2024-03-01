@@ -8,6 +8,8 @@
     "compile": "npx hardhat compile --force",
     "circom-compile": "npx hardhat circom:compile",
     "circom-verifier": "npx hardhat circom:verifier",
+    "circom-build": "npx hardhat circom:build",
+    "circom-clean": "npx hardhat circom:clean",
     "test": "npx hardhat test"
   },
   "devDependencies": {

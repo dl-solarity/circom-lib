@@ -13,13 +13,15 @@ const logger = Logger.create("Distributed Lab", { showTimestamp: false });
 const templatePath: string = path.normalize(
   "./node_modules/snarkjs/templates/verifier_groth16.sol.ejs"
 );
+
 const configPath: string = path.normalize("./circuit.config.json");
 const verifierPath: string = path.normalize("./contracts/verifiers");
-const outputPath: string = path.normalize("./zk-out");
+
+const outputPath: string = path.normalize(config.outputDir);
+const circuitsDir: string = path.normalize(config.build.inputDir);
+
 const zkPath = (circuitId: string) =>
   path.normalize(`./zk-out/${circuitId}/circuit_final.zkey`);
-
-const circuitsDir: string = path.normalize("./circuits");
 
 const circuitExtensionName: string = ".circom";
 
