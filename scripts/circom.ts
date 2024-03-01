@@ -106,7 +106,7 @@ export async function clean() {
 
 async function updateCircuitConfig() {
   config.build.circuits = [];
-  let counter = 0;
+
   for await (const p of walkOverDir(circuitsDir)) {
     if (path.extname(p).toLocaleLowerCase() === circuitExtensionName) {
       config.build.circuits.push({
@@ -129,7 +129,10 @@ async function* walkOverDir(
 ): AsyncGenerator<string, void, unknown> {
   for await (const d of await fs.promises.opendir(dir)) {
     const entry = path.join(dir, d.name);
-    if (d.isDirectory()) yield* walkOverDir(entry);
-    else if (d.isFile()) yield entry;
+    if (d.isDirectory()) {
+      yield* walkOverDir(entry);
+    } else if (d.isFile()) {
+      yield entry;
+    }
   }
 }

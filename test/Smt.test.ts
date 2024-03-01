@@ -9,7 +9,7 @@ import { Reverter } from "./helpers/reverter";
 import { SmtMock, SmtMock__factory, SmtVerifier } from "../typechain-types";
 
 import { ProofStruct } from "./helpers/types";
-import { generateCallData } from "./helpers/zkHelper";
+import { generateCallData as generateCalldata } from "./helpers/zkHelper";
 
 describe("SMT test", () => {
   const reverter = new Reverter();
@@ -28,14 +28,15 @@ describe("SMT test", () => {
 
     smtVerifier = await ethers.deployContract("SmtVerifier");
 
-    const SMTChecker = new SmtMock__factory({
-      ["@iden3/contracts/lib/Poseidon.sol:PoseidonFacade"]:
-        await poseidonFacade.getAddress(),
+    const SmtMock = await ethers.getContractFactory("SmtMock", {
+      libraries: {
+        PoseidonFacade: poseidonFacade,
+      },
     });
 
-    smtChecker = await SMTChecker.connect(owner).deploy();
+    smtChecker = await SmtMock.connect(owner).deploy();
 
-    reverter.snapshot();
+    await reverter.snapshot();
   });
 
   afterEach(async () => {
@@ -62,7 +63,7 @@ describe("SMT test", () => {
       value: merkleProof.value,
     })) as ProofStruct;
 
-    const [pA, pB, pC, publicSignals] = await generateCallData(proofStruct);
+    const [pA, pB, pC, publicSignals] = await generateCalldata(proofStruct);
 
     expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
   });
