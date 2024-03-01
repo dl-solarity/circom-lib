@@ -1,6 +1,7 @@
 // @ts-ignore
 import * as Logger from "logplease";
 import * as fs from "fs";
+import path from "path";
 
 import { zKey } from "snarkjs";
 import { CircomJS } from "@zefi/circomjs";
@@ -9,12 +10,22 @@ import config from "../circuit.config.json";
 
 const logger = Logger.create("Distributed Lab", { showTimestamp: false });
 
-const templatePath =
-  "./node_modules/snarkjs/templates/verifier_groth16.sol.ejs";
-const verifierPath = "./contracts/verifiers";
-const outputPath = "./zk-out";
+const templatePath: string = path.normalize(
+  "./node_modules/snarkjs/templates/verifier_groth16.sol.ejs"
+);
+const configPath: string = path.normalize("./circuit.config.json");
+const verifierPath: string = path.normalize("./contracts/verifiers");
+const outputPath: string = path.normalize("./zk-out");
+const zkPath = (circuitId: string) =>
+  path.normalize(`./zk-out/${circuitId}/circuit_final.zkey`);
 
-export async function compile(circuitId: string) {
+const circuitsDir: string = path.normalize("./circuits");
+
+const circuitExtensionName: string = ".circom";
+
+export async function compile(circuitId: string, shouldUpdateConfig = true) {
+  shouldUpdateConfig && (await updateCircuitConfig());
+
   const circom = new CircomJS();
 
   const circuits = circuitId?.trim() ? [circuitId] : circom.getCIDs();
@@ -37,9 +48,9 @@ export async function createVerifier(circuitId: string) {
     circuitId = circuitId[0].toLocaleUpperCase() + circuitId.substring(1);
 
     let verifierCode = (await zKey.exportSolidityVerifier(
-      `./zk-out/${circuitId}/circuit_final.zkey`,
+      zkPath(circuitId),
       { groth16: groth16Template },
-      infoger
+      logger
     )) as string;
 
     verifierCode = verifierCode.replace(
@@ -62,7 +73,7 @@ export async function createVerifier(circuitId: string) {
 }
 
 export async function build(circuitId: string) {
-  await compile(circuitId);
+  await compile(circuitId, true);
   await createVerifier(circuitId);
 }
 
@@ -80,4 +91,32 @@ export async function clean() {
   }
 }
 
-export async function updateCircuitConfig() {}
+async function updateCircuitConfig() {
+  config.build.circuits = [];
+  let counter = 0;
+  for await (const p of walkOverDir(circuitsDir)) {
+    if (path.extname(p).toLocaleLowerCase() === circuitExtensionName) {
+      config.build.circuits.push({
+        cID: `${path.parse(p).name.replaceAll(" ", "_")}`,
+        fileName: path.relative(circuitsDir, p),
+        compilationMode: "wasm",
+        proofType: "groth16",
+      });
+    }
+  }
+
+  await fs.promises.writeFile(
+    path.normalize(configPath),
+    JSON.stringify(config, null, 2)
+  );
+}
+
+async function* walkOverDir(
+  dir: string
+): AsyncGenerator<string, void, unknown> {
+  for await (const d of await fs.promises.opendir(dir)) {
+    const entry = path.join(dir, d.name);
+    if (d.isDirectory()) yield* walkOverDir(entry);
+    else if (d.isFile()) yield entry;
+  }
+}
