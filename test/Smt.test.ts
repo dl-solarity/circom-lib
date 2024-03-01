@@ -18,7 +18,7 @@ describe("SMT test", () => {
   const reverter = new Reverter();
   const circom = new CircomJS();
 
-  const smtCircuit = circom.getCircuit("smt");
+  const smtCircuit = circom.getCircuit("Smt");
 
   let smtMock: SmtMock;
   let smtVerifier: SmtVerifier;
