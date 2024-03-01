@@ -3,6 +3,7 @@ import * as Logger from "logplease";
 import * as fs from "fs";
 import path from "path";
 
+import { performance } from "perf_hooks";
 import { zKey } from "snarkjs";
 import { CircomJS } from "@zefi/circomjs";
 
@@ -34,8 +35,18 @@ export async function compile(circuitId: string, shouldUpdateConfig = true) {
 
   for (const circuitId of circuits) {
     const circuit = circom.getCircuit(circuitId);
+
+    const start = performance.now();
+
     await circuit.compile();
-    logger.info(`Circuit is compiled: ${circuitId}`);
+
+    const end = performance.now();
+
+    logger.info(
+      `Circuit is compiled: ${circuitId} for ${((end - start) / 1000).toFixed(
+        2
+      )}s\n`
+    );
   }
 }
 
