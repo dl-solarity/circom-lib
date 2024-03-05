@@ -3,14 +3,12 @@ node_modules
 .env
 
 # Hardhat files
-/cache
-/artifacts
+cache
+artifacts
 
 # TypeChain files
-/generated-types
+generated-types
 
 # circom files
-zk-out/tau
-zk-out/*/circuit_[0-9][0-9][0-9][0-9].zkey
-zk-out/*/challenge_phase2_????
-zk-out/*/response_phase2_????
+zk-out
+contracts/verifiers

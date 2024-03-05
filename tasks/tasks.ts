@@ -7,7 +7,6 @@ task("circom:compile", "Compile circuits")
     "Id of a circuit. If not specified, all circuits in the project will be compiled",
   )
   .setAction(async (args) => {
-    console.log(args);
     await compile(args.circuitIds);
   });
 
