@@ -5,6 +5,7 @@
   "author": "Distributed Lab",
   "description": "Circom Library by Distributed Lab",
   "scripts": {
+    "prepare": "npx husky",
     "compile": "npx hardhat compile --force",
     "circom-compile": "npx hardhat circom:compile",
     "circom-verifier": "npx hardhat circom:verifier",
