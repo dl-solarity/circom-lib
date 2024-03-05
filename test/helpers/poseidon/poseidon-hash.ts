@@ -15,7 +15,7 @@ export async function getPoseidon(num: number): Promise<BaseContract> {
   const PoseidonHasher = new ethers.ContractFactory(
     poseidonContract.generateABI(num),
     poseidonContract.createCode(num),
-    deployer
+    deployer,
   );
 
   return await PoseidonHasher.deploy();

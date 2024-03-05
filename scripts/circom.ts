@@ -11,9 +11,7 @@ import config from "../circuit.config.json";
 
 const logger = Logger.create("Distributed Lab", { showTimestamp: false });
 
-const templatePath: string = path.normalize(
-  "./node_modules/snarkjs/templates/verifier_groth16.sol.ejs"
-);
+const templatePath: string = path.normalize("./node_modules/snarkjs/templates/verifier_groth16.sol.ejs");
 
 const configPath: string = path.normalize("./circuit.config.json");
 const verifierPath: string = path.normalize("./contracts/verifiers");
@@ -21,8 +19,7 @@ const verifierPath: string = path.normalize("./contracts/verifiers");
 const outputPath: string = path.normalize(config.outputDir);
 const circuitsDir: string = path.normalize(config.build.inputDir);
 
-const zkPath = (circuitId: string) =>
-  path.normalize(`./zk-out/${circuitId}/circuit_final.zkey`);
+const zkPath = (circuitId: string) => path.normalize(`./zk-out/${circuitId}/circuit_final.zkey`);
 
 const circuitExtensionName: string = ".circom";
 
@@ -30,7 +27,6 @@ export async function compile(circuitId: string, shouldUpdateConfig = true) {
   shouldUpdateConfig && (await updateCircuitConfig());
 
   const circom = new CircomJS();
-
   const circuits = circuitId?.trim() ? [circuitId] : circom.getCIDs();
 
   for (const circuitId of circuits) {
@@ -42,19 +38,13 @@ export async function compile(circuitId: string, shouldUpdateConfig = true) {
 
     const end = performance.now();
 
-    logger.info(
-      `Circuit is compiled: ${circuitId} for ${((end - start) / 1000).toFixed(
-        2
-      )}s\n`
-    );
+    logger.info(`Circuit is compiled: ${circuitId} for ${((end - start) / 1000).toFixed(2)}s\n`);
   }
 }
 
 export async function createVerifier(circuitId: string) {
   const circom = new CircomJS();
-
   const circuits = circuitId?.trim() ? [circuitId] : circom.getCIDs();
-
   const groth16Template = await fs.promises.readFile(templatePath, "utf8");
 
   for (let circuitId of circuits) {
@@ -63,23 +53,16 @@ export async function createVerifier(circuitId: string) {
     let verifierCode = (await zKey.exportSolidityVerifier(
       zkPath(circuitId),
       { groth16: groth16Template },
-      logger
+      logger,
     )) as string;
 
-    verifierCode = verifierCode.replace(
-      "contract Verifier",
-      `contract ${circuitId}Verifier`
-    );
+    verifierCode = verifierCode.replace("contract Verifier", `contract ${circuitId}Verifier`);
 
     if (!fs.existsSync(verifierPath)) {
       await fs.promises.mkdir(verifierPath, { recursive: true });
     }
 
-    await fs.promises.writeFile(
-      `${verifierPath}/${circuitId}Verifier.sol`,
-      verifierCode,
-      "utf-8"
-    );
+    await fs.promises.writeFile(`${verifierPath}/${circuitId}Verifier.sol`, verifierCode, "utf-8");
 
     console.info(`Verifier is created: ${circuitId}Verifier.sol\n`);
   }
@@ -118,17 +101,13 @@ async function updateCircuitConfig() {
     }
   }
 
-  await fs.promises.writeFile(
-    path.normalize(configPath),
-    JSON.stringify(config, null, 2)
-  );
+  await fs.promises.writeFile(path.normalize(configPath), JSON.stringify(config, null, 2));
 }
 
-async function* walkOverDir(
-  dir: string
-): AsyncGenerator<string, void, unknown> {
+async function* walkOverDir(dir: string): AsyncGenerator<string, void, unknown> {
   for await (const d of await fs.promises.opendir(dir)) {
     const entry = path.join(dir, d.name);
+
     if (d.isDirectory()) {
       yield* walkOverDir(entry);
     } else if (d.isFile()) {

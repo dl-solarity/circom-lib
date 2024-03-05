@@ -1,21 +1,20 @@
-import { expect } from "chai";
-
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { CircomJS } from "@zefi/circomjs";
 import { ethers } from "hardhat";
+import { expect } from "chai";
+
 import { deployPoseidonFacade } from "./helpers/poseidon/poseidon-deployer";
 import { Reverter } from "./helpers/reverter";
-
-import { SmtMock, SmtMock__factory, SmtVerifier } from "../typechain-types";
-
 import { ProofStruct } from "./helpers/types";
-import { generateCallData as generateCalldata } from "./helpers/zkHelper";
+import { generateCalldata } from "./helpers/zk-helper";
 
-describe("SMT test", () => {
+import { SmtMock, SmtVerifier } from "@ethers-v6";
+
+describe("SMT", () => {
   const reverter = new Reverter();
   const circom = new CircomJS();
 
-  const smtCircuit = circom.getCircuit("smt");
+  const smtCircuit = circom.getCircuit("Smt");
 
   let smtChecker: SmtMock;
   let smtVerifier: SmtVerifier;
@@ -25,16 +24,14 @@ describe("SMT test", () => {
     [owner] = await ethers.getSigners();
 
     const poseidonFacade = await deployPoseidonFacade();
-
-    smtVerifier = await ethers.deployContract("SmtVerifier");
-
     const SmtMock = await ethers.getContractFactory("SmtMock", {
       libraries: {
         PoseidonFacade: poseidonFacade,
       },
     });
 
-    smtChecker = await SmtMock.connect(owner).deploy();
+    smtVerifier = await ethers.deployContract("SmtVerifier");
+    smtChecker = await SmtMock.deploy();
 
     await reverter.snapshot();
   });

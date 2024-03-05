@@ -14,7 +14,7 @@ export type Calldata = [
   [NumericString, NumericString],
   [[NumericString, NumericString], [NumericString, NumericString]],
   [NumericString, NumericString],
-  [NumericString]
+  [NumericString],
 ];
 
 export type ProofStruct = {

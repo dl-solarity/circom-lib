@@ -2,7 +2,7 @@
   "projectName": "Circuits",
   "outputDir": "./zk-out",
   "build": {
-    "inputDir": "./circuits/mock",
+    "inputDir": "./circuits/",
     "circuits": [
       {
         "cID": "Smt",

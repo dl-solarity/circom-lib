@@ -1,0 +1,14 @@
+node_modules
+.env
+.DS_Store
+package-lock.json
+
+# Aurogenerated snarkjs verifiers
+contracts/verifiers
+
+# Hardhat files
+cache
+artifacts
+
+# Typechain generated files
+generated-types

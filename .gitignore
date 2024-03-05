@@ -7,12 +7,7 @@ node_modules
 /artifacts
 
 # TypeChain files
-/typechain
-/typechain-types
-
-# solidity-coverage files
-/coverage
-/coverage.json
+/generated-types
 
 # circom files
 zk-out/tau
