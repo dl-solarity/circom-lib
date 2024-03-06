@@ -22,6 +22,7 @@ runs:
         path: ./circom
     - name: Install circom
       working-directory: ./circom
-      run: cargo build --release
+      run: |
+       cargo build --release
+       cargo install --path circom
       shell: bash
-        # cargo install --path circom
