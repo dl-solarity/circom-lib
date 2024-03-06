@@ -7,7 +7,7 @@ import { Reverter } from "./helpers/reverter";
 import { ProofStruct } from "./helpers/types";
 import { generateCalldata } from "./helpers/zk-helper";
 
-import { SmtMock, SmtVerifier } from "@/typechain-types";
+import { SmtMock, SmtVerifier } from "@ethers-v6";
 
 describe("SMT", () => {
   const reverter = new Reverter();
