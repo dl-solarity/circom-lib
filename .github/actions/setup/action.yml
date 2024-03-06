@@ -11,10 +11,10 @@ runs:
     - name: Install packages
       run: npm install
       shell: bash
-    # - name: Install rust
-    #   uses: actions-rs/toolchain@v1
-    #   with:
-    #     toolchain: stable
+    - name: Install rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
     # - name: Clone circom
     #   uses: actions/checkout@v4
     #   with:
