@@ -15,11 +15,11 @@ runs:
       uses: actions-rs/toolchain@v1
       with:
         toolchain: stable
-    # - name: Clone circom
-    #   uses: actions/checkout@v4
-    #   with:
-    #     repository: iden3/circom
-    #     path: circom
+    - name: Clone circom
+      uses: actions/checkout@v4
+      with:
+        repository: iden3/circom
+        path: ./circom
     # - name: Install circom
     #   uses: actions/checkout@v4
     #   with:
