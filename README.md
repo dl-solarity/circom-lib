@@ -1,49 +1,36 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 # Circom Library by Distributed Lab
 
-The library consists of common circuits, tests and utilities that facilitate the interaction with the circuits and its' usage.
+The library consists of circom circuits that extend the capabilities of [solarity/solidity-lib](https://github.com/dl-solarity/solidity-lib) to be used in magnificent ZK applications.
 
 ## Overview
 
 ### Installation
 
 ```console
-$ npm install
+$ npm install ...
 ```
 
-### Compile all circuits
+> [!NOTE]
+> You will need circom binary preinstalled to be able to compile the circuits.
+
+### Compile the circuits
+
+You can compile the circuits in the project by executing the following command:
 
 ```console
 $ npm run circom-compile
 ```
 
-or
+> The compilation includes the generation of `r1cs` file, `zkey`, and scripts to produce the corresponding `witnesses`.
 
-```console
-$ npx hardhat circom:compile
-```
+### Create verifier contracts for the circuits
 
-### Compile circuit by ID
-
-```console
-$ npx hardhat circom:compile "smt"
-```
-
-### Create verifier contracts for all circuits
+Run the following command in order to generate the solidity verifier contracts:
 
 ```console
 $ npm run circom-verifier
-```
-
-or
-
-```console
-$ npx hardhat circom:verifier
-```
-
-### Create verifier contract by circuit ID
-
-```console
-$ npx hardhat circom:verifier "smt"
 ```
 
 #

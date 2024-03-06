@@ -1,20 +1,15 @@
-import { expect } from "chai";
-
-import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { CircomJS } from "@zefi/circomjs";
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { groth16 } from "snarkjs";
 
 import { deployPoseidonFacade } from "./helpers/poseidon/poseidon-deployer";
 import { Reverter } from "./helpers/reverter";
-
-import { SmtMock, SmtMock__factory, SmtVerifier } from "../typechain-types";
-
 import { ProofStruct } from "./helpers/types";
-import { generateCallData } from "./helpers/zkHelper";
+import { generateCalldata } from "./helpers/zk-helper";
 
-describe("SMT test", () => {
+import { SmtMock, SmtVerifier } from "@/typechain-types";
+
+describe("SMT", () => {
   const reverter = new Reverter();
   const circom = new CircomJS();
 
@@ -25,19 +20,16 @@ describe("SMT test", () => {
 
   before("setup", async () => {
     const poseidonFacade = await deployPoseidonFacade();
-
-    const SmtVerifier = await ethers.getContractFactory("SmtVerifier");
-    smtVerifier = await SmtVerifier.deploy();
-
     const SmtMock = await ethers.getContractFactory("SmtMock", {
       libraries: {
         PoseidonFacade: poseidonFacade,
       },
     });
 
+    smtVerifier = await ethers.deployContract("SmtVerifier");
     smtMock = await SmtMock.deploy();
 
-    reverter.snapshot();
+    await reverter.snapshot();
   });
 
   afterEach(async () => {
@@ -68,7 +60,7 @@ describe("SMT test", () => {
       isExclusion: 0,
     })) as ProofStruct;
 
-    const [pA, pB, pC, publicSignals] = await generateCallData(proofStruct);
+    const [pA, pB, pC, publicSignals] = await generateCalldata(proofStruct);
 
     expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
   });
@@ -97,7 +89,7 @@ describe("SMT test", () => {
       isExclusion: 0,
     })) as ProofStruct;
 
-    const [pA, pB, pC, publicSignals] = await generateCallData(proofStruct);
+    const [pA, pB, pC, publicSignals] = await generateCalldata(proofStruct);
 
     expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
   });
@@ -119,7 +111,7 @@ describe("SMT test", () => {
       isExclusion: 0,
     })) as ProofStruct;
 
-    const [pA, pB, pC, publicSignals] = await generateCallData(proofStruct);
+    const [pA, pB, pC, publicSignals] = await generateCalldata(proofStruct);
 
     expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
   });
@@ -148,7 +140,7 @@ describe("SMT test", () => {
       isExclusion: 1,
     })) as ProofStruct;
 
-    const [pA, pB, pC, publicSignals] = await generateCallData(proofStruct);
+    const [pA, pB, pC, publicSignals] = await generateCalldata(proofStruct);
 
     expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
   });
@@ -178,7 +170,7 @@ describe("SMT test", () => {
         auxValue: 0,
         auxIsEmpty: 0,
         isExclusion: 0,
-      })
+      }),
     ).to.be.rejected;
   });
 
@@ -207,7 +199,7 @@ describe("SMT test", () => {
         auxValue: incorrectValue,
         auxIsEmpty: auxIsEmpty,
         isExclusion: 1,
-      })
+      }),
     ).to.be.rejected;
   });
 });
