@@ -50,7 +50,7 @@ template Hash3() {
 * is the current depth of the tree
 */
 template DepthDeterminer(depth) {
-    assert(depth > 1); // Do we need this?
+    assert(depth > 1);
 
     signal input siblings[depth];
     signal output desiredDepth[depth];
@@ -150,7 +150,6 @@ template DepthHash() {
     root <== res[0] + res[1] + res[2];
 }
 
-
 template SMTVerifier(depth) {
     signal input root;
     signal input siblings[depth];
@@ -195,11 +194,13 @@ template SMTVerifier(depth) {
     keyBits.in <== key;
 
     component depths = DepthDeterminer(depth);
+    
     for (var i = 0; i < depth; i++) {
         depths.siblings[i] <== siblings[i];
     }
 
     component nodeType[depth];
+
     for (var i = 0; i < depth; i++) {
         nodeType[i] = NodeTypeDeterminer();
 
@@ -221,6 +222,7 @@ template SMTVerifier(depth) {
     }
 
     component depthHash[depth];
+
     for (var i = depth - 1; i >= 0; i--) {
         depthHash[i] = DepthHash();
 

@@ -7,16 +7,16 @@ import { Reverter } from "./helpers/reverter";
 import { ProofStruct } from "./helpers/types";
 import { generateCalldata } from "./helpers/zk-helper";
 
-import { SmtMock, SmtVerifier } from "@ethers-v6";
+import { SmtMock, SmtMockVerifier } from "@ethers-v6";
 
 describe("SMT", () => {
   const reverter = new Reverter();
   const circom = new CircomJS();
 
-  const smtCircuit = circom.getCircuit("Smt");
+  const smtCircuit = circom.getCircuit("SmtMock");
 
   let smtMock: SmtMock;
-  let smtVerifier: SmtVerifier;
+  let smtVerifier: SmtMockVerifier;
 
   before("setup", async () => {
     const poseidonFacade = await deployPoseidonFacade();
@@ -26,15 +26,13 @@ describe("SMT", () => {
       },
     });
 
-    smtVerifier = await ethers.deployContract("SmtVerifier");
+    smtVerifier = await ethers.deployContract("SmtMockVerifier");
     smtMock = await SmtMock.deploy();
 
     await reverter.snapshot();
   });
 
-  afterEach(async () => {
-    await reverter.revert();
-  });
+  afterEach(reverter.revert);
 
   it("should prove the tree inclusion", async () => {
     let leaves: string[] = [];
