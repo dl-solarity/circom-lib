@@ -13,18 +13,18 @@ runs:
       shell: bash
     - name: Install rust
       uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
+      with:
+        toolchain: stable
     - name: Clone circom
       uses: actions/checkout@v4
-        with:
-          repository: iden3/circom
-          path: circom
+      with:
+        repository: iden3/circom
+        path: circom
     - name: Install circom
       uses: actions/checkout@v4
-        with:
-          repository: iden3/circom
-          path: ./circom
+      with:
+        repository: iden3/circom
+        path: ./circom
       working-directory: ./circom
       run: |
         cargo build --release
