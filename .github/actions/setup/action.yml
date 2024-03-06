@@ -20,9 +20,11 @@ runs:
       with:
         repository: iden3/circom
         path: ./circom
+    - name: Cargo build
+      working-directory: ./circom
+      run: cargo build --release
+      shell: bash
     - name: Install circom
       working-directory: ./circom
-      run: |
-       cargo build --release
-       cargo install --path circom
+      run: cargo install --path circom
       shell: bash
