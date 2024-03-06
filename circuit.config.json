@@ -2,11 +2,11 @@
   "projectName": "Circuits",
   "outputDir": "./zk-out",
   "build": {
-    "inputDir": "./circuits/",
+    "inputDir": "./circuits/mock",
     "circuits": [
       {
-        "cID": "Smt",
-        "fileName": "Smt.circom",
+        "cID": "SmtMock",
+        "fileName": "SmtMock.circom",
         "compilationMode": "wasm",
         "proofType": "groth16"
       }
