@@ -42,7 +42,6 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typechain": "^8.3.2",
-    "typescript": "^5.3.3",
-    "@nomicfoundation/edr-win32-x64-msvc": "^0.2.1"
+    "typescript": "^5.3.3"
   }
 }
