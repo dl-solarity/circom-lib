@@ -8,6 +8,7 @@ artifacts
 
 # TypeChain files
 generated-types
+typechain-types
 
 # circom files
 zk-out

@@ -1,0 +1,34 @@
+name: setup
+
+runs:
+  using: composite
+  steps:
+    - name: Setup node
+      uses: actions/setup-node@v3
+      with:
+        node-version: "16.18.x"
+        cache: npm
+    - name: Install packages
+      run: npm install
+      shell: bash
+  steps:
+    - name: Install rust
+      uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+  steps:
+    - name: Clone circom
+      uses: actions/checkout@v4
+        with:
+          repository: iden3/circom
+          path: circom
+  steps: 
+    - name: Install circom
+      uses: actions/checkout@v4
+        with:
+          repository: iden3/circom
+          path: ./circom
+      working-directory: ./circom
+      run: |
+        cargo build --release
+        cargo install --path circom
