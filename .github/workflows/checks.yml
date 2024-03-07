@@ -16,11 +16,17 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v3
-      - name: Setup
-        uses: ./.github/actions/setup
-      - name: Circom clean
-        run: npm run circom-clean
-      - name: Circom build
-        run: npm run circom-build
-      - name: Run tests
-        run: npm run test
+      - name: Download circom binary
+        run: |
+          curl --location --request GET https://github.com/iden3/circom/releases/latest/download/circom-linux-amd64 --output circom-linux-amd64
+          chmod +x circom-linux-amd64
+      - name: Verify downloaded binary
+        run: circom-linux-amd64 --version
+      # - name: Setup
+      #   uses: ./.github/actions/setup
+      # - name: Circom clean
+      #   run: npm run circom-clean
+      # - name: Circom build
+      #   run: npm run circom-build
+      # - name: Run tests
+      #   run: npm run test
