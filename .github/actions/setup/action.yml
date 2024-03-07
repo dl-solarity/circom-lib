@@ -3,14 +3,14 @@ name: setup
 runs:
   using: composite
   steps:
-    # - name: Setup node
-    #   uses: actions/setup-node@v3
-    #   with:
-    #     node-version: "16.18.x"
-    #     cache: npm
-    # - name: Install packages
-    #   run: npm install
-    #   shell: bash
+    - name: Setup node
+      uses: actions/setup-node@v3
+      with:
+        node-version: "16.18.x"
+        cache: npm
+    - name: Install packages
+      run: npm install
+      shell: bash
     - name: Install rust
       uses: actions-rs/toolchain@v1
       with:
