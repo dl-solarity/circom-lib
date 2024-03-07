@@ -11,20 +11,20 @@ runs:
     - name: Install packages
       run: npm install
       shell: bash
-    - name: Install rust
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-    - name: Clone circom
-      uses: actions/checkout@v4
-      with:
-        repository: iden3/circom
-        path: ./circom
-    - name: Cargo build
-      working-directory: ./circom
-      run: cargo build --release
-      shell: bash
-    - name: Install circom
-      working-directory: ./circom
-      run: cargo install --path circom
-      shell: bash
+    # - name: Install rust
+    #   uses: actions-rs/toolchain@v1
+    #   with:
+    #     toolchain: stable
+    # - name: Clone circom
+    #   uses: actions/checkout@v4
+    #   with:
+    #     repository: iden3/circom
+    #     path: ./circom
+    # - name: Cargo build
+    #   working-directory: ./circom
+    #   run: cargo build --release
+    #   shell: bash
+    # - name: Install circom
+    #   working-directory: ./circom
+    #   run: cargo install --path circom
+    #   shell: bash
