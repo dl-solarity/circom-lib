@@ -20,14 +20,11 @@ jobs:
         uses: ./.github/actions/setup
       - name: Download circom binary
         run: |
-          curl --location --request GET https://github.com/iden3/circom/releases/latest/download/circom-linux-amd64 --output circom-linux-amd64
-          chmod +x circom-linux-amd64
-      - name: path
-        run: |
-          echo "$HOME/.cargo/bin"
-          ls -la $HOME/.cargo/bin
+          curl --location --request GET https://github.com/iden3/circom/releases/latest/download/circom-linux-amd64 --output $HOME/.cargo/bin/circom
+      # - name: Copy circom binary to $HOME/.cargo/bin 
+      #   run: cp /path/to/your/exe/file $HOME/.cargo/bin/
       - name: ls
-        run: ls
+        run: ls $HOME/.cargo/bin
       - name: Circom clean
         run: npm run circom-clean
       - name: Circom build
