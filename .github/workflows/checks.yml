@@ -21,6 +21,7 @@ jobs:
       - name: Download circom binary
         run: |
           curl --location --request GET https://github.com/iden3/circom/releases/latest/download/circom-linux-amd64 --output $HOME/.cargo/bin/circom
+          chmod +x $HOME/.cargo/bin/circom
       # - name: Copy circom binary to $HOME/.cargo/bin 
       #   run: cp /path/to/your/exe/file $HOME/.cargo/bin/
       - name: ls
