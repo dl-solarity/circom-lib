@@ -21,6 +21,8 @@ jobs:
           curl --location --request GET https://github.com/iden3/circom/releases/latest/download/circom-linux-amd64 --output circom-linux-amd64
           chmod +x circom-linux-amd64
       - name: Install downloaded binary
+        run: ls -1
+      - name: Install downloaded binary
         run: ./circom-linux-amd64
       # - name: Setup
       #   uses: ./.github/actions/setup
