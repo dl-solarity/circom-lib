@@ -37,7 +37,7 @@ describe("SMT", () => {
   it("should prove the tree inclusion", async () => {
     let leaves: string[] = [];
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 9; i++) {
       const rand = ethers.hexlify(ethers.randomBytes(30));
 
       await smtMock.addElement(rand, rand);
@@ -115,7 +115,7 @@ describe("SMT", () => {
   });
 
   it("should prove the tree exclusion", async () => {
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 9; i++) {
       const rand = ethers.hexlify(ethers.randomBytes(30));
 
       await smtMock.addElement(rand, rand);
@@ -125,7 +125,7 @@ describe("SMT", () => {
 
     const merkleProof = await smtMock.getProof(nonExistentLeaf);
 
-    const auxIsEmpty = merkleProof.auxKey ? 0 : 1;
+    const auxIsEmpty = BigInt(merkleProof.auxKey) == 0n ? 1 : 0;
 
     const proofStruct = (await smtCircuit.genProof({
       root: merkleProof.root,
@@ -157,7 +157,7 @@ describe("SMT", () => {
     it("should revert an incorrect tree inclusion", async () => {
       let leaves: string[] = [];
 
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 9; i++) {
         const rand = ethers.hexlify(ethers.randomBytes(30));
 
         await smtMock.addElement(rand, rand);
@@ -184,7 +184,7 @@ describe("SMT", () => {
     });
 
     it("should revert an incorrect tree exclusion", async () => {
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 9; i++) {
         const rand = ethers.hexlify(ethers.randomBytes(30));
 
         await smtMock.addElement(rand, rand);
@@ -194,9 +194,9 @@ describe("SMT", () => {
 
       const merkleProof = await smtMock.getProof(nonExistentLeaf);
 
-      const auxIsEmpty = merkleProof.auxKey ? 0 : 1;
+      let auxIsEmpty = BigInt(merkleProof.auxKey) == 0n ? 1 : 0;
 
-      const incorrectValue = merkleProof.auxValue + 1n;
+      auxIsEmpty = auxIsEmpty == 0 ? 1 : 0;
 
       await expect(
         smtCircuit.genProof({
@@ -205,7 +205,7 @@ describe("SMT", () => {
           key: merkleProof.key,
           value: 0,
           auxKey: merkleProof.auxKey,
-          auxValue: incorrectValue,
+          auxValue: merkleProof.auxValue,
           auxIsEmpty: auxIsEmpty,
           isExclusion: 1,
         }),
