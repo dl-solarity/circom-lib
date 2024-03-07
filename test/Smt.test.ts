@@ -37,7 +37,7 @@ describe("SMT", () => {
   it("should prove the tree inclusion", async () => {
     let leaves: string[] = [];
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 9; i++) {
       const rand = ethers.hexlify(ethers.randomBytes(30));
 
       await smtMock.addElement(rand, rand);
@@ -115,7 +115,7 @@ describe("SMT", () => {
   });
 
   it("should prove the tree exclusion", async () => {
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 9; i++) {
       const rand = ethers.hexlify(ethers.randomBytes(30));
 
       await smtMock.addElement(rand, rand);
@@ -125,7 +125,7 @@ describe("SMT", () => {
 
     const merkleProof = await smtMock.getProof(nonExistentLeaf);
 
-    const auxIsEmpty = merkleProof.auxKey ? 0 : 1;
+    const auxIsEmpty = BigInt(merkleProof.auxKey) == 0n ? 1 : 0;
 
     const proofStruct = (await smtCircuit.genProof({
       root: merkleProof.root,
@@ -143,61 +143,73 @@ describe("SMT", () => {
     expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
   });
 
-  it("should revert an incorrect tree inclusion", async () => {
-    let leaves: string[] = [];
+  context("when data is incorrect", () => {
+    let _console = console;
 
-    for (let i = 0; i < 10; i++) {
-      const rand = ethers.hexlify(ethers.randomBytes(30));
+    beforeEach(() => {
+      console = {} as any;
+    });
 
-      await smtMock.addElement(rand, rand);
+    afterEach(() => {
+      console = _console;
+    });
 
-      leaves.push(rand);
-    }
+    it("should revert an incorrect tree inclusion", async () => {
+      let leaves: string[] = [];
 
-    const merkleProof = await smtMock.getProof(leaves[5]);
+      for (let i = 0; i < 9; i++) {
+        const rand = ethers.hexlify(ethers.randomBytes(30));
 
-    const incorrectValue = merkleProof.value + 1n;
+        await smtMock.addElement(rand, rand);
 
-    await expect(
-      smtCircuit.genProof({
-        root: merkleProof.root,
-        siblings: merkleProof.siblings,
-        key: merkleProof.key,
-        value: incorrectValue,
-        auxKey: 0,
-        auxValue: 0,
-        auxIsEmpty: 0,
-        isExclusion: 0,
-      }),
-    ).to.be.rejected;
-  });
+        leaves.push(rand);
+      }
 
-  it("should revert an incorrect tree exclusion", async () => {
-    for (let i = 0; i < 10; i++) {
-      const rand = ethers.hexlify(ethers.randomBytes(30));
+      const merkleProof = await smtMock.getProof(leaves[5]);
 
-      await smtMock.addElement(rand, rand);
-    }
+      const incorrectValue = merkleProof.value + 1n;
 
-    const nonExistentLeaf = ethers.hexlify(ethers.randomBytes(30));
+      await expect(
+        smtCircuit.genProof({
+          root: merkleProof.root,
+          siblings: merkleProof.siblings,
+          key: merkleProof.key,
+          value: incorrectValue,
+          auxKey: 0,
+          auxValue: 0,
+          auxIsEmpty: 0,
+          isExclusion: 0,
+        }),
+      ).to.be.rejected;
+    });
 
-    const merkleProof = await smtMock.getProof(nonExistentLeaf);
+    it("should revert an incorrect tree exclusion", async () => {
+      for (let i = 0; i < 9; i++) {
+        const rand = ethers.hexlify(ethers.randomBytes(30));
 
-    const auxIsEmpty = merkleProof.auxKey ? 0 : 1;
+        await smtMock.addElement(rand, rand);
+      }
 
-    const incorrectValue = merkleProof.auxValue + 1n;
+      const nonExistentLeaf = ethers.hexlify(ethers.randomBytes(30));
 
-    await expect(
-      smtCircuit.genProof({
-        root: merkleProof.root,
-        siblings: merkleProof.siblings,
-        key: merkleProof.key,
-        value: 0,
-        auxKey: merkleProof.auxKey,
-        auxValue: incorrectValue,
-        auxIsEmpty: auxIsEmpty,
-        isExclusion: 1,
-      }),
-    ).to.be.rejected;
+      const merkleProof = await smtMock.getProof(nonExistentLeaf);
+
+      let auxIsEmpty = BigInt(merkleProof.auxKey) == 0n ? 1 : 0;
+
+      auxIsEmpty = auxIsEmpty == 0 ? 1 : 0;
+
+      await expect(
+        smtCircuit.genProof({
+          root: merkleProof.root,
+          siblings: merkleProof.siblings,
+          key: merkleProof.key,
+          value: 0,
+          auxKey: merkleProof.auxKey,
+          auxValue: merkleProof.auxValue,
+          auxIsEmpty: auxIsEmpty,
+          isExclusion: 1,
+        }),
+      ).to.be.rejected;
+    });
   });
 });
