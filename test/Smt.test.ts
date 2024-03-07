@@ -143,61 +143,73 @@ describe("SMT", () => {
     expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
   });
 
-  it("should revert an incorrect tree inclusion", async () => {
-    let leaves: string[] = [];
+  context("when data is incorrect", () => {
+    let _console = console;
 
-    for (let i = 0; i < 10; i++) {
-      const rand = ethers.hexlify(ethers.randomBytes(30));
+    beforeEach(() => {
+      console = {} as any;
+    });
 
-      await smtMock.addElement(rand, rand);
+    afterEach(() => {
+      console = _console;
+    });
 
-      leaves.push(rand);
-    }
+    it("should revert an incorrect tree inclusion", async () => {
+      let leaves: string[] = [];
 
-    const merkleProof = await smtMock.getProof(leaves[5]);
+      for (let i = 0; i < 10; i++) {
+        const rand = ethers.hexlify(ethers.randomBytes(30));
 
-    const incorrectValue = merkleProof.value + 1n;
+        await smtMock.addElement(rand, rand);
 
-    await expect(
-      smtCircuit.genProof({
-        root: merkleProof.root,
-        siblings: merkleProof.siblings,
-        key: merkleProof.key,
-        value: incorrectValue,
-        auxKey: 0,
-        auxValue: 0,
-        auxIsEmpty: 0,
-        isExclusion: 0,
-      }),
-    ).to.be.rejected;
-  });
+        leaves.push(rand);
+      }
 
-  it("should revert an incorrect tree exclusion", async () => {
-    for (let i = 0; i < 10; i++) {
-      const rand = ethers.hexlify(ethers.randomBytes(30));
+      const merkleProof = await smtMock.getProof(leaves[5]);
 
-      await smtMock.addElement(rand, rand);
-    }
+      const incorrectValue = merkleProof.value + 1n;
 
-    const nonExistentLeaf = ethers.hexlify(ethers.randomBytes(30));
+      await expect(
+        smtCircuit.genProof({
+          root: merkleProof.root,
+          siblings: merkleProof.siblings,
+          key: merkleProof.key,
+          value: incorrectValue,
+          auxKey: 0,
+          auxValue: 0,
+          auxIsEmpty: 0,
+          isExclusion: 0,
+        }),
+      ).to.be.rejected;
+    });
 
-    const merkleProof = await smtMock.getProof(nonExistentLeaf);
+    it("should revert an incorrect tree exclusion", async () => {
+      for (let i = 0; i < 10; i++) {
+        const rand = ethers.hexlify(ethers.randomBytes(30));
 
-    const auxIsEmpty = merkleProof.auxKey ? 0 : 1;
+        await smtMock.addElement(rand, rand);
+      }
 
-    const incorrectValue = merkleProof.auxValue + 1n;
+      const nonExistentLeaf = ethers.hexlify(ethers.randomBytes(30));
 
-    await expect(
-      smtCircuit.genProof({
-        root: merkleProof.root,
-        siblings: merkleProof.siblings,
-        key: merkleProof.key,
-        value: 0,
-        auxKey: merkleProof.auxKey,
-        auxValue: incorrectValue,
-        auxIsEmpty: auxIsEmpty,
-        isExclusion: 1,
-      }),
-    ).to.be.rejected;
+      const merkleProof = await smtMock.getProof(nonExistentLeaf);
+
+      const auxIsEmpty = merkleProof.auxKey ? 0 : 1;
+
+      const incorrectValue = merkleProof.auxValue + 1n;
+
+      await expect(
+        smtCircuit.genProof({
+          root: merkleProof.root,
+          siblings: merkleProof.siblings,
+          key: merkleProof.key,
+          value: 0,
+          auxKey: merkleProof.auxKey,
+          auxValue: incorrectValue,
+          auxIsEmpty: auxIsEmpty,
+          isExclusion: 1,
+        }),
+      ).to.be.rejected;
+    });
   });
 });
