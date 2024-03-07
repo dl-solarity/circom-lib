@@ -33,7 +33,7 @@
     "circomlibjs": "^0.1.7",
     "dotenv": "^16.4.5",
     "ethers": "^6.11.1",
-    "hardhat": "^2.20.1",
+    "hardhat": "2.20.1",
     "husky": "^9.0.11",
     "logplease": "^1.2.15",
     "mocha": "^10.3.0",
@@ -42,7 +42,6 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typechain": "^8.3.2",
-    "typescript": "^5.3.3",
-    "@nomicfoundation/edr-linux-x64-gnu": "0.2.1"
+    "typescript": "^5.3.3"
   }
 }
