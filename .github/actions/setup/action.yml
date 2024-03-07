@@ -16,6 +16,6 @@ runs:
       with:
         toolchain: stable
     - name: Download and locate circom binary
-        run: |
-          curl --location --request GET https://github.com/iden3/circom/releases/latest/download/circom-linux-amd64 --output $HOME/.cargo/bin/circom
-          chmod +x $HOME/.cargo/bin/circom
+      run: |
+        curl --location --request GET https://github.com/iden3/circom/releases/latest/download/circom-linux-amd64 --output $HOME/.cargo/bin/circom
+        chmod +x $HOME/.cargo/bin/circom
