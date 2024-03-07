@@ -22,6 +22,8 @@ jobs:
           chmod +x circom-linux-amd64
       - name: Install downloaded binary
         run: ./circom-linux-amd64
+      - name: List files
+        run: ls -1
       - name: Setup
         uses: ./.github/actions/setup
       - name: Circom clean
