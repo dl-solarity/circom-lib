@@ -1,0 +1,20 @@
+name: setup
+
+runs:
+  using: composite
+  steps:
+    - name: Setup node
+      uses: actions/setup-node@v3
+      with:
+        node-version: "18.18.x"
+        cache: npm
+    - name: Install packages
+      run: npm install
+      shell: bash
+    - name: Download and locate circom binary
+      working-directory: /usr/local/bin
+      run: |
+        wget -O circom https://github.com/iden3/circom/releases/latest/download/circom-linux-amd64 
+        chmod 777 ./circom
+        export PATH=$PATH:/usr/local/bin
+      shell: bash

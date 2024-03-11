@@ -1,0 +1,26 @@
+name: "checks"
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+      - dev
+      - feat/github-action
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+      - name: Setup
+        uses: ./.github/actions/setup
+      - name: Circom clean
+        run: npm run circom-clean
+      - name: Circom build
+        run: npm run circom-build
+      - name: Run tests
+        run: npm run test
