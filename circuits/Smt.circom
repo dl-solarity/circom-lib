@@ -27,6 +27,7 @@ template Hash2() {
 
 /*
  * Hash2 = Poseidon(key | value | 1)
+ * The 1 is added to the end of the value to make the hash unique
  */
 template Hash3() {
     signal input a;
@@ -64,11 +65,15 @@ template DepthDeterminer(depth) {
         isZero[i].in <== siblings[i];
     }
 
+    // The last sibling is always zero due to the way the proof is constructed
     isZero[depth - 1].out === 1;
 
+    // If a previous depth is zero, then the current depth is the desired one
     desiredDepth[depth - 1] <== inverse(isZero[depth - 2].out);
+    // If the current depth is the desired one, then all the following depths are done
     done[depth - 2] <== desiredDepth[depth - 1];
 
+    // If we didn't find the done depth, then check if the previous depth is zero
     for (var i = depth - 2; i > 0; i--) {
         desiredDepth[i] <== inverse(done[i]) * inverse(isZero[i - 1].out);
         done[i - 1] <== desiredDepth[i] + done[i];
@@ -80,6 +85,7 @@ template DepthDeterminer(depth) {
 // Determines the type of the node
 template NodeTypeDeterminer() {
     signal input auxIsEmpty;
+    // 1 if the node is at the desired depth, 0 otherwise
     signal input isDesiredDepth;
     signal input isExclusion;
 
@@ -88,14 +94,17 @@ template NodeTypeDeterminer() {
     signal input previousAuxLeaf;
     signal input previousLeaf;
 
+    // 1 if the node is a middle node, 0 otherwise
     signal output middle;
+    // 1 if the node is a empty node, 0 otherwise
     signal output empty;
+    // 1 if the node is a leaf node for the exclusion proof, 0 otherwise
     signal output auxLeaf;
+    // 1 if the node is a leaf node, 0 otherwise
     signal output leaf;
 
-    signal leafForExclusionCheck;
-
-    leafForExclusionCheck <== isDesiredDepth * isExclusion;
+    // 1 if the node is a leaf node and we are checking for exclusion, 0 otherwise
+    signal leafForExclusionCheck <== isDesiredDepth * isExclusion;
 
     // Determine the node as a middle, until get to the desired depth
     middle <== previousMiddle - isDesiredDepth;
@@ -151,16 +160,20 @@ template DepthHash() {
 }
 
 template SMTVerifier(depth) {
+    // The root of the full merkle tree
     signal input root;
+    // The siblings for each depth
     signal input siblings[depth];
-
-    signal input auxKey;
-    signal input auxValue;
-    signal input auxIsEmpty;
 
     signal input key;
     signal input value;
 
+    signal input auxKey;
+    signal input auxValue;
+    // 1 if the aux node is empty, 0 otherwise
+    signal input auxIsEmpty;
+
+    // 1 if we are checking for exclusion, 0 if we are checking for inclusion
     signal input isExclusion;
 
     // Check that the auxIsEmpty is 0 if we are checking for inclusion
@@ -237,11 +250,14 @@ template SMTVerifier(depth) {
         depthHash[i].currentKeyBit <== keyBits.out[i];
 
         if (i == depth - 1) {
+            // The last depth has no child
             depthHash[i].child <== 0;
         } else {
+            // The child of the current depth is the root of the next depth
             depthHash[i].child <== depthHash[i + 1].root;
         }
     }
 
+    // The root of the merkle tree is the root of the first depth
     depthHash[0].root === root;
 }
