@@ -20,13 +20,15 @@ describe("SMT", () => {
 
   before("setup", async () => {
     const poseidonFacade = await deployPoseidonFacade();
+
+    const SmtMockVerifier = await ethers.getContractFactory("SmtMockVerifier");
     const SmtMock = await ethers.getContractFactory("SmtMock", {
       libraries: {
         PoseidonFacade: poseidonFacade,
       },
     });
 
-    smtVerifier = await ethers.deployContract("SmtMockVerifier");
+    smtVerifier = await SmtMockVerifier.deploy();
     smtMock = await SmtMock.deploy();
 
     await reverter.snapshot();
@@ -63,33 +65,29 @@ describe("SMT", () => {
     expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
   });
 
-  it("should prove the tree inclusion for bamboo", async () => {
-    let leaves: string[] = [];
-
+  it("should prove the tree inclusion for each depth of bamboo", async () => {
     for (let i = 0; i < 9; i++) {
       const rand = parseInt("1".repeat(i + 1), 2).toString();
 
       await smtMock.addElement(rand, rand);
 
-      leaves.push(rand);
+      const merkleProof = await smtMock.getProof(rand);
+
+      const proofStruct = (await smtCircuit.genProof({
+        root: merkleProof.root,
+        siblings: merkleProof.siblings,
+        key: merkleProof.key,
+        value: merkleProof.value,
+        auxKey: 0,
+        auxValue: 0,
+        auxIsEmpty: 0,
+        isExclusion: 0,
+      })) as ProofStruct;
+
+      const [pA, pB, pC, publicSignals] = await generateCalldata(proofStruct);
+
+      expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
     }
-
-    const merkleProof = await smtMock.getProof(leaves[8]);
-
-    const proofStruct = (await smtCircuit.genProof({
-      root: merkleProof.root,
-      siblings: merkleProof.siblings,
-      key: merkleProof.key,
-      value: merkleProof.value,
-      auxKey: 0,
-      auxValue: 0,
-      auxIsEmpty: 0,
-      isExclusion: 0,
-    })) as ProofStruct;
-
-    const [pA, pB, pC, publicSignals] = await generateCalldata(proofStruct);
-
-    expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
   });
 
   it("should prove the tree inclusion for max depth", async () => {
@@ -135,6 +133,56 @@ describe("SMT", () => {
       auxKey: merkleProof.auxKey,
       auxValue: merkleProof.auxValue,
       auxIsEmpty: auxIsEmpty,
+      isExclusion: 1,
+    })) as ProofStruct;
+
+    const [pA, pB, pC, publicSignals] = await generateCalldata(proofStruct);
+
+    expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
+  });
+
+  it("should prove the tree exclusion for each depth of bamboo", async () => {
+    for (let i = 0; i < 9; i++) {
+      const rand = parseInt("1".repeat(i + 1), 2).toString();
+
+      await smtMock.addElement(rand, rand);
+
+      const nonExistentLeaf = ethers.hexlify(ethers.randomBytes(30));
+
+      const merkleProof = await smtMock.getProof(nonExistentLeaf);
+
+      const auxIsEmpty = BigInt(merkleProof.auxKey) == 0n ? 1 : 0;
+
+      const proofStruct = (await smtCircuit.genProof({
+        root: merkleProof.root,
+        siblings: merkleProof.siblings,
+        key: merkleProof.key,
+        value: 0,
+        auxKey: merkleProof.auxKey,
+        auxValue: merkleProof.auxValue,
+        auxIsEmpty: auxIsEmpty,
+        isExclusion: 1,
+      })) as ProofStruct;
+
+      const [pA, pB, pC, publicSignals] = await generateCalldata(proofStruct);
+
+      expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
+    }
+  });
+
+  it("should prove the tree exclusion for empty tree", async () => {
+    const nonExistentLeaf = ethers.hexlify(ethers.randomBytes(30));
+
+    const merkleProof = await smtMock.getProof(nonExistentLeaf);
+
+    const proofStruct = (await smtCircuit.genProof({
+      root: merkleProof.root,
+      siblings: merkleProof.siblings,
+      key: merkleProof.key,
+      value: 0,
+      auxKey: merkleProof.auxKey,
+      auxValue: merkleProof.auxValue,
+      auxIsEmpty: 1,
       isExclusion: 1,
     })) as ProofStruct;
 
