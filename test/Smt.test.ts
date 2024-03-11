@@ -143,7 +143,7 @@ describe("SMT", () => {
     expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
   });
 
-  context("when data is incorrect", () => {
+  describe("when data is incorrect", () => {
     let _console = console;
 
     beforeEach(() => {
