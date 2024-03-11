@@ -20,13 +20,15 @@ describe("SMT", () => {
 
   before("setup", async () => {
     const poseidonFacade = await deployPoseidonFacade();
+
+    const SmtMockVerifier = await ethers.getContractFactory("SmtMockVerifier");
     const SmtMock = await ethers.getContractFactory("SmtMock", {
       libraries: {
         PoseidonFacade: poseidonFacade,
       },
     });
 
-    smtVerifier = await ethers.deployContract("SmtMockVerifier");
+    smtVerifier = await SmtMockVerifier.deploy();
     smtMock = await SmtMock.deploy();
 
     await reverter.snapshot();
@@ -189,7 +191,7 @@ describe("SMT", () => {
     expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
   });
 
-  context("when data is incorrect", () => {
+  describe("when data is incorrect", () => {
     let _console = console;
 
     beforeEach(() => {
