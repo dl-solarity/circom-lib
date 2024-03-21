@@ -5,6 +5,12 @@
     "inputDir": "./circuits/mock",
     "circuits": [
       {
+        "cID": "CommitmentMock",
+        "fileName": "CommitmentMock.circom",
+        "compilationMode": "wasm",
+        "proofType": "groth16"
+      },
+      {
         "cID": "SmtMock",
         "fileName": "SmtMock.circom",
         "compilationMode": "wasm",
