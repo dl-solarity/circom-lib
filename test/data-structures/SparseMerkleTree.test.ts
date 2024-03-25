@@ -9,7 +9,7 @@ import { generateCalldata } from "../helpers/zk-helper";
 
 import { SparseMerkleTreeMock, SparseMerkleTreeMockVerifier } from "@ethers-v6";
 
-describe.only("SparseMerkleTree", () => {
+describe("SparseMerkleTree", () => {
   const reverter = new Reverter();
   const circom = new CircomJS();
 
