@@ -34,7 +34,13 @@ export async function compile(circuitId: string, shouldUpdateConfig = true) {
 
     const start = performance.now();
 
+    // supressing deprecation warnings
+    const oldErr = console.error;
+    console.error = (...data: any[]) => {};
+
     await circuit.compile();
+
+    console.error = oldErr;
 
     const end = performance.now();
 

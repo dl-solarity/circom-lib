@@ -1,18 +1,18 @@
 {
-  "projectName": "Circuits",
+  "projectName": "@solarity/circom-lib",
   "outputDir": "./zk-out",
   "build": {
     "inputDir": "./circuits/mock",
     "circuits": [
       {
-        "cID": "CommitmentMock",
-        "fileName": "CommitmentMock.circom",
+        "cID": "SparseMerkleTreeMock",
+        "fileName": "data-structures/SparseMerkleTreeMock.circom",
         "compilationMode": "wasm",
         "proofType": "groth16"
       },
       {
-        "cID": "SmtMock",
-        "fileName": "SmtMock.circom",
+        "cID": "CommitmentMock",
+        "fileName": "blinders/CommitmentMock.circom",
         "compilationMode": "wasm",
         "proofType": "groth16"
       }

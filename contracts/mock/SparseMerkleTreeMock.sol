@@ -5,7 +5,7 @@ import {PoseidonFacade} from "@iden3/contracts/lib/Poseidon.sol";
 
 import {SparseMerkleTree} from "@solarity/solidity-lib/libs/data-structures/SparseMerkleTree.sol";
 
-contract SmtMock {
+contract SparseMerkleTreeMock {
     using SparseMerkleTree for SparseMerkleTree.UintSMT;
 
     SparseMerkleTree.UintSMT internal _uintTree;

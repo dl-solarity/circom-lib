@@ -1,9 +1,9 @@
 pragma circom 2.0.0;
 
-include "../node_modules/circomlib/circuits/poseidon.circom";
-include "../node_modules/circomlib/circuits/switcher.circom";
-include "../node_modules/circomlib/circuits/gates.circom";
-include "../node_modules/circomlib/circuits/bitify.circom";
+include "../../node_modules/circomlib/circuits/poseidon.circom";
+include "../../node_modules/circomlib/circuits/switcher.circom";
+include "../../node_modules/circomlib/circuits/gates.circom";
+include "../../node_modules/circomlib/circuits/bitify.circom";
 
 function inverse(a) {
     return 1 - a;
@@ -127,7 +127,7 @@ template NodeTypeDeterminer() {
  * Gets hash at the current depth, based on the type of the node
  * If the mode is a empty, then the hash is 0
  */
-template DepthHash() {
+template DepthHasher() {
     signal input isMiddle;
     signal input isAuxLeaf;
     signal input isLeaf;
@@ -165,7 +165,7 @@ template DepthHash() {
 /*
  * Checks the sparse merkle proof against the given root
  */
-template SMTVerifier(depth) {
+template SparseMerkleTreeVerifier(depth) {
     // The root of the sparse merkle tree
     signal input root;
     // The siblings for each depth
@@ -245,7 +245,7 @@ template SMTVerifier(depth) {
 
     // Hash up the elements in the reverse order
     for (var i = depth - 1; i >= 0; i--) {
-        depthHash[i] = DepthHash();
+        depthHash[i] = DepthHasher();
 
         depthHash[i].isMiddle <== nodeType[i].middle;
         depthHash[i].isLeaf <== nodeType[i].leaf;

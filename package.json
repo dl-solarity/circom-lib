@@ -1,12 +1,29 @@
 {
   "name": "@solarity/circom-lib",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "license": "MIT",
   "author": "Distributed Lab",
-  "description": "Circom Library by Distributed Lab",
+  "readme": "README.md",
+  "description": "Circom Library for Savvies",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dl-solarity/circom-lib"
+  },
+  "keywords": [
+    "circom",
+    "ethereum",
+    "zero-knowledge",
+    "distributedlab",
+    "solarity"
+  ],
+  "files": [
+    "**/*.circom",
+    "!mock/**/*"
+  ],
   "scripts": {
-    "prepare": "npx husky",
-    "compile": "npx hardhat compile --force",
+    "prepare": "husky",
+    "compile": "npm run circom-compile",
+    "solidity-compile": "npx hardhat compile --force",
     "circom-compile": "npx hardhat circom:compile",
     "circom-verifier": "npx hardhat circom:verifier",
     "circom-build": "npx hardhat circom:build",
@@ -16,20 +33,23 @@
     "lint-fix": "npm run lint-sol-fix && npm run lint-ts-fix && npm run lint-json-fix",
     "lint-json-fix": "prettier --write \"./**/*.json\"",
     "lint-ts-fix": "prettier --write \"./**/*.ts\"",
-    "lint-sol-fix": "prettier --write \"contracts/**/*.sol\""
+    "lint-sol-fix": "prettier --write \"contracts/**/*.sol\"",
+    "publish-to-npm": "npm run lint-fix && bash ./scripts/publish.sh --public"
+  },
+  "dependencies": {
+    "circomlib": "2.0.5"
   },
   "devDependencies": {
     "@iden3/contracts": "^1.4.7",
     "@iden3/js-crypto": "^1.0.3",
-    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
-    "@solarity/solidity-lib": "^2.6.18",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@solarity/solidity-lib": "^2.7.2",
     "@typechain/ethers-v6": "^0.5.1",
-    "@types/chai": "^4.3.12",
+    "@types/chai": "^4.3.14",
     "@types/mocha": "^10.0.6",
     "@types/node": "^18.16.0",
     "@types/snarkjs": "^0.7.8",
     "@zefi/circomjs": "^1.0.6",
-    "circomlib": "^2.0.5",
     "circomlibjs": "^0.1.7",
     "dotenv": "^16.4.5",
     "hardhat": "2.20.1",
@@ -42,6 +62,6 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typechain": "^8.3.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.3"
   }
 }

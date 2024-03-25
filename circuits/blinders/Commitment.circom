@@ -1,6 +1,6 @@
 pragma circom 2.0.0;
 
-include "../node_modules/circomlib/circuits/poseidon.circom";
+include "../../node_modules/circomlib/circuits/poseidon.circom";
 
 /*
  * Hash1 = Poseidon(nullifier)
@@ -36,7 +36,7 @@ template Hash2() {
  * This circuit is a simple commitment circuit that takes a nullifier and a secret and returns a commitment.
  * The commitment is the result of hashing the secret and the nullifier together using a Poseidon hash function.
  */
-template Commitment() {
+template CommitmentVerifier() {
     signal input nullifier;
     signal input secret;
 

@@ -2,34 +2,34 @@ import { CircomJS } from "@zefi/circomjs";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-import { deployPoseidonFacade } from "./helpers/poseidon/poseidon-deployer";
-import { Reverter } from "./helpers/reverter";
-import { ProofStruct } from "./helpers/types";
-import { generateCalldata } from "./helpers/zk-helper";
+import { deployPoseidonFacade } from "../helpers/poseidon/poseidon-deployer";
+import { Reverter } from "../helpers/reverter";
+import { ProofStruct } from "../helpers/types";
+import { generateCalldata } from "../helpers/zk-helper";
 
-import { SmtMock, SmtMockVerifier } from "@ethers-v6";
+import { SparseMerkleTreeMock, SparseMerkleTreeMockVerifier } from "@ethers-v6";
 
-describe("SMT", () => {
+describe("SparseMerkleTree", () => {
   const reverter = new Reverter();
   const circom = new CircomJS();
 
-  const smtCircuit = circom.getCircuit("SmtMock");
+  const smtCircuit = circom.getCircuit("SparseMerkleTreeMock");
 
-  let smtMock: SmtMock;
-  let smtVerifier: SmtMockVerifier;
+  let smtMock: SparseMerkleTreeMock;
+  let smtVerifier: SparseMerkleTreeMockVerifier;
 
   before("setup", async () => {
     const poseidonFacade = await deployPoseidonFacade();
 
-    const SmtMockVerifier = await ethers.getContractFactory("SmtMockVerifier");
-    const SmtMock = await ethers.getContractFactory("SmtMock", {
+    const SparseMerkleTreeMockVerifier = await ethers.getContractFactory("SparseMerkleTreeMockVerifier");
+    const SparseMerkleTreeMock = await ethers.getContractFactory("SparseMerkleTreeMock", {
       libraries: {
         PoseidonFacade: poseidonFacade,
       },
     });
 
-    smtVerifier = await SmtMockVerifier.deploy();
-    smtMock = await SmtMock.deploy();
+    smtVerifier = await SparseMerkleTreeMockVerifier.deploy();
+    smtMock = await SparseMerkleTreeMock.deploy();
 
     await reverter.snapshot();
   });

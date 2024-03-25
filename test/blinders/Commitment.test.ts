@@ -2,8 +2,8 @@ import { CircomJS } from "@zefi/circomjs";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-import { Reverter } from "./helpers/reverter";
-import { generateCalldata } from "./helpers/zk-helper";
+import { Reverter } from "../helpers/reverter";
+import { generateCalldata } from "../helpers/zk-helper";
 
 import { CommitmentMockVerifier } from "@ethers-v6";
 
