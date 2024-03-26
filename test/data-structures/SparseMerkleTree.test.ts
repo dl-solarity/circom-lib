@@ -18,6 +18,9 @@ describe("SparseMerkleTree", () => {
   let smtMock: SparseMerkleTreeMock;
   let smtVerifier: SparseMerkleTreeMockVerifier;
 
+  const leaves: string[] = [];
+  let nonExistentLeaf: string;
+
   before("setup", async () => {
     const poseidonFacade = await deployPoseidonFacade();
 
@@ -31,23 +34,24 @@ describe("SparseMerkleTree", () => {
     smtVerifier = await SparseMerkleTreeMockVerifier.deploy();
     smtMock = await SparseMerkleTreeMock.deploy();
 
+    for (let i = 0; i < 10; i++) {
+      let rand: string;
+      do {
+        rand = ethers.hexlify(ethers.randomBytes(1));
+      } while (leaves.includes(rand));
+      leaves.push(rand);
+    }
+
+    nonExistentLeaf = leaves[9];
+
     await reverter.snapshot();
   });
 
   afterEach(reverter.revert);
 
   it("should prove the tree inclusion", async () => {
-    let leaves: string[] = [];
-
     for (let i = 0; i < 9; i++) {
-      let rand: string;
-      do {
-        rand = ethers.hexlify(ethers.randomBytes(1));
-      } while (leaves.includes(rand));
-
-      await smtMock.addElement(rand, rand);
-
-      leaves.push(rand);
+      await smtMock.addElement(leaves[i], leaves[i]);
     }
 
     const merkleProof = await smtMock.getProof(leaves[5]);
@@ -116,23 +120,9 @@ describe("SparseMerkleTree", () => {
   });
 
   it("should prove the tree exclusion", async () => {
-    const leaves: string[] = [];
-
     for (let i = 0; i < 9; i++) {
-      let rand: string;
-      do {
-        rand = ethers.hexlify(ethers.randomBytes(1));
-      } while (leaves.includes(rand));
-
-      await smtMock.addElement(rand, rand);
-
-      leaves.push(rand);
+      await smtMock.addElement(leaves[i], leaves[i]);
     }
-
-    let nonExistentLeaf;
-    do {
-      nonExistentLeaf = ethers.hexlify(ethers.randomBytes(1));
-    } while (leaves.includes(nonExistentLeaf));
 
     const merkleProof = await smtMock.getProof(nonExistentLeaf);
 
@@ -159,11 +149,6 @@ describe("SparseMerkleTree", () => {
       const rand = parseInt("1".repeat(i + 1), 2).toString();
 
       await smtMock.addElement(rand, rand);
-
-      let nonExistentLeaf;
-      do {
-        nonExistentLeaf = ethers.hexlify(ethers.randomBytes(1));
-      } while (nonExistentLeaf == rand);
 
       const merkleProof = await smtMock.getProof(nonExistentLeaf);
 
@@ -219,17 +204,8 @@ describe("SparseMerkleTree", () => {
     });
 
     it("should revert an incorrect tree inclusion", async () => {
-      let leaves: string[] = [];
-
       for (let i = 0; i < 9; i++) {
-        let rand: string;
-        do {
-          rand = ethers.hexlify(ethers.randomBytes(1));
-        } while (leaves.includes(rand));
-
-        await smtMock.addElement(rand, rand);
-
-        leaves.push(rand);
+        await smtMock.addElement(leaves[i], leaves[i]);
       }
 
       const merkleProof = await smtMock.getProof(leaves[5]);
@@ -251,23 +227,9 @@ describe("SparseMerkleTree", () => {
     });
 
     it("should revert an incorrect tree exclusion", async () => {
-      const leaves: string[] = [];
-
       for (let i = 0; i < 9; i++) {
-        let rand: string;
-        do {
-          rand = ethers.hexlify(ethers.randomBytes(1));
-        } while (leaves.includes(rand));
-
-        await smtMock.addElement(rand, rand);
-
-        leaves.push(rand);
+        await smtMock.addElement(leaves[i], leaves[i]);
       }
-
-      let nonExistentLeaf;
-      do {
-        nonExistentLeaf = ethers.hexlify(ethers.randomBytes(1));
-      } while (leaves.includes(nonExistentLeaf));
 
       const merkleProof = await smtMock.getProof(nonExistentLeaf);
 
