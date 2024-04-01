@@ -34,9 +34,15 @@ export async function compile(circuitId: string, shouldUpdateConfig = true) {
 
     const start = performance.now();
 
-    // supressing deprecation warnings
+    // supressing garbage collection warnings
     const oldErr = console.error;
-    console.error = (...data: any[]) => {};
+    console.error = (...data: any[]) => {
+      if (data.length > 0 && typeof data[0] == "string" && (<string>data[0]).includes("garbage collection")) {
+        return;
+      }
+
+      oldErr(data);
+    };
 
     await circuit.compile();
 
