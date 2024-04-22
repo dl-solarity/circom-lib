@@ -36,9 +36,11 @@ describe("SparseMerkleTree", () => {
 
     for (let i = 0; i < 10; i++) {
       let rand: string;
+
       do {
         rand = ethers.hexlify(ethers.randomBytes(1));
       } while (leaves.includes(rand));
+
       leaves.push(rand);
     }
 
@@ -51,10 +53,10 @@ describe("SparseMerkleTree", () => {
 
   it("should prove the tree inclusion", async () => {
     for (let i = 0; i < 9; i++) {
-      await smtMock.addElement(leaves[i], leaves[i]);
+      await smtMock.addElement(ethers.toBeHex(leaves[i], 32), leaves[i]);
     }
 
-    const merkleProof = await smtMock.getProof(leaves[5]);
+    const merkleProof = await smtMock.getProof(ethers.toBeHex(leaves[5], 32));
 
     const proofStruct = (await smtCircuit.genProof({
       root: merkleProof.root,
@@ -76,9 +78,9 @@ describe("SparseMerkleTree", () => {
     for (let i = 0; i < 9; i++) {
       const rand = parseInt("1".repeat(i + 1), 2).toString();
 
-      await smtMock.addElement(rand, rand);
+      await smtMock.addElement(ethers.toBeHex(rand, 32), rand);
 
-      const merkleProof = await smtMock.getProof(rand);
+      const merkleProof = await smtMock.getProof(ethers.toBeHex(rand, 32));
 
       const proofStruct = (await smtCircuit.genProof({
         root: merkleProof.root,
@@ -98,10 +100,10 @@ describe("SparseMerkleTree", () => {
   });
 
   it("should prove the tree inclusion for max depth", async () => {
-    await smtMock.addElement(255, 255);
-    await smtMock.addElement(511, 511);
+    await smtMock.addElement(ethers.toBeHex(255, 32), 255);
+    await smtMock.addElement(ethers.toBeHex(511, 32), 511);
 
-    const merkleProof = await smtMock.getProof(511);
+    const merkleProof = await smtMock.getProof(ethers.toBeHex(511, 32));
 
     const proofStruct = (await smtCircuit.genProof({
       root: merkleProof.root,
@@ -121,10 +123,10 @@ describe("SparseMerkleTree", () => {
 
   it("should prove the tree exclusion", async () => {
     for (let i = 0; i < 9; i++) {
-      await smtMock.addElement(leaves[i], leaves[i]);
+      await smtMock.addElement(ethers.toBeHex(leaves[i], 32), leaves[i]);
     }
 
-    const merkleProof = await smtMock.getProof(nonExistentLeaf);
+    const merkleProof = await smtMock.getProof(ethers.toBeHex(nonExistentLeaf, 32));
 
     const auxIsEmpty = BigInt(merkleProof.auxKey) == 0n ? 1 : 0;
 
@@ -148,9 +150,9 @@ describe("SparseMerkleTree", () => {
     for (let i = 0; i < 9; i++) {
       const rand = parseInt("1".repeat(i + 1), 2).toString();
 
-      await smtMock.addElement(rand, rand);
+      await smtMock.addElement(ethers.toBeHex(rand, 32), rand);
 
-      const merkleProof = await smtMock.getProof(nonExistentLeaf);
+      const merkleProof = await smtMock.getProof(ethers.toBeHex(nonExistentLeaf, 32));
 
       const auxIsEmpty = BigInt(merkleProof.auxKey) == 0n ? 1 : 0;
 
@@ -174,7 +176,7 @@ describe("SparseMerkleTree", () => {
   it("should prove the tree exclusion for empty tree", async () => {
     const nonExistentLeaf = ethers.hexlify(ethers.randomBytes(1));
 
-    const merkleProof = await smtMock.getProof(nonExistentLeaf);
+    const merkleProof = await smtMock.getProof(ethers.toBeHex(nonExistentLeaf, 32));
 
     const proofStruct = (await smtCircuit.genProof({
       root: merkleProof.root,
@@ -205,10 +207,10 @@ describe("SparseMerkleTree", () => {
 
     it("should revert an incorrect tree inclusion", async () => {
       for (let i = 0; i < 9; i++) {
-        await smtMock.addElement(leaves[i], leaves[i]);
+        await smtMock.addElement(ethers.toBeHex(leaves[i], 32), leaves[i]);
       }
 
-      const merkleProof = await smtMock.getProof(leaves[5]);
+      const merkleProof = await smtMock.getProof(ethers.toBeHex(leaves[5], 32));
 
       const incorrectValue = merkleProof.value + 1n;
 
@@ -228,10 +230,10 @@ describe("SparseMerkleTree", () => {
 
     it("should revert an incorrect tree exclusion", async () => {
       for (let i = 0; i < 9; i++) {
-        await smtMock.addElement(leaves[i], leaves[i]);
+        await smtMock.addElement(ethers.toBeHex(leaves[i], 32), leaves[i]);
       }
 
-      const merkleProof = await smtMock.getProof(nonExistentLeaf);
+      const merkleProof = await smtMock.getProof(ethers.toBeHex(nonExistentLeaf, 32));
 
       let auxIsEmpty = BigInt(merkleProof.auxKey) == 0n ? 1 : 0;
 

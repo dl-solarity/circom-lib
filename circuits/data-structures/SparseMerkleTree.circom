@@ -1,9 +1,9 @@
 pragma circom 2.0.0;
 
-include "../../node_modules/circomlib/circuits/poseidon.circom";
-include "../../node_modules/circomlib/circuits/switcher.circom";
-include "../../node_modules/circomlib/circuits/gates.circom";
-include "../../node_modules/circomlib/circuits/bitify.circom";
+include "../vendor/circomlib/circuits/poseidon.circom";
+include "../vendor/circomlib/circuits/switcher.circom";
+include "../vendor/circomlib/circuits/gates.circom";
+include "../vendor/circomlib/circuits/bitify.circom";
 
 function inverse(a) {
     return 1 - a;

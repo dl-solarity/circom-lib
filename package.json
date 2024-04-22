@@ -1,6 +1,6 @@
 {
   "name": "@solarity/circom-lib",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "license": "MIT",
   "author": "Distributed Lab",
   "readme": "README.md",
@@ -22,7 +22,7 @@
   ],
   "scripts": {
     "prepare": "husky",
-    "compile": "npm run circom-compile",
+    "compile": "npm run circom-compile && npm run solidity-compile",
     "solidity-compile": "npx hardhat compile --force",
     "circom-compile": "npx hardhat circom:compile",
     "circom-verifier": "npx hardhat circom:verifier",
@@ -36,14 +36,11 @@
     "lint-sol-fix": "prettier --write \"contracts/**/*.sol\"",
     "publish-to-npm": "npm run lint-fix && bash ./scripts/publish.sh --public"
   },
-  "dependencies": {
-    "circomlib": "2.0.5"
-  },
   "devDependencies": {
     "@iden3/contracts": "^1.4.7",
     "@iden3/js-crypto": "^1.0.3",
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
-    "@solarity/solidity-lib": "^2.7.2",
+    "@solarity/solidity-lib": "^2.7.3",
     "@typechain/ethers-v6": "^0.5.1",
     "@types/chai": "^4.3.14",
     "@types/mocha": "^10.0.6",

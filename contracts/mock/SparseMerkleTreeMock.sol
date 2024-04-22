@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
 import {PoseidonFacade} from "@iden3/contracts/lib/Poseidon.sol";
@@ -15,11 +15,11 @@ contract SparseMerkleTreeMock {
         _uintTree.setHashers(poseidon2, poseidon3);
     }
 
-    function addElement(uint256 index_, uint256 elem_) external {
+    function addElement(bytes32 index_, uint256 elem_) external {
         _uintTree.add(index_, elem_);
     }
 
-    function getProof(uint256 index_) public view returns (SparseMerkleTree.Proof memory) {
+    function getProof(bytes32 index_) public view returns (SparseMerkleTree.Proof memory) {
         return _uintTree.getProof(index_);
     }
 
