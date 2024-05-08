@@ -25,16 +25,16 @@ export function getBytes32PoseidonHash(element: string) {
   return poseidonHash(ethers.zeroPadValue(element, 32));
 }
 
-export function poseidonHash(data: string): string {
+export function poseidonHash(data: string, chunkSize = 32): string {
   data = ethers.hexlify(data);
-  const chunks = splitHexIntoChunks(data.replace("0x", ""), 64);
+  const chunks = splitHexIntoChunks(data.replace("0x", ""), chunkSize);
   const inputs = chunks.map((v) => BigInt(v));
 
   return ethers.toBeHex(Poseidon.hash(inputs), 32);
 }
 
-function splitHexIntoChunks(hexString: string, chunkSize = 64) {
-  const regex = new RegExp(`.{1,${chunkSize}}`, "g");
+function splitHexIntoChunks(hexString: string, chunkSize = 32) {
+  const regex = new RegExp(`.{1,${chunkSize * 2}}`, "g");
   const chunks = hexString.match(regex);
 
   if (!chunks) {
