@@ -1,22 +1,20 @@
-import { CircomJS } from "@zefi/circomjs";
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { ethers, zkit } from "hardhat";
+
+import { CircuitZKit } from "@solarity/zkit";
 
 import { deployPoseidonFacade } from "../helpers/poseidon/poseidon-deployer";
 import { Reverter } from "../helpers/reverter";
-import { ProofStruct } from "../helpers/types";
-import { generateCalldata } from "../helpers/zk-helper";
 
-import { SparseMerkleTreeMock, SparseMerkleTreeMockVerifier } from "@ethers-v6";
+import { SparseMerkleTreeMock, SparseMerkleTreeVerifierVerifier } from "@ethers-v6";
 
 describe("SparseMerkleTree", () => {
   const reverter = new Reverter();
-  const circom = new CircomJS();
 
-  const smtCircuit = circom.getCircuit("SparseMerkleTreeMock");
+  let smtCircuit: CircuitZKit;
 
   let smtMock: SparseMerkleTreeMock;
-  let smtVerifier: SparseMerkleTreeMockVerifier;
+  let smtVerifier: SparseMerkleTreeVerifierVerifier;
 
   const leaves: string[] = [];
   let nonExistentLeaf: string;
@@ -24,7 +22,7 @@ describe("SparseMerkleTree", () => {
   before("setup", async () => {
     const poseidonFacade = await deployPoseidonFacade();
 
-    const SparseMerkleTreeMockVerifier = await ethers.getContractFactory("SparseMerkleTreeMockVerifier");
+    const SparseMerkleTreeMockVerifier = await ethers.getContractFactory("SparseMerkleTreeVerifierVerifier");
     const SparseMerkleTreeMock = await ethers.getContractFactory("SparseMerkleTreeMock", {
       libraries: {
         PoseidonFacade: poseidonFacade,
@@ -33,6 +31,8 @@ describe("SparseMerkleTree", () => {
 
     smtVerifier = await SparseMerkleTreeMockVerifier.deploy();
     smtMock = await SparseMerkleTreeMock.deploy();
+
+    smtCircuit = await zkit.getCircuit("SparseMerkleTreeVerifier");
 
     for (let i = 0; i < 10; i++) {
       let rand: string;
@@ -58,7 +58,7 @@ describe("SparseMerkleTree", () => {
 
     const merkleProof = await smtMock.getProof(ethers.toBeHex(leaves[5], 32));
 
-    const proofStruct = (await smtCircuit.genProof({
+    const proofStruct = await smtCircuit.generateProof({
       root: merkleProof.root,
       siblings: merkleProof.siblings,
       key: merkleProof.key,
@@ -67,9 +67,9 @@ describe("SparseMerkleTree", () => {
       auxValue: 0,
       auxIsEmpty: 0,
       isExclusion: 0,
-    })) as ProofStruct;
+    });
 
-    const [pA, pB, pC, publicSignals] = await generateCalldata(proofStruct);
+    const [pA, pB, pC, publicSignals] = await smtCircuit.generateCalldata(proofStruct);
 
     expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
   });
@@ -82,7 +82,7 @@ describe("SparseMerkleTree", () => {
 
       const merkleProof = await smtMock.getProof(ethers.toBeHex(rand, 32));
 
-      const proofStruct = (await smtCircuit.genProof({
+      const proofStruct = await smtCircuit.generateProof({
         root: merkleProof.root,
         siblings: merkleProof.siblings,
         key: merkleProof.key,
@@ -91,9 +91,9 @@ describe("SparseMerkleTree", () => {
         auxValue: 0,
         auxIsEmpty: 0,
         isExclusion: 0,
-      })) as ProofStruct;
+      });
 
-      const [pA, pB, pC, publicSignals] = await generateCalldata(proofStruct);
+      const [pA, pB, pC, publicSignals] = await smtCircuit.generateCalldata(proofStruct);
 
       expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
     }
@@ -105,7 +105,7 @@ describe("SparseMerkleTree", () => {
 
     const merkleProof = await smtMock.getProof(ethers.toBeHex(511, 32));
 
-    const proofStruct = (await smtCircuit.genProof({
+    const proofStruct = await smtCircuit.generateProof({
       root: merkleProof.root,
       siblings: merkleProof.siblings,
       key: merkleProof.key,
@@ -114,9 +114,9 @@ describe("SparseMerkleTree", () => {
       auxValue: 0,
       auxIsEmpty: 0,
       isExclusion: 0,
-    })) as ProofStruct;
+    });
 
-    const [pA, pB, pC, publicSignals] = await generateCalldata(proofStruct);
+    const [pA, pB, pC, publicSignals] = await smtCircuit.generateCalldata(proofStruct);
 
     expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
   });
@@ -130,7 +130,7 @@ describe("SparseMerkleTree", () => {
 
     const auxIsEmpty = BigInt(merkleProof.auxKey) == 0n ? 1 : 0;
 
-    const proofStruct = (await smtCircuit.genProof({
+    const proofStruct = await smtCircuit.generateProof({
       root: merkleProof.root,
       siblings: merkleProof.siblings,
       key: merkleProof.key,
@@ -139,9 +139,9 @@ describe("SparseMerkleTree", () => {
       auxValue: merkleProof.auxValue,
       auxIsEmpty: auxIsEmpty,
       isExclusion: 1,
-    })) as ProofStruct;
+    });
 
-    const [pA, pB, pC, publicSignals] = await generateCalldata(proofStruct);
+    const [pA, pB, pC, publicSignals] = await smtCircuit.generateCalldata(proofStruct);
 
     expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
   });
@@ -156,7 +156,7 @@ describe("SparseMerkleTree", () => {
 
       const auxIsEmpty = BigInt(merkleProof.auxKey) == 0n ? 1 : 0;
 
-      const proofStruct = (await smtCircuit.genProof({
+      const proofStruct = await smtCircuit.generateProof({
         root: merkleProof.root,
         siblings: merkleProof.siblings,
         key: merkleProof.key,
@@ -165,9 +165,9 @@ describe("SparseMerkleTree", () => {
         auxValue: merkleProof.auxValue,
         auxIsEmpty: auxIsEmpty,
         isExclusion: 1,
-      })) as ProofStruct;
+      });
 
-      const [pA, pB, pC, publicSignals] = await generateCalldata(proofStruct);
+      const [pA, pB, pC, publicSignals] = await smtCircuit.generateCalldata(proofStruct);
 
       expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
     }
@@ -178,7 +178,7 @@ describe("SparseMerkleTree", () => {
 
     const merkleProof = await smtMock.getProof(ethers.toBeHex(nonExistentLeaf, 32));
 
-    const proofStruct = (await smtCircuit.genProof({
+    const proofStruct = await smtCircuit.generateProof({
       root: merkleProof.root,
       siblings: merkleProof.siblings,
       key: merkleProof.key,
@@ -187,9 +187,9 @@ describe("SparseMerkleTree", () => {
       auxValue: merkleProof.auxValue,
       auxIsEmpty: 1,
       isExclusion: 1,
-    })) as ProofStruct;
+    });
 
-    const [pA, pB, pC, publicSignals] = await generateCalldata(proofStruct);
+    const [pA, pB, pC, publicSignals] = await smtCircuit.generateCalldata(proofStruct);
 
     expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
   });
@@ -215,7 +215,7 @@ describe("SparseMerkleTree", () => {
       const incorrectValue = merkleProof.value + 1n;
 
       await expect(
-        smtCircuit.genProof({
+        smtCircuit.generateProof({
           root: merkleProof.root,
           siblings: merkleProof.siblings,
           key: merkleProof.key,
@@ -240,7 +240,7 @@ describe("SparseMerkleTree", () => {
       auxIsEmpty = auxIsEmpty == 0 ? 1 : 0;
 
       await expect(
-        smtCircuit.genProof({
+        smtCircuit.generateProof({
           root: merkleProof.root,
           siblings: merkleProof.siblings,
           key: merkleProof.key,

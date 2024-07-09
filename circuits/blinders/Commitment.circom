@@ -1,6 +1,6 @@
 pragma circom 2.0.0;
 
-include "../vendor/circomlib/circuits/poseidon.circom";
+include "circomlib/circuits/poseidon.circom";
 
 /*
  * Hash1 = Poseidon(nullifier)

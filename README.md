@@ -4,6 +4,11 @@
 
 The library consists of circom circuits that extend the capabilities of [solarity/solidity-lib](https://github.com/dl-solarity/solidity-lib) to be used in magnificent ZK applications.
 
+- Versatile commitment / nullifier circuit.
+- Optimized Sparse Merkle Tree (SMT) data structure.
+
+Powered by [hardhat-zkit](https://github.com/dl-solarity/hardhat-zkit) circom environment.
+
 ## Overview
 
 ### Installation
@@ -12,31 +17,24 @@ The library consists of circom circuits that extend the capabilities of [solarit
 $ npm install @solarity/circom-lib
 ```
 
-> [!NOTE]
-> You will need circom binary preinstalled to be able to compile the circuits.
+> [!TIP]
+> No need to install the Circom compiler, the repository leverages `hardhat-zkit` that does everything for you.
 
 ### Compile the circuits
 
 You can compile the circuits in the project by executing the following command:
 
 ```console
-$ npm run compile
+$ npm run zkit-compile
 ```
-
-> The compilation includes the generation of `r1cs` file, `zkey`, and scripts to produce the corresponding `witnesses`.
 
 ### Create verifier contracts for the circuits
 
 Run the following command in order to generate the solidity verifier contracts:
 
 ```console
-$ npm run circom-verifier
+$ npm run zkit-verifiers
 ```
-
-#
-
-> [!TIP]
-> All essential circuit-related information is stored in the `circuit.config.json` file.
 
 ## License
 

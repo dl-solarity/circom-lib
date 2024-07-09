@@ -12,5 +12,5 @@ generated-types
 typechain-types
 
 # circom files
-zk-out
+zkit
 contracts/verifiers

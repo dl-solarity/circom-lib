@@ -1,8 +1,8 @@
 import "@nomicfoundation/hardhat-toolbox";
+import "@solarity/hardhat-zkit";
 import "tsconfig-paths/register";
 
 import { HardhatUserConfig } from "hardhat/config";
-import "./tasks/tasks";
 
 import * as dotenv from "dotenv";
 dotenv.config();
