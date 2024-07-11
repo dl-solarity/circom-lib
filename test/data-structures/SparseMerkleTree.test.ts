@@ -1,17 +1,16 @@
 import { expect } from "chai";
 import { ethers, zkit } from "hardhat";
 
-import { CircuitZKit } from "@solarity/zkit";
-
 import { deployPoseidonFacade } from "../helpers/poseidon/poseidon-deployer";
 import { Reverter } from "../helpers/reverter";
 
 import { SparseMerkleTreeMock, SparseMerkleTreeVerifierVerifier } from "@ethers-v6";
+import { SparseMerkleTreeVerifier } from "@zkit";
 
 describe("SparseMerkleTree", () => {
   const reverter = new Reverter();
 
-  let smtCircuit: CircuitZKit;
+  let smtCircuit: SparseMerkleTreeVerifier;
 
   let smtMock: SparseMerkleTreeMock;
   let smtVerifier: SparseMerkleTreeVerifierVerifier;

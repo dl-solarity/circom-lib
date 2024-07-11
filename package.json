@@ -41,7 +41,7 @@
     "@iden3/contracts": "^1.4.7",
     "@iden3/js-crypto": "^1.0.3",
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
-    "@solarity/hardhat-zkit": "^0.1.2",
+    "@solarity/hardhat-zkit": "^0.2.1",
     "@solarity/solidity-lib": "^2.7.3",
     "@typechain/ethers-v6": "^0.5.1",
     "@types/chai": "^4.3.14",
