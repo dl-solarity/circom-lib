@@ -68,9 +68,7 @@ describe("SparseMerkleTree", () => {
       isExclusion: 0,
     });
 
-    const [pA, pB, pC, publicSignals] = await smtCircuit.generateCalldata(proofStruct);
-
-    expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
+    await expect(smtCircuit).to.useSolidityVerifier(smtVerifier).and.verifyProof(proofStruct);
   });
 
   it("should prove the tree inclusion for each depth of bamboo", async () => {
@@ -92,9 +90,7 @@ describe("SparseMerkleTree", () => {
         isExclusion: 0,
       });
 
-      const [pA, pB, pC, publicSignals] = await smtCircuit.generateCalldata(proofStruct);
-
-      expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
+      await expect(smtCircuit).to.useSolidityVerifier(smtVerifier).and.verifyProof(proofStruct);
     }
   });
 
@@ -115,9 +111,7 @@ describe("SparseMerkleTree", () => {
       isExclusion: 0,
     });
 
-    const [pA, pB, pC, publicSignals] = await smtCircuit.generateCalldata(proofStruct);
-
-    expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
+    await expect(smtCircuit).to.useSolidityVerifier(smtVerifier).and.verifyProof(proofStruct);
   });
 
   it("should prove the tree exclusion", async () => {
@@ -140,9 +134,7 @@ describe("SparseMerkleTree", () => {
       isExclusion: 1,
     });
 
-    const [pA, pB, pC, publicSignals] = await smtCircuit.generateCalldata(proofStruct);
-
-    expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
+    await expect(smtCircuit).to.useSolidityVerifier(smtVerifier).and.verifyProof(proofStruct);
   });
 
   it("should prove the tree exclusion for each depth of bamboo", async () => {
@@ -166,9 +158,7 @@ describe("SparseMerkleTree", () => {
         isExclusion: 1,
       });
 
-      const [pA, pB, pC, publicSignals] = await smtCircuit.generateCalldata(proofStruct);
-
-      expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
+      await expect(smtCircuit).to.useSolidityVerifier(smtVerifier).and.verifyProof(proofStruct);
     }
   });
 
@@ -188,9 +178,7 @@ describe("SparseMerkleTree", () => {
       isExclusion: 1,
     });
 
-    const [pA, pB, pC, publicSignals] = await smtCircuit.generateCalldata(proofStruct);
-
-    expect(await smtVerifier.verifyProof(pA, pB, pC, publicSignals)).to.be.true;
+    await expect(smtCircuit).to.useSolidityVerifier(smtVerifier).and.verifyProof(proofStruct);
   });
 
   describe("when data is incorrect", () => {
@@ -213,18 +201,16 @@ describe("SparseMerkleTree", () => {
 
       const incorrectValue = merkleProof.value + 1n;
 
-      await expect(
-        smtCircuit.generateProof({
-          root: BigInt(merkleProof.root),
-          siblings: merkleProof.siblings.map((e) => BigInt(e)),
-          key: BigInt(merkleProof.key),
-          value: BigInt(incorrectValue),
-          auxKey: 0,
-          auxValue: 0,
-          auxIsEmpty: 0,
-          isExclusion: 0,
-        }),
-      ).to.be.rejected;
+      await expect(smtCircuit).to.not.generateProof({
+        root: BigInt(merkleProof.root),
+        siblings: merkleProof.siblings.map((e) => BigInt(e)),
+        key: BigInt(merkleProof.key),
+        value: BigInt(incorrectValue),
+        auxKey: 0,
+        auxValue: 0,
+        auxIsEmpty: 0,
+        isExclusion: 0,
+      });
     });
 
     it("should revert an incorrect tree exclusion", async () => {
@@ -238,18 +224,16 @@ describe("SparseMerkleTree", () => {
 
       auxIsEmpty = auxIsEmpty == 0 ? 1 : 0;
 
-      await expect(
-        smtCircuit.generateProof({
-          root: BigInt(merkleProof.root),
-          siblings: merkleProof.siblings.map((e) => BigInt(e)),
-          key: BigInt(merkleProof.key),
-          value: 0,
-          auxKey: BigInt(merkleProof.auxKey),
-          auxValue: BigInt(merkleProof.auxValue),
-          auxIsEmpty: auxIsEmpty,
-          isExclusion: 1,
-        }),
-      ).to.be.rejected;
+      await expect(smtCircuit).to.not.generateProof({
+        root: BigInt(merkleProof.root),
+        siblings: merkleProof.siblings.map((e) => BigInt(e)),
+        key: BigInt(merkleProof.key),
+        value: 0,
+        auxKey: BigInt(merkleProof.auxKey),
+        auxValue: BigInt(merkleProof.auxValue),
+        auxIsEmpty: auxIsEmpty,
+        isExclusion: 1,
+      });
     });
   });
 });
