@@ -3,17 +3,17 @@ import { ethers, zkit } from "hardhat";
 
 import { Reverter } from "../helpers/reverter";
 
-import { CommitmentVerifierVerifier } from "@ethers-v6";
+import { CommitmentVerifierGroth16Verifier } from "@ethers-v6";
 import { CommitmentVerifier } from "@zkit";
 
 describe("Commitment", () => {
   const reverter = new Reverter();
 
-  let commitmentVerifier: CommitmentVerifierVerifier;
+  let commitmentVerifier: CommitmentVerifierGroth16Verifier;
   let commitmentCircuit: CommitmentVerifier;
 
   before("setup", async () => {
-    const CommitmentMockVerifier = await ethers.getContractFactory("CommitmentVerifierVerifier");
+    const CommitmentMockVerifier = await ethers.getContractFactory("CommitmentVerifierGroth16Verifier");
 
     commitmentVerifier = await CommitmentMockVerifier.deploy();
     commitmentCircuit = await zkit.getCircuit("CommitmentVerifier");

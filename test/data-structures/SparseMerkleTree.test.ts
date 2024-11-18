@@ -4,7 +4,7 @@ import { ethers, zkit } from "hardhat";
 import { deployPoseidonFacade } from "../helpers/poseidon/poseidon-deployer";
 import { Reverter } from "../helpers/reverter";
 
-import { SparseMerkleTreeMock, SparseMerkleTreeVerifierVerifier } from "@ethers-v6";
+import { SparseMerkleTreeMock, SparseMerkleTreeVerifierGroth16Verifier } from "@ethers-v6";
 import { SparseMerkleTreeVerifier } from "@zkit";
 
 describe("SparseMerkleTree", () => {
@@ -13,7 +13,7 @@ describe("SparseMerkleTree", () => {
   let smtCircuit: SparseMerkleTreeVerifier;
 
   let smtMock: SparseMerkleTreeMock;
-  let smtVerifier: SparseMerkleTreeVerifierVerifier;
+  let smtVerifier: SparseMerkleTreeVerifierGroth16Verifier;
 
   const leaves: string[] = [];
   let nonExistentLeaf: string;
@@ -21,7 +21,7 @@ describe("SparseMerkleTree", () => {
   before("setup", async () => {
     const poseidonFacade = await deployPoseidonFacade();
 
-    const SparseMerkleTreeMockVerifier = await ethers.getContractFactory("SparseMerkleTreeVerifierVerifier");
+    const SparseMerkleTreeMockVerifier = await ethers.getContractFactory("SparseMerkleTreeVerifierGroth16Verifier");
     const SparseMerkleTreeMock = await ethers.getContractFactory("SparseMerkleTreeMock", {
       libraries: {
         PoseidonFacade: poseidonFacade,
@@ -58,10 +58,10 @@ describe("SparseMerkleTree", () => {
     const merkleProof = await smtMock.getProof(ethers.toBeHex(leaves[5], 32));
 
     const proofStruct = await smtCircuit.generateProof({
-      root: merkleProof.root,
-      siblings: merkleProof.siblings,
-      key: merkleProof.key,
-      value: merkleProof.value,
+      root: BigInt(merkleProof.root),
+      siblings: merkleProof.siblings.map((e) => BigInt(e)),
+      key: BigInt(merkleProof.key),
+      value: BigInt(merkleProof.value),
       auxKey: 0,
       auxValue: 0,
       auxIsEmpty: 0,
@@ -82,10 +82,10 @@ describe("SparseMerkleTree", () => {
       const merkleProof = await smtMock.getProof(ethers.toBeHex(rand, 32));
 
       const proofStruct = await smtCircuit.generateProof({
-        root: merkleProof.root,
-        siblings: merkleProof.siblings,
-        key: merkleProof.key,
-        value: merkleProof.value,
+        root: BigInt(merkleProof.root),
+        siblings: merkleProof.siblings.map((e) => BigInt(e)),
+        key: BigInt(merkleProof.key),
+        value: BigInt(merkleProof.value),
         auxKey: 0,
         auxValue: 0,
         auxIsEmpty: 0,
@@ -105,10 +105,10 @@ describe("SparseMerkleTree", () => {
     const merkleProof = await smtMock.getProof(ethers.toBeHex(511, 32));
 
     const proofStruct = await smtCircuit.generateProof({
-      root: merkleProof.root,
-      siblings: merkleProof.siblings,
-      key: merkleProof.key,
-      value: merkleProof.value,
+      root: BigInt(merkleProof.root),
+      siblings: merkleProof.siblings.map((e) => BigInt(e)),
+      key: BigInt(merkleProof.key),
+      value: BigInt(merkleProof.value),
       auxKey: 0,
       auxValue: 0,
       auxIsEmpty: 0,
@@ -130,12 +130,12 @@ describe("SparseMerkleTree", () => {
     const auxIsEmpty = BigInt(merkleProof.auxKey) == 0n ? 1 : 0;
 
     const proofStruct = await smtCircuit.generateProof({
-      root: merkleProof.root,
-      siblings: merkleProof.siblings,
-      key: merkleProof.key,
+      root: BigInt(merkleProof.root),
+      siblings: merkleProof.siblings.map((e) => BigInt(e)),
+      key: BigInt(merkleProof.key),
       value: 0,
-      auxKey: merkleProof.auxKey,
-      auxValue: merkleProof.auxValue,
+      auxKey: BigInt(merkleProof.auxKey),
+      auxValue: BigInt(merkleProof.auxValue),
       auxIsEmpty: auxIsEmpty,
       isExclusion: 1,
     });
@@ -156,12 +156,12 @@ describe("SparseMerkleTree", () => {
       const auxIsEmpty = BigInt(merkleProof.auxKey) == 0n ? 1 : 0;
 
       const proofStruct = await smtCircuit.generateProof({
-        root: merkleProof.root,
-        siblings: merkleProof.siblings,
-        key: merkleProof.key,
+        root: BigInt(merkleProof.root),
+        siblings: merkleProof.siblings.map((e) => BigInt(e)),
+        key: BigInt(merkleProof.key),
         value: 0,
-        auxKey: merkleProof.auxKey,
-        auxValue: merkleProof.auxValue,
+        auxKey: BigInt(merkleProof.auxKey),
+        auxValue: BigInt(merkleProof.auxValue),
         auxIsEmpty: auxIsEmpty,
         isExclusion: 1,
       });
@@ -178,12 +178,12 @@ describe("SparseMerkleTree", () => {
     const merkleProof = await smtMock.getProof(ethers.toBeHex(nonExistentLeaf, 32));
 
     const proofStruct = await smtCircuit.generateProof({
-      root: merkleProof.root,
-      siblings: merkleProof.siblings,
-      key: merkleProof.key,
+      root: BigInt(merkleProof.root),
+      siblings: merkleProof.siblings.map((e) => BigInt(e)),
+      key: BigInt(merkleProof.key),
       value: 0,
-      auxKey: merkleProof.auxKey,
-      auxValue: merkleProof.auxValue,
+      auxKey: BigInt(merkleProof.auxKey),
+      auxValue: BigInt(merkleProof.auxValue),
       auxIsEmpty: 1,
       isExclusion: 1,
     });
@@ -215,10 +215,10 @@ describe("SparseMerkleTree", () => {
 
       await expect(
         smtCircuit.generateProof({
-          root: merkleProof.root,
-          siblings: merkleProof.siblings,
-          key: merkleProof.key,
-          value: incorrectValue,
+          root: BigInt(merkleProof.root),
+          siblings: merkleProof.siblings.map((e) => BigInt(e)),
+          key: BigInt(merkleProof.key),
+          value: BigInt(incorrectValue),
           auxKey: 0,
           auxValue: 0,
           auxIsEmpty: 0,
@@ -240,12 +240,12 @@ describe("SparseMerkleTree", () => {
 
       await expect(
         smtCircuit.generateProof({
-          root: merkleProof.root,
-          siblings: merkleProof.siblings,
-          key: merkleProof.key,
+          root: BigInt(merkleProof.root),
+          siblings: merkleProof.siblings.map((e) => BigInt(e)),
+          key: BigInt(merkleProof.key),
           value: 0,
-          auxKey: merkleProof.auxKey,
-          auxValue: merkleProof.auxValue,
+          auxKey: BigInt(merkleProof.auxKey),
+          auxValue: BigInt(merkleProof.auxValue),
           auxIsEmpty: auxIsEmpty,
           isExclusion: 1,
         }),
