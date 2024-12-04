@@ -30,6 +30,7 @@
     "zkit-compile": "npx hardhat zkit compile",
     "zkit-verifiers": "npx hardhat zkit verifiers",
     "test": "npx hardhat test",
+    "wasm-test": "./node_modules/.bin/mocha -p 'wasm-test/*.js'",
     "generate-types": "TYPECHAIN_FORCE=true npx hardhat typechain",
     "lint-fix": "npm run lint-sol-fix && npm run lint-ts-fix && npm run lint-json-fix",
     "lint-json-fix": "prettier --write \"./**/*.json\"",
@@ -63,6 +64,10 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typechain": "^8.3.2",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "circom_tester": "^0.0.20",
+    "chai": "^5.1.2",
+    "ffjavascript": "^0.3.1",
+    "path": "^0.12.7"
   }
 }
