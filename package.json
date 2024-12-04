@@ -66,7 +66,7 @@
     "typechain": "^8.3.2",
     "typescript": "^5.6.3",
     "circom_tester": "^0.0.20",
-    "chai": "^5.1.2",
+    "chai": "^4.5.0",
     "ffjavascript": "^0.3.1",
     "path": "^0.12.7"
   }
