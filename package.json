@@ -32,9 +32,10 @@
     "test": "npx hardhat test",
     "wasm-test": "./node_modules/.bin/mocha \"wasm-test/*.js\"",
     "generate-types": "TYPECHAIN_FORCE=true npx hardhat typechain",
-    "lint-fix": "npm run lint-sol-fix && npm run lint-ts-fix && npm run lint-json-fix",
+    "lint-fix": "npm run lint-sol-fix && npm run lint-ts-fix && npm run lint-json-fix && npm run lint-js-fix",
     "lint-json-fix": "prettier --write \"./**/*.json\"",
     "lint-ts-fix": "prettier --write \"./**/*.ts\"",
+    "lint-js-fix": "prettier --write \"./**/*.js\"",
     "lint-sol-fix": "prettier --write \"contracts/**/*.sol\"",
     "publish-to-npm": "npm run lint-fix && bash ./scripts/publish.sh --public"
   },
