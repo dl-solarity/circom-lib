@@ -30,7 +30,7 @@
     "zkit-compile": "npx hardhat zkit compile",
     "zkit-verifiers": "npx hardhat zkit verifiers",
     "test": "npx hardhat test",
-    "wasm-test": "./node_modules/.bin/mocha -p 'wasm-test/*.js'",
+    "wasm-test": "./node_modules/.bin/mocha \"wasm-test/*.js\"",
     "generate-types": "TYPECHAIN_FORCE=true npx hardhat typechain",
     "lint-fix": "npm run lint-sol-fix && npm run lint-ts-fix && npm run lint-json-fix",
     "lint-json-fix": "prettier --write \"./**/*.json\"",
