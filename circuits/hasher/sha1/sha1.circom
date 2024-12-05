@@ -1,14 +1,16 @@
 pragma circom 2.1.6;
 
-include "constants.circom";
-include "sha1compression.circom";
 include "../sha2/sha2Common.circom";
+include "./internal/constants.circom";
+include "./internal/sha1compression.circom";
 
 template Sha1HashChunks(BLOCK_NUM) {
     signal input dummy;
-    dummy * dummy === 0;
     signal input in[BLOCK_NUM * 512];
+
     signal output out[160];
+
+    dummy * dummy === 0;
     
     var i;
     var k;
@@ -57,9 +59,11 @@ template Sha1HashChunks(BLOCK_NUM) {
 
 template Sha1HashBits(LEN) {
     signal input dummy;
-    dummy * dummy === 0;
     signal input in[LEN];
+
     signal output out[160];
+    
+    dummy * dummy === 0;
     
     component addPadding = ShaPadding(LEN, 512);
     addPadding.in <== in;

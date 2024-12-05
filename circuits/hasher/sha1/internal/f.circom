@@ -6,6 +6,7 @@ template ChT(n) {
     signal input a[n];
     signal input b[n];
     signal input c[n];
+
     signal output out[n];
     
     for (var k = 0; k < n; k++) {
@@ -17,7 +18,9 @@ template MajT(n) {
     signal input a[n];
     signal input b[n];
     signal input c[n];
+
     signal output out[n];
+
     signal mid[n];
     
     for (var k = 0; k < n; k++) {
@@ -30,6 +33,7 @@ template fT(T) {
     signal input b[32];
     signal input c[32];
     signal input d[32];
+    
     signal output out[32];
     
     component maj = MajT(32);

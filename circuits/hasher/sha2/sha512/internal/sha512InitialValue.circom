@@ -1,10 +1,7 @@
-pragma circom 2.0.0;
+pragma circom 2.1.6;
 
-//------------------------------------------------------------------------------
 // initial hash value for SHA2-512 
-
-template Sha512InitialValue() {
-    
+template Sha512InitialValue() {    
     signal output out[8][64];
     
     var INITIAL_STATE[8] =
@@ -24,5 +21,4 @@ template Sha512InitialValue() {
             out[k][i] <== (INITIAL_STATE[k] >> i) & 1;
         }
     }
-    
 }

@@ -1,10 +1,7 @@
-pragma circom 2.0.0;
+pragma circom 2.1.6;
 
-//------------------------------------------------------------------------------
 // round constants for SHA2-384 and SHA2-512 (they are the same)
-
 template SHA2_384_512RoundKeys() {
-    
     signal output out[80];
     
     var ROUND_KEYS[80] =
@@ -33,9 +30,5 @@ template SHA2_384_512RoundKeys() {
     
     for (var j = 0; j < 80; j++) {
         out[j] <== ROUND_KEYS[j];
-    }
-    
+    }    
 }
-
-//------------------------------------------------------------------------------
-

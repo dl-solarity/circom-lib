@@ -1,15 +1,12 @@
-pragma circom 2.0.0;
+pragma circom 2.1.6;
 
-include "../sha2Common.circom";
+include "../../sha2Common.circom";
 
-//------------------------------------------------------------------------------
 // SHA384 / SHA512 compression function inner loop
 //
 // note: the d,h,inp,key inputs (and outputs) are 64 bit numbers;
 // the rest are little-endian bit vectors.
-
 template Sha2_384_512CompressInner() {
-    
     signal input inp;
     signal input key;
     signal input dummy;
@@ -35,8 +32,10 @@ template Sha2_384_512CompressInner() {
     
     component dSum = GetSumOfNElements(64);
     dSum.dummy <== dummy;
+
     component hSum = GetSumOfNElements(64);
     hSum.dummy <== dummy;
+    
     for (var i = 0; i < 64; i++) {
         outG[i] <== f[i];
         outF[i] <== e[i];
@@ -45,6 +44,7 @@ template Sha2_384_512CompressInner() {
         dSum.in[i] <== (1 << i) * c[i];
         hSum.in[i] <== (1 << i) * g[i];
     }
+
     outDD <== dSum.out;
     outHH <== hSum.out;
     
@@ -53,18 +53,20 @@ template Sha2_384_512CompressInner() {
     component major[64];
     component s0Xor[64];
     component s1Xor[64];
-    
+
     component s0Sum = GetSumOfNElements(64);
     s0Sum.dummy <== dummy;
+
     component s1Sum = GetSumOfNElements(64);
     s1Sum.dummy <== dummy;
+
     component mjSum = GetSumOfNElements(64);
     mjSum.dummy <== dummy;
+
     component chSum = GetSumOfNElements(64);
     chSum.dummy <== dummy;
     
     for (var i = 0; i < 64; i++) {
-        
         // ch(e,f,g) = if e then f else g = e(f-g)+g
         chb[i] <== e[i] * (f[i] - g[i]) + g[i];
         chSum.in[i] <== (1 << i) * chb[i];
@@ -84,21 +86,17 @@ template Sha2_384_512CompressInner() {
         s1Xor[i].x <== e[ (i + 14) % 64 ];
         s1Xor[i].y <== e[ (i + 18) % 64 ];
         s1Xor[i].z <== e[ (i + 41) % 64 ];
-         s1Sum.in[i] <== (1 << i) * s1Xor[i].out;
-        
+        s1Sum.in[i] <== (1 << i) * s1Xor[i].out;
     }
     
     signal overflowE <== dd + hh + s1Sum.out + chSum.out + key + inp;
     signal overflowA <== hh + s1Sum.out + chSum.out + key + inp + s0Sum.out + mjSum.out;
     
-   component decomposeE = GetLastNBits(64);
+    component decomposeE = GetLastNBits(64);
     decomposeE.in <== overflowE;
     decomposeE.out ==> outE;
     
     component decomposeA = GetLastNBits(64);
     decomposeA.in <== overflowA;
     decomposeA.out ==> outA;
-    
 }
-
-//------------------------------------------------------------------------------

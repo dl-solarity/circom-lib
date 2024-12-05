@@ -1,20 +1,16 @@
-pragma circom 2.0.0;
+pragma circom 2.1.6;
 
-include "../sha2Common.circom";
+include "../../sha2Common.circom";
 
-//------------------------------------------------------------------------------
 // SHA256 (and also SHA224) compression function inner loop
 //
 // note: the d,h,inp,key inputs (and outputs) are 32 bit numbers;
 // the rest are little-endian bit vectors.
-
-template Sha2_224_256CompressInner() {
-    
+template Sha2_224_256CompressInner() {    
     signal input inp;
     signal input key;
     signal input dummy;
-    dummy * dummy === 0;
-    
+
     signal input a[32];
     signal input b[32];
     signal input c[32];
@@ -32,6 +28,8 @@ template Sha2_224_256CompressInner() {
     signal output outF[32];
     signal output outG[32];
     signal output outHH;
+
+    dummy * dummy === 0;
     
     outG <== f;
     outF <== e;
@@ -47,6 +45,7 @@ template Sha2_224_256CompressInner() {
         dSum.in[i] <== (1 << i) * c[i];
         hSum.in[i] <== (1 << i) * g[i];
     }
+
     outDD <== dSum.out;
     outHH <== hSum.out;
     
@@ -65,8 +64,7 @@ template Sha2_224_256CompressInner() {
     component chSum = GetSumOfNElements(32);
     chSum.dummy <== dummy;
     
-    for (var i = 0; i < 32; i++) {
-        
+    for (var i = 0; i < 32; i++) {        
         // ch(e,f,g) = if e then f else g = e(f-g)+g
         chb[i] <== e[i] * (f[i] - g[i]) + g[i];
         chSum.in[i] <== (1 << i) * chb[i];
@@ -86,8 +84,7 @@ template Sha2_224_256CompressInner() {
         s1Xor[i].x <== e[ (i + 6) % 32 ];
         s1Xor[i].y <== e[ (i + 11) % 32 ];
         s1Xor[i].z <== e[ (i + 25) % 32 ];
-        s1Sum.in[i] <== (1 << i) * s1Xor[i].out;
-        
+        s1Sum.in[i] <== (1 << i) * s1Xor[i].out;        
     }
     
     signal overflowE <== dd + hh + s1Sum.out + chSum.out + key + inp;
@@ -99,8 +96,5 @@ template Sha2_224_256CompressInner() {
     
     component decomposeA = GetLastNBits(32);
     decomposeA.in <== overflowA;
-    decomposeA.out ==> outA;
-    
+    decomposeA.out ==> outA;    
 }
-
-//------------------------------------------------------------------------------

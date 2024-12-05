@@ -1,10 +1,7 @@
-pragma circom 2.0.0;
+pragma circom 2.1.6;
 
-//------------------------------------------------------------------------------
 // round constants for SHA2-224 and SHA2-256 (they are the same)
-
-template Sha2_224_256RoundKeys() {
-    
+template Sha2_224_256RoundKeys() {    
     signal output out[64];
     
     var ROUND_KEYS[64] =
@@ -21,9 +18,5 @@ template Sha2_224_256RoundKeys() {
     
     for (var j = 0; j < 64; j++) {
         out[j] <== ROUND_KEYS[j];
-    }
-    
+    }    
 }
-
-//------------------------------------------------------------------------------
-

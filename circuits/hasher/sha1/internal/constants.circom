@@ -1,9 +1,10 @@
 pragma circom 2.1.6;
 
-include "../../bitify/bitify.circom";
+include "../../../bitify/bitify.circom";
 
 template H(x) {
     signal output out[32];
+
     var c[5] = [
     0x67452301,
     0xefcdab89,
@@ -22,6 +23,7 @@ template H(x) {
 
 template K(t) {
     signal output out[32];
+    
     var k[4] = [0x5a827999, 0x6ed9eba1, 0x8f1bbcdc, 0xca62c1d6];
     
     component bitify = Num2Bits(32);

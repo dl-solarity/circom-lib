@@ -1,17 +1,19 @@
 pragma circom 2.1.6;
 
+include "../../../bitify/operations.circom";
 include "./rotate.circom";
 include "./xor4.circom";
 include "./constants.circom";
 include "./t.circom";
-include "../../bitify/operations.circom";
 
 template Sha1compression() {
     signal input hin[160];
     signal input inp[512];
     signal input dummy;
-    dummy * dummy === 0;
+    
     signal output out[160];
+
+    dummy * dummy === 0;
     
     signal a[81][32];
     signal b[81][32];
@@ -23,34 +25,40 @@ template Sha1compression() {
     var i;
     
     component rotl1[64];
-    for (i = 0; i < 64; i++){
+
+    for (i = 0; i < 64; i++) {
         rotl1[i] = RotL(32, 1);
     }
     
     component xor4[64];
-    for (i = 0; i < 64; i++){
+
+    for (i = 0; i < 64; i++) {
         xor4[i] = Xor4(32);
     }
     
     component rotl30[80];
-    for (i = 0; i <= 79; i++){
+
+    for (i = 0; i <= 79; i++) {
         rotl30[i] = RotL(32, 30);
     }
     
     component kT[80];
-    for (i = 0; i <= 79; i++){
+
+    for (i = 0; i <= 79; i++) {
         kT[i] = K(i);
     }
     
     component tTmp[80];
-    for (i = 0; i <= 79; i++){
+
+    for (i = 0; i <= 79; i++) {
         tTmp[i] = T(i);
         tTmp[i].dummy <== dummy;
 
     }
     
     component fSum[5];
-    for (i = 0; i < 5; i++){
+    
+    for (i = 0; i < 5; i++) {
         fSum[i] = BinSum(2, 32);
         fSum[i].dummy <== dummy;
     }

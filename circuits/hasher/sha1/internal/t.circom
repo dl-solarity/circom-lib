@@ -1,10 +1,10 @@
 pragma circom 2.1.6;
 
+include "../../../bitify/comparators.circom";
+include "../../../int/arithmetic.circom";
 include "./rotate.circom";
-include "../../bitify/comparators.circom";
 include "./f.circom";
 include "./constants.circom";
-include "../../int/arithmetic.circom";
 
 template T(t) {
     signal input dummy;
@@ -54,6 +54,5 @@ template T(t) {
 
     for (k = 0; k < 32; k++) {
         out[k] <== getLastNBits.out[31 - k];
-    }
-  
+    } 
 }

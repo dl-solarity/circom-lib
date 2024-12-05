@@ -1,10 +1,7 @@
-pragma circom 2.0.0;
+pragma circom 2.1.6;
 
-//------------------------------------------------------------------------------
 // initial hash value for SHA2-384
-
 template Sha384InitialValues() {
-    
     signal output out[8][64];
     
     var INITIAL_STATE[8] =

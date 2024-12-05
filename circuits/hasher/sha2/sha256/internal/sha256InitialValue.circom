@@ -1,10 +1,7 @@
-pragma circom 2.0.0;
+pragma circom 2.1.6;
 
-//------------------------------------------------------------------------------
 // initial hash value for SHA2-256 
-
 template Sha256InitialValue() {
-    
     signal output out[8][32];
     
     var INITIAL_STATE[8] =
@@ -22,6 +19,5 @@ template Sha256InitialValue() {
         for (var i = 0; i < 32; i++) {
             out[k][i] <== (INITIAL_STATE[k] >> i) & 1;
         }
-    }
-    
+    }    
 }
