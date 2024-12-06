@@ -1,7 +1,6 @@
 const { assert } = require("console");
 const path = require("path");
 
-const Scalar = require("ffjavascript").Scalar;
 const wasm_tester = require("circom_tester").wasm;
 
 function bigintToArray(n, k, x) {
@@ -92,11 +91,13 @@ async function testGreaterEqThan(input1, input2, circuit) {
   const w = await circuit.calculateWitness({ in: input }, true);
 
   let circuit_result = w[1];
+
   assert(circuit_result == real_result, `${input1} >= ${input2}`);
 }
 
 describe("Comparators tests", function () {
   this.timeout(100000);
+
   let circuitEqual;
   let circuitLessThan;
   let circuitLessEqThan;

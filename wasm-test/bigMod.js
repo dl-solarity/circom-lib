@@ -1,7 +1,6 @@
 const { assert } = require("console");
 const path = require("path");
 
-const Scalar = require("ffjavascript").Scalar;
 const wasm_tester = require("circom_tester").wasm;
 
 function bigintToArray(n, k, x) {

@@ -1,13 +1,13 @@
 const { assert } = require("console");
 const path = require("path");
 
-const Scalar = require("ffjavascript").Scalar;
 const wasm_tester = require("circom_tester").wasm;
 
 async function testA(input1, input2, circuit) {
   let input = [input1, input2];
 
   const w = await circuit.calculateWitness({ in: input }, true);
+
   let real_result = [input1];
   let circuit_result = w.slice(1, 1 + 1);
 
@@ -19,6 +19,7 @@ async function testA(input1, input2, circuit) {
 async function testAnd(input1, input2, circuit) {
   let input = [input1, input2];
   let real_result = [input1 * input2];
+
   const w = await circuit.calculateWitness({ in: input }, true);
 
   let circuit_result = w.slice(1, 1 + 1);
@@ -32,6 +33,7 @@ async function testB(input1, input2, circuit) {
   let input = [input1, input2];
 
   const w = await circuit.calculateWitness({ in: input }, true);
+
   let real_result = [input2];
   let circuit_result = w.slice(1, 1 + 1);
 
@@ -42,6 +44,7 @@ async function testB(input1, input2, circuit) {
 
 async function testBuffer(input1, circuit) {
   const w = await circuit.calculateWitness({ in: input1 }, true);
+
   let real_result = [input1];
   let circuit_result = w.slice(1, 1 + 1);
 
@@ -55,6 +58,7 @@ async function testBuffer(input1, circuit) {
 
 async function testFalse(input1, input2, circuit) {
   const w = await circuit.calculateWitness({ in: [input1, input2] }, true);
+
   let real_result = [0n];
   let circuit_result = w.slice(1, 1 + 1);
 
@@ -65,6 +69,7 @@ async function testFalse(input1, input2, circuit) {
 
 async function testNimply(input1, input2, circuit) {
   const w = await circuit.calculateWitness({ in: [input1, input2] }, true);
+
   let real_result = [input1 - input2 + (1n - input1) * input2];
   let circuit_result = w.slice(1, 1 + 1);
 
@@ -75,6 +80,7 @@ async function testNimply(input1, input2, circuit) {
 
 async function testImply(input1, input2, circuit) {
   const w = await circuit.calculateWitness({ in: [input1, input2] }, true);
+
   let real_result = [1n - input1 + input2 - (1n - input1) * input2];
   let circuit_result = w.slice(1, 1 + 1);
 
@@ -85,6 +91,7 @@ async function testImply(input1, input2, circuit) {
 
 async function testInvImply(input1, input2, circuit) {
   const w = await circuit.calculateWitness({ in: [input1, input2] }, true);
+
   let real_result = [1n - input2 + input1 - (1n - input2) * input1];
   let circuit_result = w.slice(1, 1 + 1);
 
@@ -98,6 +105,7 @@ async function testInvImply(input1, input2, circuit) {
 
 async function testNinvImply(input1, input2, circuit) {
   const w = await circuit.calculateWitness({ in: [input1, input2] }, true);
+
   let real_result = [input2 - input1 + (1n - input2) * input1];
   let circuit_result = w.slice(1, 1 + 1);
 
@@ -111,6 +119,7 @@ async function testNinvImply(input1, input2, circuit) {
 
 async function testNor(input1, input2, circuit) {
   const w = await circuit.calculateWitness({ in: [input1, input2] }, true);
+
   let real_result = [1n - input1 + input2 + input1 * input2];
   let circuit_result = w.slice(1, 1 + 1);
 
@@ -121,6 +130,7 @@ async function testNor(input1, input2, circuit) {
 
 async function testNot(input1, circuit) {
   const w = await circuit.calculateWitness({ in: input1 }, true);
+
   let real_result = [1n - input1];
   let circuit_result = w.slice(1, 1 + 1);
 
@@ -134,6 +144,7 @@ async function testNot(input1, circuit) {
 
 async function testNotA(input1, input2, circuit) {
   const w = await circuit.calculateWitness({ in: [input1, input2] }, true);
+
   let real_result = [1n - input1];
   let circuit_result = w.slice(1, 1 + 1);
 
@@ -144,6 +155,7 @@ async function testNotA(input1, input2, circuit) {
 
 async function testNotB(input1, input2, circuit) {
   const w = await circuit.calculateWitness({ in: [input1, input2] }, true);
+
   let real_result = [1n - input2];
   let circuit_result = w.slice(1, 1 + 1);
 
@@ -154,6 +166,7 @@ async function testNotB(input1, input2, circuit) {
 
 async function testOr(input1, input2, circuit) {
   const w = await circuit.calculateWitness({ in: [input1, input2] }, true);
+
   let real_result = [input1 + input2 - input1 * input2];
   let circuit_result = w.slice(1, 1 + 1);
 
@@ -164,6 +177,7 @@ async function testOr(input1, input2, circuit) {
 
 async function testTrue(input1, input2, circuit) {
   const w = await circuit.calculateWitness({ in: [input1, input2] }, true);
+
   let real_result = [1n];
   let circuit_result = w.slice(1, 1 + 1);
 
@@ -174,6 +188,7 @@ async function testTrue(input1, input2, circuit) {
 
 async function testXnor(input1, input2, circuit) {
   const w = await circuit.calculateWitness({ in: [input1, input2] }, true);
+
   let real_result = [1n - input1 - input2 + 2n * input1 * input2];
   let circuit_result = w.slice(1, 1 + 1);
 
@@ -184,6 +199,7 @@ async function testXnor(input1, input2, circuit) {
 
 async function testXor(input1, input2, circuit) {
   const w = await circuit.calculateWitness({ in: [input1, input2] }, true);
+
   let real_result = [input1 + input2 - 2n * input1 * input2];
   let circuit_result = w.slice(1, 1 + 1);
 
@@ -194,6 +210,7 @@ async function testXor(input1, input2, circuit) {
 
 async function testNAnd(input1, input2, circuit) {
   const w = await circuit.calculateWitness({ in: [input1, input2] }, true);
+
   let real_result = [1n - input1 * input2];
   let circuit_result = w.slice(1, 1 + 1);
 

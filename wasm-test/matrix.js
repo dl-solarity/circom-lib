@@ -1,7 +1,6 @@
-const { assert, log } = require("console");
+const { assert } = require("console");
 const path = require("path");
 
-const Scalar = require("ffjavascript").Scalar;
 const wasm_tester = require("circom_tester").wasm;
 
 function determinant(matrix) {
@@ -73,6 +72,7 @@ function performConvolution(matrix, filter, step) {
 
   return output;
 }
+
 function transposeMatrix(matrix) {
   const rows = matrix.length;
   const cols = matrix[0].length;
@@ -90,11 +90,13 @@ function transposeMatrix(matrix) {
 
 async function testMatrixAdd(input1, input2, circuit) {
   const real_result = [];
+
   for (let i = 0; i < input1.length; i++) {
     for (let j = 0; j < input1[i].length; j++) {
       real_result.push(input1[i][j] + input2[i][j]);
     }
   }
+
   const w = await circuit.calculateWitness({ in1: input1, in2: input2, dummy: 0n }, true);
 
   let circuit_result = w.slice(1, 1 + 16);
@@ -130,6 +132,7 @@ async function testMatrixConvolation(input1, input2, step, circuit) {
 
 async function testMatrixHadamard(input1, input2, circuit) {
   const real_result = [];
+
   for (let i = 0; i < input1.length; i++) {
     for (let j = 0; j < input1[i].length; j++) {
       real_result.push(input1[i][j] * input2[i][j]);
@@ -182,11 +185,13 @@ async function testMatrixPow(input1, circuit) {
 
 async function testMatrixScalar(input1, input2, circuit) {
   const real_result = [];
+
   for (let i = 0; i < input1.length; i++) {
     for (let j = 0; j < input1[i].length; j++) {
       real_result.push(input1[i][j] * input2);
     }
   }
+
   const w = await circuit.calculateWitness({ in: input1, scalar: input2, dummy: 0n }, true);
 
   let circuit_result = w.slice(1, 1 + 16);

@@ -1,12 +1,12 @@
-const { assert, log } = require("console");
+const { assert } = require("console");
 const path = require("path");
 
-const Scalar = require("ffjavascript").Scalar;
 const wasm_tester = require("circom_tester").wasm;
 
 async function testNum2Bits(input, circuit) {
   let real_result = [];
   let inp_clone = input;
+
   for (var i = 0; i < 5; i++) {
     real_result.push(inp_clone % 2n);
     inp_clone = (inp_clone - (inp_clone % 2n)) / 2n;
@@ -23,9 +23,11 @@ async function testNum2Bits(input, circuit) {
 
 async function testBits2Num(input, circuit) {
   let real_result = 0n;
+
   for (var i = 0; i < 5; i++) {
     real_result += 2n ** BigInt(i) * input[i];
   }
+
   real_result = [real_result];
 
   const w = await circuit.calculateWitness({ in: input }, true);

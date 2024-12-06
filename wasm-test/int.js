@@ -1,11 +1,11 @@
-const { assert, log } = require("console");
+const { assert } = require("console");
 const path = require("path");
 
-const Scalar = require("ffjavascript").Scalar;
 const wasm_tester = require("circom_tester").wasm;
 
 async function testInverse(input, circuit) {
   let real_result = [1n];
+
   if (input == 2n) {
     real_result = [10944121435919637611123202872628637544274182200208017171849102093287904247809n];
   }
@@ -18,6 +18,7 @@ async function testInverse(input, circuit) {
     assert(circuit_result[i] == real_result[i], `1 / ${input}`);
   }
 }
+
 async function testDivision(input1, input2, circuit) {
   let input = [input1, input2];
 
@@ -62,6 +63,7 @@ async function testLog(input, circuit) {
     assert(circuit_result[i] == real_result[i], `log(${input}), ${real_result[i]}, ${circuit_result[i]}`);
   }
 }
+
 async function testLogRange(input, circuit) {
   let real_result = [0n];
 
@@ -153,6 +155,7 @@ describe("Log2 (Strict) test", function () {
   it("log(2)", async function () {
     await testLog(2n, circuit);
   });
+
   it("log(127364283)", async function () {
     await testLog(127364283n, circuit);
   });
@@ -181,6 +184,7 @@ describe("Log2 test", function () {
   it("log(2)", async function () {
     await testLogRange(2n, circuit);
   });
+
   it("log(127364283)", async function () {
     await testLogRange(127364283n, circuit);
   });

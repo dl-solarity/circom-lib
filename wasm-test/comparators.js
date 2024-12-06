@@ -1,11 +1,11 @@
-const { assert, log } = require("console");
+const { assert } = require("console");
 const path = require("path");
 
-const Scalar = require("ffjavascript").Scalar;
 const wasm_tester = require("circom_tester").wasm;
 
 async function testIsZero(input, circuit) {
   let real_result = [0n];
+
   if (input == 0n) {
     real_result = [1n];
   }

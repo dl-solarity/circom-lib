@@ -1,14 +1,12 @@
 const { assert } = require("console");
 const path = require("path");
 
-const Scalar = require("ffjavascript").Scalar;
 const wasm_tester = require("circom_tester").wasm;
-
 const crypto = require("crypto");
-const { read } = require("fs");
 
 function hexToBitArray(hexStr) {
   const bitArray = [];
+
   for (const hexChar of hexStr) {
     const binary = parseInt(hexChar, 16).toString(2).padStart(4, "0");
     bitArray.push(...binary.split("").map((bit) => parseInt(bit, 10)));

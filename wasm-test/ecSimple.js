@@ -1,11 +1,11 @@
-const { assert, log } = require("console");
+const { assert } = require("console");
 const path = require("path");
 
-const Scalar = require("ffjavascript").Scalar;
 const wasm_tester = require("circom_tester").wasm;
 
 function bigintToArray(n, k, x) {
   let mod = BigInt(1);
+
   for (let idx = 0; idx < n; idx++) {
     mod *= BigInt(2);
   }
@@ -86,6 +86,7 @@ function point_add(x1, y1, x2, y2, p) {
   if (x1 === x2) {
     return { x: null, y: null };
   }
+
   let lambda_num = (p + y2 - y1) % p;
   let lambda_den = modInverse((p + x2 - x1) % p, p);
   let lam = (lambda_num * lambda_den) % p;
