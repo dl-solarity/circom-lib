@@ -1,4 +1,4 @@
-pragma circom  2.1.6;
+pragma circom 2.1.6;
 
 include "../bigInt/bigInt.circom";
 include "./mgf1.circom";
@@ -15,8 +15,7 @@ include "../hasher/hash.circom";
 // This is because salt len can`t be % 8 != 0 so we use bytes len (8 bites) 
 // For now, only HASH_TYPE == 384 && SALT_LEN == 48,  HASH_TYPE == 256 && SALT_LEN == 64, HASH_TYPE == 256 && SALT_LEN == 32 cases supported
 // use this for CHUNK_NUMBER == 2**n, otherwise error will occur
-template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE){
-    
+template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE) {
     assert((HASH_TYPE == 384 && SALT_LEN == 48) || (HASH_TYPE == 256 && SALT_LEN == 64) || (HASH_TYPE == 256 && SALT_LEN == 32));
     
     signal input pubkey[CHUNK_NUMBER]; 
@@ -35,21 +34,17 @@ template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE){
     signal eMsgInBits[EM_LEN_BITS];
     
     //computing encoded message
-
     component powerMod;
-    var isPowerOfTwo = 0;
-
     powerMod = PowerMod(CHUNK_SIZE, CHUNK_NUMBER, EXP);
-
     powerMod.base <== signature;
     powerMod.modulus <== pubkey;
     powerMod.dummy <== dummy;
-    
     
     signal encoded[CHUNK_NUMBER];
     encoded <== powerMod.out;
     
     component num2Bits[CHUNK_NUMBER];
+
     for (var i = 0; i < CHUNK_NUMBER; i++) {
         num2Bits[i] = Num2Bits(CHUNK_SIZE);
         num2Bits[i].in <== encoded[CHUNK_NUMBER - 1 - i];
@@ -60,16 +55,17 @@ template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE){
     }
     
     component bits2Num[EM_LEN];
+
     for (var i = 0; i < EM_LEN; i++) {
         bits2Num[i] = Bits2Num(8);
+
         for (var j = 0; j < 8; j++) {
             bits2Num[i].in[7 - j] <== eMsgInBits[i * 8 + j];
         }
+
         eM[EM_LEN - i - 1] <== bits2Num[i].out;
     }
-    
-    
-    
+ 
     //should be more than HLEN + SLEN + 2
     assert(EM_LEN >= HASH_LEN + SALT_LEN + 2);
     
@@ -94,32 +90,38 @@ template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE){
     }
     
     //getting mask
-    if (HASH_TYPE == 256){
+    if (HASH_TYPE == 256) {
         component MGF1_256 = Mgf1Sha256(HASH_LEN, DB_MASK_LEN);
         MGF1_256.dummy <== dummy;
+
         for (var i = 0; i < (HASH_TYPE); i++) {
             MGF1_256.seed[i] <== hash[i];
         }
+
         for (var i = 0; i < DB_MASK_LEN * 8; i++) {
             dbMask[i] <== MGF1_256.out[i];
         }
     }
-    if (HASH_TYPE == 384){
+    if (HASH_TYPE == 384) {
         component MGF1_384 = Mgf1Sha384(HASH_LEN, DB_MASK_LEN);
         MGF1_384.dummy <== dummy;
+
         for (var i = 0; i < (HASH_TYPE); i++) {
             MGF1_384.seed[i] <== hash[i];
         }
+
         for (var i = 0; i < DB_MASK_LEN * 8; i++) {
             dbMask[i] <== MGF1_384.out[i];
         }
     }
 
     component xor = Xor2(DB_MASK_LEN * 8);
+
     for (var i = 0; i < DB_MASK_LEN * 8; i++) {
         xor.in1[i] <== maskedDB[i];
         xor.in2[i] <== dbMask[i];
     }
+
     for (var i = 0; i < DB_MASK_LEN * 8; i++) {
         //setting the first leftmost byte to 0
         if (i == 0) {
@@ -139,22 +141,24 @@ template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE){
     for (var i = 0; i < 64; i++) {
         mDash[i] <== 0;
     }
+
     //adding message hash
     for (var i = 0; i < HASH_LEN * 8; i++) {
         mDash[64 + i] <== hashed[i];
     }
+
     //adding salt
     for (var i = 0; i < SALT_LEN * 8; i++) {
         mDash[64 + HASH_LEN * 8 + i] <== salt[i];
     }
     
-    if (HASH_TYPE == 256 && SALT_LEN == 32){
-        
+    if (HASH_TYPE == 256 && SALT_LEN == 32) {
         //adding padding
         //len = 64+512 = 576 = 1001000000
-        for (var i = 577; i < 1014; i++){
+        for (var i = 577; i < 1014; i++) {
             mDash[i] <== 0;
         }
+
         mDash[576] <== 1;
         mDash[1023] <== 0;
         mDash[1022] <== 0;
@@ -171,12 +175,15 @@ template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE){
         component hDash256 = ShaHashChunks(2, HASH_TYPE);
         hDash256.dummy <== dummy;
         hDash256.in <== mDash;
+
         hDash256.out === hash;
     }
-    if (HASH_TYPE == 256 && SALT_LEN == 64){
-        for (var i = 833; i < 1014; i++){
+
+    if (HASH_TYPE == 256 && SALT_LEN == 64) {
+        for (var i = 833; i < 1014; i++) {
             mDash[i] <== 0;
         }
+
         mDash[832] <== 1;
         mDash[1023] <== 0;
         mDash[1022] <== 0;
@@ -188,18 +195,21 @@ template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE){
         mDash[1016] <== 0;
         mDash[1015] <== 1;
         mDash[1014] <== 1;
+
         component hDash256 = ShaHashChunks(2, HASH_TYPE);
         hDash256.dummy <== dummy;
         hDash256.in <== mDash;
+
         hDash256.out === hash;
     }
-    if (HASH_TYPE == 384 && SALT_LEN == 48){
-        
+
+    if (HASH_TYPE == 384 && SALT_LEN == 48) {        
         //padding
         //len = 64+48*16 = 832 = 1101000000
-        for (var i = 833; i < 1014; i++){
+        for (var i = 833; i < 1014; i++) {
             mDash[i] <== 0;
         }
+
         mDash[832] <== 1;
         mDash[1023] <== 0;
         mDash[1022] <== 0;
@@ -216,10 +226,10 @@ template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE){
         component hDash384 = ShaHashChunks(1, HASH_TYPE);
         hDash384.dummy <== dummy;
         hDash384.in <== mDash;
+
         hDash384.out === hash;
     }
 }
-
 
 // Verification for RSAPSS signature
 // hashed is hashed message of hash_type algo
@@ -232,15 +242,14 @@ template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE){
 // This is because salt len can`t be % 8 != 0 so we use bytes len (8 bites) 
 // For now, only HASH_TYPE == 384 && SALT_LEN == 48,  HASH_TYPE == 256 && SALT_LEN == 64, HASH_TYPE == 256 && SALT_LEN == 32 cases supported
 // use this for CHUNK_NUMBER != 2**n, otherwise use previous
-template VerifyRsaPssSigNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE){
-    
+template VerifyRsaPssSigNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE) {
     assert((HASH_TYPE == 384 && SALT_LEN == 48) || (HASH_TYPE == 256 && SALT_LEN == 64) || (HASH_TYPE == 256 && SALT_LEN == 32));
     
     signal input pubkey[CHUNK_NUMBER]; 
     signal input signature[CHUNK_NUMBER];
     signal input hashed[HASH_TYPE]; 
-
     signal input dummy;
+
     dummy * dummy === 0;
 
     var EM_LEN = (CHUNK_SIZE * CHUNK_NUMBER) \ 8; 
@@ -252,12 +261,8 @@ template VerifyRsaPssSigNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HA
     signal eMsgInBits[EM_LEN_BITS];
     
     //computing encoded message
-
     component powerMod;
-    var isPowerOfTwo = 0;
-
     powerMod = PowerModNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, EXP);
-
     powerMod.base <== signature;
     powerMod.modulus <== pubkey;
     powerMod.dummy <== dummy;
@@ -266,6 +271,7 @@ template VerifyRsaPssSigNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HA
     encoded <== powerMod.out;
     
     component num2Bits[CHUNK_NUMBER];
+
     for (var i = 0; i < CHUNK_NUMBER; i++) {
         num2Bits[i] = Num2Bits(CHUNK_SIZE);
         num2Bits[i].in <== encoded[CHUNK_NUMBER - 1 - i];
@@ -276,11 +282,14 @@ template VerifyRsaPssSigNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HA
     }
     
     component bits2Num[EM_LEN];
+
     for (var i = 0; i < EM_LEN; i++) {
         bits2Num[i] = Bits2Num(8);
+
         for (var j = 0; j < 8; j++) {
             bits2Num[i].in[7 - j] <== eMsgInBits[i * 8 + j];
         }
+
         eM[EM_LEN - i - 1] <== bits2Num[i].out;
     }
     
@@ -308,34 +317,38 @@ template VerifyRsaPssSigNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HA
     }
     
     //getting mask
-    if (HASH_TYPE == 256){
+    if (HASH_TYPE == 256) {
         component MGF1_256 = Mgf1Sha256(HASH_LEN, DB_MASK_LEN);
         MGF1_256.dummy <== dummy;
+
         for (var i = 0; i < (HASH_TYPE); i++) {
             MGF1_256.seed[i] <== hash[i];
         }
+
         for (var i = 0; i < DB_MASK_LEN * 8; i++) {
             dbMask[i] <== MGF1_256.out[i];
         }
     }
-    if (HASH_TYPE == 384){
+    if (HASH_TYPE == 384) {
         component MGF1_384 = Mgf1Sha384(HASH_LEN, DB_MASK_LEN);
         MGF1_384.dummy <== dummy;
+
         for (var i = 0; i < (HASH_TYPE); i++) {
             MGF1_384.seed[i] <== hash[i];
         }
+
         for (var i = 0; i < DB_MASK_LEN * 8; i++) {
             dbMask[i] <== MGF1_384.out[i];
         }
     }
     
-    
-    
     component xor = Xor2(DB_MASK_LEN * 8);
+
     for (var i = 0; i < DB_MASK_LEN * 8; i++) {
         xor.in1[i] <== maskedDB[i];
         xor.in2[i] <== dbMask[i];
     }
+
     for (var i = 0; i < DB_MASK_LEN * 8; i++) {
         //setting the first leftmost byte to 0
         if (i == 0) {
@@ -355,24 +368,25 @@ template VerifyRsaPssSigNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HA
     for (var i = 0; i < 64; i++) {
         mDash[i] <== 0;
     }
+
     //adding message hash
     for (var i = 0; i < HASH_LEN * 8; i++) {
         mDash[64 + i] <== hashed[i];
         
     }
+
     //adding salt
     for (var i = 0; i < SALT_LEN * 8; i++) {
-        mDash[64 + HASH_LEN * 8 + i] <== salt[i];
-        
+        mDash[64 + HASH_LEN * 8 + i] <== salt[i];  
     }
-    
-    if (HASH_TYPE == 256 && SALT_LEN == 32){
-        
+
+    if (HASH_TYPE == 256 && SALT_LEN == 32) {
         //adding padding
         //len = 64+512 = 576 = 1001000000
-        for (var i = 577; i < 1014; i++){
+        for (var i = 577; i < 1014; i++) {
             mDash[i] <== 0;
         }
+
         mDash[576] <== 1;
         mDash[1023] <== 0;
         mDash[1022] <== 0;
@@ -389,12 +403,14 @@ template VerifyRsaPssSigNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HA
         component hDash256 = ShaHashChunks(2, HASH_TYPE);
         hDash256.dummy <== dummy;
         hDash256.in <== mDash;
+
         hDash256.out === hash;
     }
-    if (HASH_TYPE == 256 && SALT_LEN == 64){
-        for (var i = 833; i < 1014; i++){
+    if (HASH_TYPE == 256 && SALT_LEN == 64) {
+        for (var i = 833; i < 1014; i++) {
             mDash[i] <== 0;
         }
+
         mDash[832] <== 1;
         mDash[1023] <== 0;
         mDash[1022] <== 0;
@@ -406,18 +422,21 @@ template VerifyRsaPssSigNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HA
         mDash[1016] <== 0;
         mDash[1015] <== 1;
         mDash[1014] <== 1;
+
         component hDash256 = ShaHashChunks(2, HASH_TYPE);
         hDash256.dummy <== dummy;
         hDash256.in <== mDash;
+
         hDash256.out === hash;
     }
-    if (HASH_TYPE == 384 && SALT_LEN == 48){
-        
+
+    if (HASH_TYPE == 384 && SALT_LEN == 48) {        
         //padding
         //len = 64+48*16 = 832 = 1101000000
-        for (var i = 833; i < 1014; i++){
+        for (var i = 833; i < 1014; i++) {
             mDash[i] <== 0;
         }
+
         mDash[832] <== 1;
         mDash[1023] <== 0;
         mDash[1022] <== 0;
@@ -434,6 +453,7 @@ template VerifyRsaPssSigNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HA
         component hDash384 = ShaHashChunks(1, HASH_TYPE);
         hDash384.dummy <== dummy;
         hDash384.in <== mDash;
+
         hDash384.out === hash;
     }
 }

@@ -19,35 +19,36 @@ include "./karatsuba.circom";
 
 // In this file we have operations for  big int but we ignore overflow (a_i * 2 ** CHUNK_SIZE * i, here a_i can be greater than 2 ** CHUNK_SIZE)
 // U should use it for some operation in a row for better optimisation
-//-------------------------------------------------------------------------------------------------------------------------------------------------
 
 // sum of each chunks with same positions for equal chunk numbers
-template BigAddOverflow(CHUNK_SIZE, CHUNK_NUMBER){
+template BigAddOverflow(CHUNK_SIZE, CHUNK_NUMBER) {
     assert(CHUNK_SIZE <= 253);
     
     signal input in[2][CHUNK_NUMBER];
-    signal output out[CHUNK_NUMBER];
     signal input dummy;
+    
+    signal output out[CHUNK_NUMBER];
 
     dummy * dummy === 0;
     
-    for (var i = 0; i < CHUNK_NUMBER; i++){
+    for (var i = 0; i < CHUNK_NUMBER; i++) {
         out[i] <== in[0][i] + in[1][i] + dummy * dummy;
     }
 }
 
 // sum of each chunks with same positions for unequal chunk numbers
-template BigAddNonEqualOverflow(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_LESS){
-    
+template BigAddNonEqualOverflow(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_LESS) {    
     signal input in1[CHUNK_NUMBER_GREATER];
     signal input in2[CHUNK_NUMBER_LESS];
-    signal output out[CHUNK_NUMBER_GREATER];
     signal input dummy;
     
-    for (var i = 0; i < CHUNK_NUMBER_LESS; i++){
+    signal output out[CHUNK_NUMBER_GREATER];
+    
+    for (var i = 0; i < CHUNK_NUMBER_LESS; i++) {
         out[i] <== in1[i] + in2[i] + dummy * dummy;
     }
-    for (var i = CHUNK_NUMBER_LESS; i < CHUNK_NUMBER_GREATER; i++){
+
+    for (var i = CHUNK_NUMBER_LESS; i < CHUNK_NUMBER_GREATER; i++) {
         out[i] <== in1[i] + dummy * dummy;
     }
 }
@@ -55,17 +56,18 @@ template BigAddNonEqualOverflow(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_L
 // multiplying 2 numbers with equal chunks ignoring overflows
 // out is in chunk number * 2 - 1
 // use it if chunk number != 2 ** k
-template BigMultOverflow(CHUNK_SIZE, CHUNK_NUMBER){
-    
+template BigMultOverflow(CHUNK_SIZE, CHUNK_NUMBER) {
     assert(CHUNK_SIZE <= 126);
     
     signal input in[2][CHUNK_NUMBER];
     signal input dummy;
+
     signal output out[CHUNK_NUMBER * 2 - 1];
     
     signal tmpMults[CHUNK_NUMBER][CHUNK_NUMBER];
-    for (var i = 0; i < CHUNK_NUMBER; i++){
-        for (var j = 0; j < CHUNK_NUMBER; j++){
+
+    for (var i = 0; i < CHUNK_NUMBER; i++) {
+        for (var j = 0; j < CHUNK_NUMBER; j++) {
             tmpMults[i][j] <== in[0][i] * in[1][j];
         }
     }
@@ -83,28 +85,28 @@ template BigMultOverflow(CHUNK_SIZE, CHUNK_NUMBER){
     
     signal tmpResult[CHUNK_NUMBER * 2 - 1][CHUNK_NUMBER];
     
-    for (var i = 0; i < CHUNK_NUMBER * 2 - 1; i++){
-        
-        if (i < CHUNK_NUMBER){
-            for (var j = 0; j < i + 1; j++){
-                if (j == 0){
+    for (var i = 0; i < CHUNK_NUMBER * 2 - 1; i++) {
+        if (i < CHUNK_NUMBER) {
+            for (var j = 0; j < i + 1; j++) {
+                if (j == 0) {
                     tmpResult[i][j] <== tmpMults[i - j][j];
                 } else {
                     tmpResult[i][j] <== tmpMults[i - j][j] + tmpResult[i][j - 1] + dummy * dummy;
                 }
             }
+
             out[i] <== tmpResult[i][i];
-            
+
         } else {
-            for (var j = 0; j < 2 * CHUNK_NUMBER - 1 - i; j++){
-                if (j == 0){
+            for (var j = 0; j < 2 * CHUNK_NUMBER - 1 - i; j++) {
+                if (j == 0) {
                     tmpResult[i][j] <== tmpMults[CHUNK_NUMBER - 1 - j][i + j - CHUNK_NUMBER + 1];
                 } else {
                     tmpResult[i][j] <== tmpMults[CHUNK_NUMBER - 1 - j][i + j - CHUNK_NUMBER + 1] + tmpResult[i][j - 1] + dummy * dummy;
                 }
             }
+
             out[i] <== tmpResult[i][2 * CHUNK_NUMBER - 2 - i];
-            
         }
     }
 }
@@ -112,40 +114,40 @@ template BigMultOverflow(CHUNK_SIZE, CHUNK_NUMBER){
 // multiplying 2 numbers with equal chunks ignoring overflows
 // out is in chunk number * 2 - 1
 // use it if chunk number == 2 ** k
-template BigMultOptimisedOverflow(CHUNK_SIZE, CHUNK_NUMBER){
-    
+template BigMultOptimisedOverflow(CHUNK_SIZE, CHUNK_NUMBER) {    
     assert(CHUNK_SIZE <= 126);
     
     signal input in[2][CHUNK_NUMBER];
     signal input dummy;
+
     signal output out[CHUNK_NUMBER * 2 - 1];
     
     component karatsuba = KaratsubaNoCarry(CHUNK_NUMBER);
     karatsuba.in <== in;
     karatsuba.dummy <== dummy;
-    for (var i = 0; i < CHUNK_NUMBER * 2 - 1; i++){
+
+    for (var i = 0; i < CHUNK_NUMBER * 2 - 1; i++) {
         out[i] <== karatsuba.out[i];
     }
 }
 
 // multiplying 2 numbers with unequal chunks ignoring overflows
 // out is in chunk number * 2 - 1
-template BigMultNonEqualOverflow(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_LESS){
-    
+template BigMultNonEqualOverflow(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_LESS) {
     assert(CHUNK_NUMBER_GREATER + CHUNK_NUMBER_LESS <= 252);
     assert(CHUNK_NUMBER_GREATER >= CHUNK_NUMBER_LESS);
     
     signal input in1[CHUNK_NUMBER_GREATER];
     signal input in2[CHUNK_NUMBER_LESS];
     signal input dummy;
+
     signal output out[CHUNK_NUMBER_GREATER + CHUNK_NUMBER_LESS - 1];
     
-    
     // We can`t mult multiply 2 big nums without multiplying each chunks of first with each chunk of second
-    
     signal tmpMults[CHUNK_NUMBER_GREATER][CHUNK_NUMBER_LESS];
-    for (var i = 0; i < CHUNK_NUMBER_GREATER; i++){
-        for (var j = 0; j < CHUNK_NUMBER_LESS; j++){
+
+    for (var i = 0; i < CHUNK_NUMBER_GREATER; i++) {
+        for (var j = 0; j < CHUNK_NUMBER_LESS; j++) {
             tmpMults[i][j] <== in1[i] * in2[j];
         }
     }
@@ -162,39 +164,39 @@ template BigMultNonEqualOverflow(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_
     // result[i].length = { result[i-1].length + 1,  i <= CHUNK_NUMBER_LESS}
     //                    {  result[i-1].length - 1,  i > CHUNK_NUMBER_GREATER}
     //                    {  result[i-1].length,      CHUNK_NUMBER_LESS < i <= CHUNK_NUMBER_GREATER}
-    
     signal tmpResult[CHUNK_NUMBER_GREATER + CHUNK_NUMBER_LESS - 1][CHUNK_NUMBER_LESS];
     
-    for (var i = 0; i < CHUNK_NUMBER_GREATER + CHUNK_NUMBER_LESS - 1; i++){
-        
-        if (i < CHUNK_NUMBER_LESS){
-            for (var j = 0; j < i + 1; j++){
-                if (j == 0){
+    for (var i = 0; i < CHUNK_NUMBER_GREATER + CHUNK_NUMBER_LESS - 1; i++) {
+        if (i < CHUNK_NUMBER_LESS) {
+            for (var j = 0; j < i + 1; j++) {
+                if (j == 0) {
                     tmpResult[i][j] <== tmpMults[i - j][j];
                 } else {
                     tmpResult[i][j] <== tmpMults[i - j][j] + tmpResult[i][j - 1] + dummy * dummy;
                 }
             }
-            out[i] <== tmpResult[i][i];
-            
+
+            out[i] <== tmpResult[i][i];            
         } else {
             if (i < CHUNK_NUMBER_GREATER) {
-                for (var j = 0; j < CHUNK_NUMBER_LESS; j++){
-                    if (j == 0){
+                for (var j = 0; j < CHUNK_NUMBER_LESS; j++) {
+                    if (j == 0) {
                         tmpResult[i][j] <== tmpMults[i - j][j];
                     } else {
                         tmpResult[i][j] <== tmpMults[i - j][j] + tmpResult[i][j - 1] + dummy * dummy;
                     }
                 }
+
                 out[i] <== tmpResult[i][CHUNK_NUMBER_LESS - 1];
             } else {
-                for (var j = 0; j < CHUNK_NUMBER_GREATER + CHUNK_NUMBER_LESS - 1 - i; j++){
-                    if (j == 0){
+                for (var j = 0; j < CHUNK_NUMBER_GREATER + CHUNK_NUMBER_LESS - 1 - i; j++) {
+                    if (j == 0) {
                         tmpResult[i][j] <== tmpMults[CHUNK_NUMBER_GREATER - 1 - j][i + j - CHUNK_NUMBER_GREATER + 1];
                     } else {
                         tmpResult[i][j] <== tmpMults[CHUNK_NUMBER_GREATER - 1 - j][i + j - CHUNK_NUMBER_GREATER + 1] + tmpResult[i][j - 1];
                     }
                 }
+
                 out[i] <== tmpResult[i][CHUNK_NUMBER_GREATER + CHUNK_NUMBER_LESS - 2 - i];
             }
         }
@@ -205,8 +207,7 @@ template BigMultNonEqualOverflow(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_
 // overflow shift is number ofadditional chunks needed to split number with overflow, put here 254 \ CHUNK_SIZE if u don`t know what u should put there
 // practically this is num of multiplications u did before, but it is better use num of muls + 1 because if u use at least one add or something similar to it too.
 // will fall if modulus[-1] == 0
-template BigModOverflow(CHUNK_SIZE, CHUNK_NUMBER_BASE, CHUNK_NUMBER_MODULUS, OVERFLOW_SHIFT){
-
+template BigModOverflow(CHUNK_SIZE, CHUNK_NUMBER_BASE, CHUNK_NUMBER_MODULUS, OVERFLOW_SHIFT) {
     signal input base[CHUNK_NUMBER_BASE];
     signal input modulus[CHUNK_NUMBER_MODULUS];
     signal input dummy;
@@ -231,11 +232,13 @@ template BigModOverflow(CHUNK_SIZE, CHUNK_NUMBER_BASE, CHUNK_NUMBER_MODULUS, OVE
 // will fall if modulus[-1] == 0
 template BigModInvOverflow(CHUNK_SIZE, CHUNK_NUMBER_BASE, CHUNK_NUMBER) {
     assert(CHUNK_SIZE <= 252);
+
     signal input in[CHUNK_NUMBER_BASE];
     signal input modulus[CHUNK_NUMBER];
+    signal input dummy;
+
     signal output out[CHUNK_NUMBER];
 
-    signal input dummy;
     dummy * dummy === 0;
 
     component reduce = RemoveOverflow(CHUNK_SIZE, CHUNK_NUMBER_BASE, CHUNK_NUMBER_BASE + 1);
@@ -244,9 +247,11 @@ template BigModInvOverflow(CHUNK_SIZE, CHUNK_NUMBER_BASE, CHUNK_NUMBER) {
 
     var div_res[2][200] = long_div(CHUNK_SIZE, CHUNK_NUMBER, (CHUNK_NUMBER_BASE + 1 - CHUNK_NUMBER), reduce.out, modulus);
     var mod[CHUNK_NUMBER];
-    for (var i = 0; i < CHUNK_NUMBER; i++){
+
+    for (var i = 0; i < CHUNK_NUMBER; i++) {
         mod[i] = div_res[1][i];
     }
+
     var inv[200] = mod_inv(CHUNK_SIZE, CHUNK_NUMBER, mod, modulus);
 
     for (var i = 0; i < CHUNK_NUMBER; i++) {
@@ -260,39 +265,43 @@ template BigModInvOverflow(CHUNK_SIZE, CHUNK_NUMBER_BASE, CHUNK_NUMBER) {
     mult.dummy <== dummy;
 
     mult.out[0] === 1;
+
     for (var i = 1; i < CHUNK_NUMBER; i++) {
         mult.out[i] === 0;
     }
 }
 
 // multiplying number with CHUNK_NUMBER by scalar, ignoring overflow
-template ScalarMultOverflow(CHUNK_NUMBER){
+template ScalarMultOverflow(CHUNK_NUMBER) {
     signal input in[CHUNK_NUMBER];
     signal input scalar;
     
     signal output out[CHUNK_NUMBER];
     
-    for (var i = 0; i < CHUNK_NUMBER; i++){
+    for (var i = 0; i < CHUNK_NUMBER; i++) {
         out[i] <== scalar * in[i];
     }
 }
 
 // removing overflow for CHUNK_NUMBER_OLD chunk number and get CHUNK_NUMBER_NEW number in out
 // even if CHUNK_NUMBER_NEW isn`t enought to get rid of all overflows, it puts all overflow only in last chunk, always leaving numbers equal
-template RemoveOverflow(CHUNK_SIZE, CHUNK_NUMBER_OLD, CHUNK_NUMBER_NEW){
+template RemoveOverflow(CHUNK_SIZE, CHUNK_NUMBER_OLD, CHUNK_NUMBER_NEW) {
     assert(CHUNK_SIZE <= 126);
     assert(CHUNK_NUMBER_OLD <= CHUNK_NUMBER_NEW);
     
     signal input dummy;
-    dummy * dummy === 0;
     signal input in[CHUNK_NUMBER_OLD];
+
     signal output out[CHUNK_NUMBER_NEW];
+    
+    dummy * dummy === 0;
     
     component getLastNBits[CHUNK_NUMBER_NEW - 1];
     component bits2Num[CHUNK_NUMBER_NEW - 1];
-    if (CHUNK_NUMBER_NEW > CHUNK_NUMBER_OLD){
-        for (var i = 0; i < CHUNK_NUMBER_OLD; i++){
-            if (i == 0){
+
+    if (CHUNK_NUMBER_NEW > CHUNK_NUMBER_OLD) {
+        for (var i = 0; i < CHUNK_NUMBER_OLD; i++) {
+            if (i == 0) {
                 getLastNBits[i] = GetLastNBits(CHUNK_SIZE);
                 getLastNBits[i].in <== in[i];
                 bits2Num[i] = Bits2Num(CHUNK_SIZE);
@@ -306,17 +315,19 @@ template RemoveOverflow(CHUNK_SIZE, CHUNK_NUMBER_OLD, CHUNK_NUMBER_NEW){
                 out[i] <== bits2Num[i].out;
             }
         }
-        for (var i = CHUNK_NUMBER_OLD; i < CHUNK_NUMBER_NEW - 1; i++){
+
+        for (var i = CHUNK_NUMBER_OLD; i < CHUNK_NUMBER_NEW - 1; i++) {
             getLastNBits[i] = GetLastNBits(CHUNK_SIZE);
             getLastNBits[i].in <== getLastNBits[i - 1].div;
             bits2Num[i] = Bits2Num(CHUNK_SIZE);
             bits2Num[i].in <== getLastNBits[i].out;
             out[i] <== bits2Num[i].out;
         }
+
         out[CHUNK_NUMBER_NEW - 1] <== getLastNBits[CHUNK_NUMBER_NEW - 2].div;
     } else {
-        for (var i = 0; i < CHUNK_NUMBER_OLD - 1; i++){
-            if (i == 0){
+        for (var i = 0; i < CHUNK_NUMBER_OLD - 1; i++) {
+            if (i == 0) {
                 getLastNBits[i] = GetLastNBits(CHUNK_SIZE);
                 getLastNBits[i].in <== in[i];
                 bits2Num[i] = Bits2Num(CHUNK_SIZE);
@@ -330,27 +341,28 @@ template RemoveOverflow(CHUNK_SIZE, CHUNK_NUMBER_OLD, CHUNK_NUMBER_NEW){
                 out[i] <== bits2Num[i].out;
             }
         }
+
         out[CHUNK_NUMBER_NEW - 1] <== getLastNBits[CHUNK_NUMBER_NEW - 2].div + in[CHUNK_NUMBER_NEW - 1] + dummy * dummy;
     }
 }
 
 // computes modulus + in1 - in2 (WITHOUT % modulus!!!) with overflows, in1 and in2 shouldn`t have overflows and in1 < modulus, in2 < modulus!
 // use only if you undestand what are you doing!!!
-template BigSubModOverflow(CHUNK_SIZE, CHUNK_NUMBER){
+template BigSubModOverflow(CHUNK_SIZE, CHUNK_NUMBER) {
     signal input in1[CHUNK_NUMBER];
     signal input in2[CHUNK_NUMBER];
     signal input modulus[CHUNK_NUMBER];
     signal input dummy;
 
-    dummy * dummy === 0;
-
     signal output out[CHUNK_NUMBER];
 
-    for (var i = 0; i < CHUNK_NUMBER; i++){
-        if (i == 0){
+    dummy * dummy === 0;
+
+    for (var i = 0; i < CHUNK_NUMBER; i++) {
+        if (i == 0) {
             out[i] <== 2 ** CHUNK_SIZE + modulus[i] + in1[i] - in2[i] + dummy * dummy;
         } else {
-            if (i == CHUNK_NUMBER - 1){
+            if (i == CHUNK_NUMBER - 1) {
                 out[i] <== modulus[i] + in1[i] - in2[i] - 1 + dummy * dummy;
             } else {
                 out[i] <== 2 ** CHUNK_SIZE + modulus[i] + in1[i] - in2[i] - 1 + dummy * dummy;
@@ -360,12 +372,11 @@ template BigSubModOverflow(CHUNK_SIZE, CHUNK_NUMBER){
 }
 
 // Comparators
-//---------------------------------------------------------------------------------------------------------------------
 
 // compare each chunk
 // can be optimised by log_2(n) multiplying results vs n which is now, will be one later
 // use this for already redused inputs or if u know that they don`t contain any overflow (any mod template output, for example)
-template ForceEqual(CHUNK_NUMBER){
+template ForceEqual(CHUNK_NUMBER) {
     signal input in[2][CHUNK_NUMBER];
     
     signal output out;
@@ -373,27 +384,31 @@ template ForceEqual(CHUNK_NUMBER){
     component isEqual[CHUNK_NUMBER];
     signal equalResults[CHUNK_NUMBER];
     
-    for (var i = 0; i < CHUNK_NUMBER; i++){
+    for (var i = 0; i < CHUNK_NUMBER; i++) {
         isEqual[i] = IsEqual();
         isEqual[i].in[0] <== in[0][i];
         isEqual[i].in[1] <== in[1][i];
-        if (i == 0){
+
+        if (i == 0) {
             equalResults[i] <== isEqual[i].out;
         } else {
             equalResults[i] <== equalResults[i - 1] * isEqual[i].out;
         }
     }
+
     out <== equalResults[CHUNK_NUMBER - 1];
 }
 
 
 // in1 already reduced, used for checks of function returns (they return correctly reduced)
-template ReducedEqual(CHUNK_SIZE, CHUNK_NUMBER_OLD, CHUNK_NUMBER_NEW){
+template ReducedEqual(CHUNK_SIZE, CHUNK_NUMBER_OLD, CHUNK_NUMBER_NEW) {
     signal input in1[CHUNK_NUMBER_NEW];
     signal input in2[CHUNK_NUMBER_OLD];
     signal input dummy;
-    dummy * dummy === 0;
+    
     signal output out;
+
+    dummy * dummy === 0;
 
     component reduce = RemoveOverflow(CHUNK_SIZE, CHUNK_NUMBER_OLD, CHUNK_NUMBER_NEW);
     reduce.in <== in2;
@@ -412,18 +427,22 @@ template ReducedEqual(CHUNK_SIZE, CHUNK_NUMBER_OLD, CHUNK_NUMBER_NEW){
 // there is a way to get "collision" and get 1 for non equal chunks, however
 // it almost impossible to get it randomly (almost the same as hash sha-256 collision), but it can be calculated
 // it still doesn`t allowed to put anything that u want at witness and get valid proof, so it shouldn`t affect on security if it is one of many cheks in your circuit
-template SmartEqual(CHUNK_SIZE, CHUNK_NUMBER){
+template SmartEqual(CHUNK_SIZE, CHUNK_NUMBER) {
 	signal input in[2][CHUNK_NUMBER];
-	signal output out;
 	signal input dummy;	
-	dummy * dummy === 0;	
+
+    signal output out;
+
+	dummy * dummy === 0;
+
 	component isEqual = IsEqual();
 	component sumLeft = GetSumOfNElements(CHUNK_NUMBER);
 	sumLeft.dummy <== dummy;
-	component sumRight = GetSumOfNElements(CHUNK_NUMBER);
+
+	component sumRight = GetSumOfNElements(CHUNK_NUMBER);    
 	sumRight.dummy <== dummy;
 
-	for (var i = 0; i < CHUNK_NUMBER; i++){
+	for (var i = 0; i < CHUNK_NUMBER; i++) {
 		sumLeft.in[i] <== 2 ** (i * CHUNK_SIZE) * in[0][i];
 		sumRight.in[i] <== 2 ** (i * CHUNK_SIZE) * in[1][i];
 	}

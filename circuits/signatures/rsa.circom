@@ -4,7 +4,6 @@ include "../bigInt/bigInt.circom";
 include "../bitify/bitify.circom";
 include "../int/arithmetic.circom";
 
-
 // Verification for RSA signature with Pkcs v15 padding
 // Hashed is hashed message of hash_type algo
 // signature and pubkey - chunked numbers (CHUNK_SIZE, CHUNK_NUMBER)
@@ -14,21 +13,21 @@ include "../int/arithmetic.circom";
 // CHUNK_SIZE == 64 cause we hardcode some constants, which will be another for other chunking,
 // so u should understand that in case of changing chunking
 template RsaVerifyPkcs1v15(CHUNK_SIZE, CHUNK_NUMBER, EXP, HASH_TYPE) {
-    
     assert(CHUNK_SIZE == 64);
     assert(HASH_TYPE == 256 || HASH_TYPE == 160);
     
     signal input signature[CHUNK_NUMBER];
     signal input pubkey[CHUNK_NUMBER]; 
     signal input hashed[HASH_TYPE];
-    
     signal input dummy;
+
     dummy * dummy === 0;
 
-    if (HASH_TYPE == 256){
+    if (HASH_TYPE == 256) {
         // signature ** exp mod modulus
         component pm = PowerMod(CHUNK_SIZE, CHUNK_NUMBER, EXP);
         pm.dummy <== dummy;
+
         for (var i = 0; i < CHUNK_NUMBER; i++) {
             pm.base[i] <== signature[i];
             pm.modulus[i] <== pubkey[i];
@@ -37,11 +36,14 @@ template RsaVerifyPkcs1v15(CHUNK_SIZE, CHUNK_NUMBER, EXP, HASH_TYPE) {
         signal hashed_chunks[4];
         
         component bits2num[4];
-        for (var i = 0; i < 4; i++){
+
+        for (var i = 0; i < 4; i++) {
             bits2num[3 - i] = Bits2Num(64);
-            for (var j = 0; j < 64; j++){
+            
+            for (var j = 0; j < 64; j++) {
                 bits2num[3 - i].in[j] <== hashed[i * 64 + 63 - j];
             }
+
             bits2num[3 - i].out ==> hashed_chunks[3 - i];
         }
         
@@ -57,7 +59,9 @@ template RsaVerifyPkcs1v15(CHUNK_SIZE, CHUNK_NUMBER, EXP, HASH_TYPE) {
         // remain 24 bit
         component num2bits_6 = Num2Bits(CHUNK_SIZE);
         num2bits_6.in <== pm.out[6];
+
         var remainsBits[32] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0];
+        
         for (var i = 0; i < 32; i++) {
             num2bits_6.out[i] === remainsBits[31 - i];
         }
@@ -71,9 +75,11 @@ template RsaVerifyPkcs1v15(CHUNK_SIZE, CHUNK_NUMBER, EXP, HASH_TYPE) {
             pm.out[i] === 18446744073709551615; 
         }
     }
+
     if (HASH_TYPE == 160) {
         component pm = PowerMod(CHUNK_SIZE, CHUNK_NUMBER, EXP);
         pm.dummy <== dummy;
+
         for (var i  = 0; i < CHUNK_NUMBER; i++) {
             pm.base[i] <== signature[i];
             pm.modulus[i] <== pubkey[i];
@@ -82,29 +88,33 @@ template RsaVerifyPkcs1v15(CHUNK_SIZE, CHUNK_NUMBER, EXP, HASH_TYPE) {
         signal hashed_chunks[2];
 
         component bits2num[2];
-        for (var i = 0; i < 2; i++){
+
+        for (var i = 0; i < 2; i++) {
             bits2num[i] = Bits2Num(64);
-            for (var j = 0; j < 64; j++){
+
+            for (var j = 0; j < 64; j++) {
                 bits2num[i].in[j] <== hashed[159 - j - i * 64];
             }
         }
 
         component getBits = GetLastNBits(32);
         getBits.in <== pm.out[2];
-        for (var i = 0; i < 32; i++){
+
+        for (var i = 0; i < 32; i++) {
             getBits.out[i] === hashed[31 - i];
         }
+
         getBits.div === 83887124; //0x5000414
 
         pm.out[3] === 650212878678426138;
         pm.out[4] === 18446744069417738544;
+
         for (var i = 5; i < CHUNK_NUMBER-1; i++) {
             pm.out[i] === 18446744073709551615; // 0b1111111111111111111111111111111111111111111111111111111111111111
         }
+
         pm.out[CHUNK_NUMBER - 1] === 562949953421311;
     }
-    
-   
 }
 
 // Verification for RSA signature with Pkcs v15 padding
@@ -114,19 +124,19 @@ template RsaVerifyPkcs1v15(CHUNK_SIZE, CHUNK_NUMBER, EXP, HASH_TYPE) {
 // default exp = 65537
 // use this for CHUNK_NUMBER != 2**n, otherwise use previous
 template RsaVerifyPkcs1v15NonOptimised(CHUNK_SIZE, CHUNK_NUMBER, EXP, HASH_TYPE) {
-
     assert(CHUNK_SIZE == 64);
     
     signal input signature[CHUNK_NUMBER];
     signal input pubkey[CHUNK_NUMBER]; 
     signal input hashed[HASH_TYPE];
-    
     signal input dummy;
+
     dummy * dummy === 0;
     
     // signature ** exp mod modulus
     component pm = PowerModNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, EXP);
     pm.dummy <== dummy;
+
     for (var i = 0; i < CHUNK_NUMBER; i++) {
         pm.base[i] <== signature[i];
         pm.modulus[i] <== pubkey[i];
@@ -135,11 +145,14 @@ template RsaVerifyPkcs1v15NonOptimised(CHUNK_SIZE, CHUNK_NUMBER, EXP, HASH_TYPE)
     signal hashed_chunks[4];
     
     component bits2num[4];
-    for (var i = 0; i < 4; i++){
+
+    for (var i = 0; i < 4; i++) {
         bits2num[3 - i] = Bits2Num(64);
-        for (var j = 0; j < 64; j++){
+
+        for (var j = 0; j < 64; j++) {
             bits2num[3 - i].in[j] <== hashed[i * 64 + 63 - j];
         }
+
         bits2num[3 - i].out ==> hashed_chunks[3 - i];
     }
     
@@ -155,7 +168,9 @@ template RsaVerifyPkcs1v15NonOptimised(CHUNK_SIZE, CHUNK_NUMBER, EXP, HASH_TYPE)
     // remain 24 bit
     component num2bits_6 = Num2Bits(CHUNK_SIZE);
     num2bits_6.in <== pm.out[6];
+
     var remainsBits[32] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0];
+    
     for (var i = 0; i < 32; i++) {
         num2bits_6.out[i] === remainsBits[31 - i];
     }

@@ -1,4 +1,4 @@
-pragma circom  2.1.6;
+pragma circom 2.1.6;
 
 // Calculates 2 numbers with CHUNK_NUMBER multiplication using karatsuba method
 // out is overflowed
@@ -6,8 +6,9 @@ pragma circom  2.1.6;
 // here is no check for CHUNK_SIZE <= 126,  maybe will be added later
 template KaratsubaNoCarry(CHUNK_NUMBER) {
     signal input in[2][CHUNK_NUMBER];
-    signal output out[2 * CHUNK_NUMBER];
     signal input dummy;
+    
+    signal output out[2 * CHUNK_NUMBER];
     
     if (CHUNK_NUMBER == 1) {
         out[0] <== in[0][0] * in[1][0];

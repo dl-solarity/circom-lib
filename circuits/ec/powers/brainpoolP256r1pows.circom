@@ -2,6 +2,7 @@ pragma circom 2.1.6;
 
 function get_g_pow_stride8_table_brainpoolP256r1(n, k) {
     assert(n == 64 && k == 4);
+    
     var powers[32][256][2][4];
 
     powers[0][0][0][0] = 0;
