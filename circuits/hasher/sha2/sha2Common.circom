@@ -1,6 +1,6 @@
 pragma circom 2.1.6;
 
-function process_padding(LEN, LEN_PADDED) {
+function processPadding(LEN, LEN_PADDED) {
     var tmp_len = LEN;
     var bit_len[128];
     var len_bit_len = 0;
@@ -44,7 +44,7 @@ template ShaPadding(LEN, HASH_BLOCK_SIZE) {
         out[i] <== in[i];
     }
 
-    var padding[1536] = process_padding(LEN, CHUNK_NUMBER * HASH_BLOCK_SIZE);
+    var padding[1536] = processPadding(LEN, CHUNK_NUMBER * HASH_BLOCK_SIZE);
 
     for (var i = LEN; i < CHUNK_NUMBER * HASH_BLOCK_SIZE; i++) {
         out[i] <== padding[i - LEN];

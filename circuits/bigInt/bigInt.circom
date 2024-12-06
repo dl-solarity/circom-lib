@@ -249,7 +249,7 @@ template BigMod(CHUNK_SIZE, CHUNK_NUMBER) {
     signal input modulus[CHUNK_NUMBER];
     signal input dummy;
 
-    var long_division[2][200] = long_div(CHUNK_SIZE, CHUNK_NUMBER, CHUNK_NUMBER, base, modulus);
+    var long_division[2][200] = longDiv(CHUNK_SIZE, CHUNK_NUMBER, CHUNK_NUMBER, base, modulus);
 
     signal output div[CHUNK_NUMBER + 1];
     signal output mod[CHUNK_NUMBER];
@@ -395,7 +395,7 @@ template PowerMod(CHUNK_SIZE, CHUNK_NUMBER, EXP) {
 
     signal output out[CHUNK_NUMBER];
 
-    var exp_process[256] = exp_to_bits(EXP);
+    var exp_process[256] = expToBits(EXP);
 
     component muls[exp_process[0]];
     component resultMuls[exp_process[1] - 1];
@@ -458,7 +458,7 @@ template BigModInvOptimised(CHUNK_SIZE, CHUNK_NUMBER) {
 
     dummy * dummy === 0;
 
-    var inv[200] = mod_inv(CHUNK_SIZE, CHUNK_NUMBER, in, modulus);
+    var inv[200] = modInv(CHUNK_SIZE, CHUNK_NUMBER, in, modulus);
 
     for (var i = 0; i < CHUNK_NUMBER; i++) {
         out[i] <-- inv[i];
@@ -704,7 +704,7 @@ template BigModNonEqual(CHUNK_SIZE, CHUNK_NUMBER_BASE, CHUNK_NUMBER_MODULUS) {
     signal output div[CHUNK_NUMBER_DIV];
     signal output mod[CHUNK_NUMBER_MODULUS];
 
-    var long_division[2][200] = long_div(CHUNK_SIZE, CHUNK_NUMBER_MODULUS, CHUNK_NUMBER_DIV - 1, base, modulus);
+    var long_division[2][200] = longDiv(CHUNK_SIZE, CHUNK_NUMBER_MODULUS, CHUNK_NUMBER_DIV - 1, base, modulus);
 
     for (var i = 0; i < CHUNK_NUMBER_DIV; i++) {
         div[i] <-- long_division[0][i];
@@ -831,7 +831,7 @@ template PowerModNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, EXP) {
 
     signal output out[CHUNK_NUMBER];
 
-    var exp_process[256] = exp_to_bits(EXP);
+    var exp_process[256] = expToBits(EXP);
 
     component muls[exp_process[0]];
     component resultMuls[exp_process[1] - 1];

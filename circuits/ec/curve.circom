@@ -30,7 +30,7 @@ include "./get.circom";
 // in template "EllipicCurveScalarGeneratorMultiplicationOptimised" for 64 4 chunking or "EllipicCurveScalarGeneratorMultiplicationNonOptimised" for other add new if for getting powers
 // var powers[parts][2 ** STRIDE][2][CHUNK_NUMBER];
 // if (P[0] == 18446744069414583343 && P[1] == 18446744073709551615 && P[2] == 18446744073709551615 && P[3] == 18446744073709551615) { // change to your P chunking
-//     powers = get_g_pow_stride8_table_secp256k1(CHUNK_SIZE, CHUNK_NUMBER);                                                      // change to your func name
+//     powers = getGPowStride8TableSecp256k1(CHUNK_SIZE, CHUNK_NUMBER);                                                      // change to your func name
 // }
 // Now u can succesfully execute all functions for your curve
 // EllipicCurveScalarPrecomputeMultiplication still needs precomputed table
@@ -562,13 +562,13 @@ template EllipicCurveScalarGeneratorMultiplicationOptimised(CHUNK_SIZE, CHUNK_NU
     var powers[parts][2 ** STRIDE][2][CHUNK_NUMBER];
 
     if (P[0] == 18446744069414583343 && P[1] == 18446744073709551615 && P[2] == 18446744073709551615 && P[3] == 18446744073709551615) {
-        powers = get_g_pow_stride8_table_secp256k1(CHUNK_SIZE, CHUNK_NUMBER);
+        powers = getGPowStride8TableSecp256k1(CHUNK_SIZE, CHUNK_NUMBER);
     }
     if (P[0] == 2311270323689771895 && P[1] == 7943213001558335528 && P[2] == 4496292894210231666 && P[3] == 12248480212390422972) {
-        powers = get_g_pow_stride8_table_brainpoolP256r1(CHUNK_SIZE, CHUNK_NUMBER);
+        powers = getGPowStride8TableBrainpoolP256r1(CHUNK_SIZE, CHUNK_NUMBER);
     }
     if (P[0] == 18446744073709551615 && P[1] == 4294967295 && P[2] == 0 && P[3] == 18446744069414584321) {
-        powers = get_g_pow_stride8_table_p256(CHUNK_SIZE, CHUNK_NUMBER);
+        powers = getGPowStride8TableP256(CHUNK_SIZE, CHUNK_NUMBER);
     }
     
     component num2bits[CHUNK_NUMBER];
@@ -1420,11 +1420,11 @@ template EllipicCurveScalarGeneratorMultiplicationNonOptimised(CHUNK_SIZE, CHUNK
 
     if (CHUNK_NUMBER == 6) {
         if (P[0] == 9747760000893709395 && P[1] == 12453481191562877553 && P[2] == 1347097566612230435 && P[3] == 1526563086152259252 && P[4] == 1107163671716839903 && P[5] == 10140169582434348328) {
-            powers = get_g_pow_stride8_table_brainpoolP384r1(CHUNK_SIZE, CHUNK_NUMBER);
+            powers = getGPowStride8TableBrainpoolP384r1(CHUNK_SIZE, CHUNK_NUMBER);
         }
 
         if (P[0] == 4294967295 && P[1] == 18446744069414584320 && P[2] == 18446744073709551614 && P[3] == 18446744073709551615 && P[4] == 18446744073709551615 && P[5] == 18446744073709551615 ) {
-            powers = get_g_pow_stride8_table_p384(CHUNK_SIZE, CHUNK_NUMBER);
+            powers = getGPowStride8TableP384(CHUNK_SIZE, CHUNK_NUMBER);
         }
     }
     

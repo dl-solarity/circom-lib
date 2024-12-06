@@ -7,7 +7,7 @@ include "../bigInt/bigIntFunc.circom";
 // Here are templates for matrix operations
 // Use them only if u know what are u doing!!!
 // To help with debug u can use this:
-// var print = log_matrix(out, x1, x2);
+// var print = logMatrix(out, x1, x2);
 // This will log your matrix out with dimmesions x1 x x2
 // x2 < 40; can be changed in "./matrixFunc.circom"
 
@@ -220,7 +220,7 @@ template MatrixPower(n, EXP) {
 
     signal output out[n][n];
     
-    var exp_process[256] = exp_to_bits(EXP);
+    var exp_process[256] = expToBits(EXP);
     
     component muls[exp_process[0]];
     component resultMuls[exp_process[1] - 1];
