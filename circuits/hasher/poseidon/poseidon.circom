@@ -65,7 +65,7 @@ template MixLast(t, M, s) {
     sum.dummy <== dummy;
 
     for (var j = 0; j < t; j++) {
-        sum.in[j] <==  M[j][s] * in[j];
+        sum.in[j] <== M[j][s] * in[j];
     }
 
     out <== sum.out;
@@ -107,7 +107,7 @@ template PoseidonEx(nInputs, nOuts) {
     var nRoundsF = 8;
     var nRoundsP = N_ROUNDS_P[t - 2];
     var C[t * nRoundsF + nRoundsP] = POSEIDON_C(t);
-    var S[  N_ROUNDS_P[t - 2] * (t * 2 - 1)  ] = POSEIDON_S(t);
+    var S[N_ROUNDS_P[t - 2] * (t * 2 - 1)] = POSEIDON_S(t);
     var M[t][t] = POSEIDON_M(t);
     var P[t][t] = POSEIDON_P(t);
     
@@ -208,7 +208,7 @@ template PoseidonEx(nInputs, nOuts) {
             }
         }
         
-        ark[ nRoundsF \ 2 + r + 1] = Ark(t, C,  (nRoundsF \ 2 + 1) * t + nRoundsP + r * t);
+        ark[nRoundsF \ 2 + r + 1] = Ark(t, C,  (nRoundsF \ 2 + 1) * t + nRoundsP + r * t);
 
         for (var j = 0; j < t; j++) {
             ark[nRoundsF \ 2 + r + 1].in[j] <== sigmaF[nRoundsF \ 2 + r][j].out;
@@ -219,8 +219,7 @@ template PoseidonEx(nInputs, nOuts) {
 
         for (var j = 0; j < t; j++) {
             mix[nRoundsF \ 2 + r].in[j] <== ark[nRoundsF \ 2 + r + 1].out[j];
-        }
-        
+        }  
     }
     
     for (var j = 0; j < t; j++) {

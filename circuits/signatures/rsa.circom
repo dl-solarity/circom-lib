@@ -109,7 +109,7 @@ template RsaVerifyPkcs1v15(CHUNK_SIZE, CHUNK_NUMBER, EXP, HASH_TYPE) {
         pm.out[3] === 650212878678426138;
         pm.out[4] === 18446744069417738544;
 
-        for (var i = 5; i < CHUNK_NUMBER-1; i++) {
+        for (var i = 5; i < CHUNK_NUMBER - 1; i++) {
             pm.out[i] === 18446744073709551615; // 0b1111111111111111111111111111111111111111111111111111111111111111
         }
 

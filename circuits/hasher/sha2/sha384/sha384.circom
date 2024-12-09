@@ -23,18 +23,19 @@ template Sha384HashChunks(BLOCK_NUM) {
     for (var m = 0; m < BLOCK_NUM; m++) {        
         sch[m] = Sha2_384_512Schedule();
         sch[m].dummy <== dummy;
+
         rds[m] = Sha2_384_512Rounds(80);
         rds[m].dummy <== dummy;
         
         for (var k = 0; k < 16; k++) {
             for (var i = 0; i < 64; i++) {
-                sch[m].chunkBits[k][i] <== in[m * 1024 + k * 64 + (63 - i) ];
+                sch[m].chunkBits[k][i] <== in[m * 1024 + k * 64 + (63 - i)];
             }
         }
         
         sch[m].outWords ==> rds[m].words;
         
-        rds[m].inpHash <== states[m  ];
+        rds[m].inpHash <== states[m];
         rds[m].outHash ==> states[m + 1];
     }
     
@@ -69,12 +70,13 @@ template Sha384HashBits(LEN) {
     for (var m = 0; m < BLOCK_NUM; m++) {        
         sch[m] = Sha2_384_512Schedule();
         sch[m].dummy <== dummy;
+
         rds[m] = Sha2_384_512Rounds(80);
         rds[m].dummy <== dummy;
         
         for (var k = 0; k < 16; k++) {
             for (var i = 0; i < 64; i++) {
-                sch[m].chunkBits[k][i] <== addPadding.out[m * 1024 + k * 64 + (63 - i) ];
+                sch[m].chunkBits[k][i] <== addPadding.out[m * 1024 + k * 64 + (63 - i)];
             }
         }
         

@@ -25,17 +25,18 @@ template Sha256HashChunks(BLOCK_NUM) {
     for (var m = 0; m < BLOCK_NUM; m++) {        
         sch[m] = Sha2_224_256Shedule();
         sch[m].dummy <== dummy;
+
         rds[m] = Sha2_224_256Rounds(64);
         rds[m].dummy <== dummy;
         
         for (var k = 0; k < 16; k++) {
             for (var i = 0; i < 32; i++) {
-                sch[m].chunkBits[k][i] <== in[m * 512 + k * 32 + (31 - i) ];
+                sch[m].chunkBits[k][i] <== in[m * 512 + k * 32 + (31 - i)];
             }
         }
         
         sch[m].outWords ==> rds[m].words;
-        
+
         rds[m].inpHash <== states[m];
         rds[m].outHash ==> states[m + 1];
     }
@@ -76,12 +77,12 @@ template Sha256HashBits(LEN) {
 
         for (var k = 0; k < 16; k++) {
             for (var i = 0; i < 32; i++) {
-                sch[m].chunkBits[k][i] <== addPadding.out[m * 512 + k * 32 + (31 - i) ];
+                sch[m].chunkBits[k][i] <== addPadding.out[m * 512 + k * 32 + (31 - i)];
             }
         }
 
         sch[m].outWords ==> rds[m].words;
-        
+
         rds[m].inpHash <== states[m];
         rds[m].outHash ==> states[m + 1];
     }
@@ -100,23 +101,25 @@ template Sha2_224_256Rounds(n) {
     assert(n <= 64);
     
     signal input words[n];
-    signal input inpHash[8][32];
+    signal input inpHash[8][32];    
+    signal input dummy;
+    
     signal output outHash[8][32];
     
-    signal input dummy;
     dummy * dummy === 0;
     
-    signal a [n + 1][32];
-    signal b [n + 1][32];
-    signal c [n + 1][32];
+    signal a[n + 1][32];
+    signal b[n + 1][32];
+    signal c[n + 1][32];
     signal dd[n + 1];
-    signal e [n + 1][32];
-    signal f [n + 1][32];
-    signal g [n + 1][32];
+    signal e[n + 1][32];
+    signal f[n + 1][32];
+    signal g[n + 1][32];
     signal hh[n + 1];
     
     signal ROUND_KEYS[64];
     component roundKeys = Sha2_224_256RoundKeys();
+
     ROUND_KEYS <== roundKeys.out;
     
     a[0] <== inpHash[0];
@@ -143,19 +146,21 @@ template Sha2_224_256Rounds(n) {
     
     signal hashWords[8];
     component sum[8];
+
     for (var j = 0; j < 8; j++) {
         sum[j] = GetSumOfNElements(32);
         sum[j].dummy <== dummy;
+
         for (var i = 0; i < 32; i++) {
             sum[j].in[i] <== (1 << i) * inpHash[j][i];
         }
+
         hashWords[j] <== sum[j].out;
     }
     
     component compress[n];
     
-    for (var k = 0; k < n; k++) {
-        
+    for (var k = 0; k < n; k++) {        
         compress[k] = Sha2_224_256CompressInner();
         
         compress[k].inp <== words[k];
@@ -182,19 +187,26 @@ template Sha2_224_256Rounds(n) {
     }
     
     component modulo[8];
+
     for (var j = 0; j < 8; j++) {
         modulo[j] = GetLastNBits(32);
     }
+
     component sumA = GetSumOfNElements(32);
     sumA.dummy <== dummy;
+
     component sumB = GetSumOfNElements(32);
     sumB.dummy <== dummy;
+
     component sumC = GetSumOfNElements(32);
     sumC.dummy <== dummy;
+
     component sumE = GetSumOfNElements(32);
     sumE.dummy <== dummy;
+
     component sumF = GetSumOfNElements(32);
     sumF.dummy <== dummy;
+
     component sumG = GetSumOfNElements(32);
     sumG.dummy <== dummy;
     
@@ -238,20 +250,22 @@ template Sha2_224_256Shedule() {
     for (var k = 0; k < 16; k++) {
         sumN[k] = GetSumOfNElements(32);
         sumN[k].dummy <== dummy;
+
         for (var i = 0; i < 32; i++) {
             sumN[k].in[i] <== (1 << i) * chunkBits[k][i];
         }
+
         outWords[k] <== sumN[k].out;
         outBits [k] <== chunkBits[k];
     }
     
-    component s0Xor [64 - 16][32];
-    component s1Xor [64 - 16][32];
+    component s0Xor[64 - 16][32];
+    component s1Xor[64 - 16][32];
     component modulo[64 - 16];
-    component bits2Num[64-16];
+    component bits2Num[64 - 16];
 
-    component s0Sum [64 - 16];
-    component s1Sum [64 - 16];
+    component s0Sum[64 - 16];
+    component s1Sum[64 - 16];
     
     for (var m = 16; m < 64; m++) {
         var r = m - 16;
@@ -267,21 +281,22 @@ template Sha2_224_256Shedule() {
             // note: with XOR3_v2, circom optimizes away the constant zero `z` thing
             // with XOR3_v1, it does not. But otherwise it's the same number of constraints.
             s0Xor[r][i] = XOR3_v2();
-            s0Xor[r][i].x <== outBits[k][ (i + 7) % 32 ];
-            s0Xor[r][i].y <== outBits[k][ (i + 18) % 32 ];
-            s0Xor[r][i].z <== (i < 32 - 3) ? outBits[k][ (i + 3) ] : 0;
+            s0Xor[r][i].x <== outBits[k][(i + 7) % 32];
+            s0Xor[r][i].y <== outBits[k][(i + 18) % 32];
+            s0Xor[r][i].z <== (i < 32 - 3) ? outBits[k][(i + 3)] : 0;
             s0Sum[r].in[i] <== (1 << i) * s0Xor[r][i].out;
             
             s1Xor[r][i] = XOR3_v2();
-            s1Xor[r][i].x <== outBits[l][ (i + 17) % 32 ];
-            s1Xor[r][i].y <== outBits[l][ (i + 19) % 32 ];
-            s1Xor[r][i].z <== (i < 32 - 10) ? outBits[l][ (i + 10) ] : 0;
+            s1Xor[r][i].x <== outBits[l][(i + 17) % 32];
+            s1Xor[r][i].y <== outBits[l][(i + 19) % 32];
+            s1Xor[r][i].z <== (i < 32 - 10) ? outBits[l][(i + 10)] : 0;
             s1Sum[r].in[i] <== (1 << i) * s1Xor[r][i].out;
         }
         
         modulo[r] = GetLastNBits(32);
         modulo[r].in <== s1Sum[m - 16].out + outWords[m - 7] + s0Sum[m - 16].out + outWords[m - 16] + dummy * dummy;
         modulo[r].out ==> outBits[m];
+
         bits2Num[r] = Bits2Num(32);
         bits2Num[r].in <== outBits[m];
         bits2Num[r].out ==> outWords[m];

@@ -5,7 +5,7 @@ template Sha256InitialValue() {
     signal output out[8][32];
     
     var INITIAL_STATE[8] =
-    [ 0x6a09e667,
+    [0x6a09e667,
     0xbb67ae85,
     0x3c6ef372,
     0xa54ff53a,

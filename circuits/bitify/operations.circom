@@ -4,7 +4,6 @@ include "./bitify.circom";
 
 // calculate bin sum of NUM numbers each LEN BITS
 // out is LEN + NUM - 1 LEN bit number
-
 template BinSum(NUM, LEN) {
     assert (LEN + NUM - 1 <= 253);
 
@@ -24,6 +23,7 @@ template BinSum(NUM, LEN) {
     for (var i = 0; i < NUM; i++) {
         bits2Num[i] = Bits2Num(LEN);
         bits2Num[i].in <== in[i];
+
         sumN.in[i] <== bits2Num[i].out;
     }
 

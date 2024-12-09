@@ -9,10 +9,10 @@ function processPadding(LEN, LEN_PADDED) {
     for (var i = 0; i < 128; i++) {
         bit_len[i] = tmp_len % 2;
         tmp_len = tmp_len \ 2;
+
         if (tmp_len == 0 && is_zero == 0) {
             len_bit_len = i + 1;
-            is_zero = 1;
-            
+            is_zero = 1;            
         }
     }
 

@@ -15,7 +15,7 @@ template IsZero() {
     
     inv <-- in != 0 ? 1 / in : 0;
     
-    out <==  -in * inv + 1;
+    out <== -in * inv + 1;
     in * out === 0;
 }
 
@@ -62,6 +62,7 @@ template LessEqThan(LEN) {
     component lessThan = LessThan(LEN);    
     lessThan.in[0] <== in[0];
     lessThan.in[1] <== in[1] + 1;
+    
     lessThan.out ==> out;
 }
 
@@ -73,6 +74,7 @@ template GreaterThan(LEN) {
     component lt = LessThan(LEN);    
     lt.in[0] <== in[1];
     lt.in[1] <== in[0];
+
     lt.out ==> out;
 }
 
@@ -84,5 +86,6 @@ template GreaterEqThan(LEN) {
     component lt = LessThan(LEN);    
     lt.in[0] <== in[1];
     lt.in[1] <== in[0] + 1;
+
     lt.out ==> out;
 }

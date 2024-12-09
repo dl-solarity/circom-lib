@@ -198,7 +198,6 @@ template AdditionCheck(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     smartEqual2.dummy <== dummy;
     
     smartEqual.out * smartEqual.out + smartEqual2.out === 1;
-    
 }
 
 // Helpers templates, don`t use them outside if u don`t know what are u doing
@@ -232,8 +231,7 @@ template EllipticCurvePrecomputePipinger(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, WIND
             doublers[i \ 2 - 1].dummy <== dummy;
             doublers[i \ 2 - 1].out ==> out[i];
             
-        }
-        else {
+        } else {
             adders[i \ 2 - 1] = EllipticCurveAddOptimised(CHUNK_SIZE, CHUNK_NUMBER, A, B, P);
             adders[i \ 2 - 1].in1 <== out[1];
             adders[i \ 2 - 1].in2 <== out[i - 1];
@@ -552,21 +550,21 @@ template EllipicCurveScalarGeneratorMultiplicationOptimised(CHUNK_SIZE, CHUNK_NU
     signal input dummy;
     
     signal output out[2][CHUNK_NUMBER];
+
+    dummy * dummy === 0;
     
     var STRIDE = 8;
-    
     var parts = CHUNK_NUMBER * CHUNK_SIZE \ STRIDE;
-    
-    dummy * dummy === 0;
-
     var powers[parts][2 ** STRIDE][2][CHUNK_NUMBER];
 
     if (P[0] == 18446744069414583343 && P[1] == 18446744073709551615 && P[2] == 18446744073709551615 && P[3] == 18446744073709551615) {
         powers = getGPowStride8TableSecp256k1(CHUNK_SIZE, CHUNK_NUMBER);
     }
+
     if (P[0] == 2311270323689771895 && P[1] == 7943213001558335528 && P[2] == 4496292894210231666 && P[3] == 12248480212390422972) {
         powers = getGPowStride8TableBrainpoolP256r1(CHUNK_SIZE, CHUNK_NUMBER);
     }
+    
     if (P[0] == 18446744073709551615 && P[1] == 4294967295 && P[2] == 0 && P[3] == 18446744069414584321) {
         powers = getGPowStride8TableP256(CHUNK_SIZE, CHUNK_NUMBER);
     }
@@ -600,6 +598,7 @@ template EllipicCurveScalarGeneratorMultiplicationOptimised(CHUNK_SIZE, CHUNK_NU
             for (var axis_idx = 0; axis_idx < CHUNK_NUMBER; axis_idx++) {
                 resultCoordinateComputation[i][j][0][axis_idx] <== equal[i][j].out * powers[i][j][0][axis_idx];
             }
+
             for (var axis_idx = 0; axis_idx < CHUNK_NUMBER; axis_idx++) {
                 resultCoordinateComputation[i][j][1][axis_idx] <== equal[i][j].out * powers[i][j][1][axis_idx];
             }
@@ -613,6 +612,7 @@ template EllipicCurveScalarGeneratorMultiplicationOptimised(CHUNK_SIZE, CHUNK_NU
             for (var axis_idx = 0; axis_idx < CHUNK_NUMBER; axis_idx++) {
                 getSumOfNElements[i][j][axis_idx] = GetSumOfNElements(2 ** STRIDE);
                 getSumOfNElements[i][j][axis_idx].dummy <== dummy;
+
                 for (var stride_idx = 0; stride_idx < 2 ** STRIDE; stride_idx++) {
                     getSumOfNElements[i][j][axis_idx].in[stride_idx] <== resultCoordinateComputation[i][stride_idx][j][axis_idx];
                 }
@@ -662,6 +662,7 @@ template EllipicCurveScalarGeneratorMultiplicationOptimised(CHUNK_SIZE, CHUNK_NU
     for (var i = 0; i < parts - 1; i++) {
         adders[i] = EllipticCurveAddOptimised(CHUNK_SIZE, CHUNK_NUMBER, A, B, P);
         adders[i].dummy <== dummy;
+
         isDummyLeft[i] = IsEqual();
         isDummyRight[i] = IsEqual();
         
@@ -672,10 +673,12 @@ template EllipicCurveScalarGeneratorMultiplicationOptimised(CHUNK_SIZE, CHUNK_NU
             isDummyLeft[i].in[1] <== additionPoints[i][0][0];
             isDummyRight[i].in[1] <== additionPoints[i + 1][0][0];
             adders[i].in1 <== additionPoints[i];
+
             for (var j = 0; j < CHUNK_NUMBER - 1; j++) {
                 adders[i].in2[0][j] <== additionPoints[i + 1][0][j];
                 adders[i].in2[1][j] <== additionPoints[i + 1][1][j];
             }
+
             adders[i].in2[0][CHUNK_NUMBER - 1] <== additionPoints[i + 1][0][CHUNK_NUMBER - 1] + isDummyRight[i].out * isDummyRight[i].out;
             adders[i].in2[1][CHUNK_NUMBER - 1] <== additionPoints[i + 1][1][CHUNK_NUMBER - 1] + isDummyRight[i].out * isDummyRight[i].out;
             
@@ -684,24 +687,25 @@ template EllipicCurveScalarGeneratorMultiplicationOptimised(CHUNK_SIZE, CHUNK_NU
             // 1 0 -> right
             // 1 1 -> right
             for (var axis_idx = 0; axis_idx < 2; axis_idx++) {
-                for (var j = 0; j < CHUNK_NUMBER; j++) {
-                    
+                for (var j = 0; j < CHUNK_NUMBER; j++) {                    
                     resultingPointsRight[i][axis_idx][j] <== (1 - isDummyRight[i].out) * adders[i].out[axis_idx][j];
                     resultingPointsRight2[i][axis_idx][j] <== isDummyRight[i].out * additionPoints[i][axis_idx][j] + resultingPointsRight[i][axis_idx][j];
                     resultingPointsLeft[i][axis_idx][j] <== isDummyLeft[i].out * additionPoints[i + 1][axis_idx][j];
                     resultingPointsLeft2[i][axis_idx][j] <== (1 - isDummyLeft[i].out) * resultingPointsRight2[i][axis_idx][j] + resultingPointsLeft[i][axis_idx][j];
                     resultingPoints[i][axis_idx][j] <== resultingPointsLeft2[i][axis_idx][j];
                 }
-            }
-            
+            }            
         } else {
             isDummyLeft[i].in[1] <== resultingPoints[i - 1][0][0];
             isDummyRight[i].in[1] <== additionPoints[i + 1][0][0];
+
             adders[i].in1 <== resultingPoints[i - 1];
+
             for (var j = 0; j < CHUNK_NUMBER - 1; j++) {
                 adders[i].in2[0][j] <== additionPoints[i + 1][0][j];
                 adders[i].in2[1][j] <== additionPoints[i + 1][1][j];
             }
+
             adders[i].in2[0][CHUNK_NUMBER - 1] <== additionPoints[i + 1][0][CHUNK_NUMBER - 1] + isDummyRight[i].out * isDummyRight[i].out;
             adders[i].in2[1][CHUNK_NUMBER - 1] <== additionPoints[i + 1][1][CHUNK_NUMBER - 1] + isDummyRight[i].out * isDummyRight[i].out;
             
@@ -711,7 +715,6 @@ template EllipicCurveScalarGeneratorMultiplicationOptimised(CHUNK_SIZE, CHUNK_NU
             // 1 1 -> right
             for (var axis_idx = 0; axis_idx < 2; axis_idx++) {
                 for (var j = 0; j < CHUNK_NUMBER; j++) {
-                    
                     resultingPointsRight[i][axis_idx][j] <== (1 - isDummyRight[i].out) * adders[i].out[axis_idx][j];
                     resultingPointsRight2[i][axis_idx][j] <== isDummyRight[i].out * resultingPoints[i - 1][axis_idx][j] + resultingPointsRight[i][axis_idx][j];
                     resultingPointsLeft[i][axis_idx][j] <== isDummyLeft[i].out * additionPoints[i + 1][axis_idx][j];
@@ -790,9 +793,9 @@ template EllipticCurvePipingerMult(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, WINDOW_SIZ
             scalarBits[CHUNK_NUMBER * CHUNK_SIZE - CHUNK_SIZE * (i + 1) + j] <== num2Bits[i].out[CHUNK_SIZE - 1 - j];
         }
     }
-    
+
     res[0] <== precomputed[0];
-    
+
     for (var i = 0; i < CHUNK_NUMBER * CHUNK_SIZE; i += WINDOW_SIZE) {
         adders[i \ WINDOW_SIZE] = EllipticCurveAddOptimised(CHUNK_SIZE, CHUNK_NUMBER, A, B, P);
         bits2Num[i \ WINDOW_SIZE] = Bits2Num(WINDOW_SIZE);
@@ -834,6 +837,7 @@ template EllipticCurvePipingerMult(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, WINDOW_SIZ
                     equals[i \ WINDOW_SIZE][point_idx][axis_idx][coor_idx] = IsEqual();
                     equals[i \ WINDOW_SIZE][point_idx][axis_idx][coor_idx].in[0] <== point_idx;
                     equals[i \ WINDOW_SIZE][point_idx][axis_idx][coor_idx].in[1] <== bits2Num[i \ WINDOW_SIZE].out;
+
                     tmp   [i \ WINDOW_SIZE][point_idx][axis_idx][coor_idx] <== precomputed[point_idx][axis_idx][coor_idx] *
                     equals[i \ WINDOW_SIZE][point_idx][axis_idx][coor_idx].out;
                 }
@@ -861,25 +865,25 @@ template EllipticCurvePipingerMult(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, WINDOW_SIZ
                 tmp[i \ WINDOW_SIZE][15][axis_idx][coor_idx];
             }
         }
-        
+
         if (i == 0) {            
             adders[i \ WINDOW_SIZE].in1 <== res [i \ WINDOW_SIZE];
             adders[i \ WINDOW_SIZE].in2 <== tmp2[i \ WINDOW_SIZE];
             adders[i \ WINDOW_SIZE].dummy <== dummy;
+
             res[i \ WINDOW_SIZE + 1] <== tmp2[i \ WINDOW_SIZE];            
         } else {            
             adders[i \ WINDOW_SIZE].in1 <== doublers[i - 1].out;
             adders[i \ WINDOW_SIZE].in2 <== tmp2[i \ WINDOW_SIZE];
             adders[i \ WINDOW_SIZE].dummy <== dummy;
-            
+
             zeroEquals[i \ WINDOW_SIZE] = IsEqual();
-            
+
             zeroEquals[i \ WINDOW_SIZE].in[0] <== 0;
             zeroEquals[i \ WINDOW_SIZE].in[1] <== tmp2[i \ WINDOW_SIZE][0][0];
-            
+
             for (var axis_idx = 0; axis_idx < 2; axis_idx++) {
-                for (var coor_idx = 0; coor_idx < CHUNK_NUMBER; coor_idx++) {
-                    
+                for (var coor_idx = 0; coor_idx < CHUNK_NUMBER; coor_idx++) {                    
                     tmp3[i \ WINDOW_SIZE][0][axis_idx][coor_idx] <== adders    [i \ WINDOW_SIZE].out[axis_idx][coor_idx] * (1 - zeroEquals[i \ WINDOW_SIZE].out);
                     tmp3[i \ WINDOW_SIZE][1][axis_idx][coor_idx] <== zeroEquals[i \ WINDOW_SIZE].out * doublers[i - 1].out[axis_idx][coor_idx];
                     tmp4[i \ WINDOW_SIZE]   [axis_idx][coor_idx] <== tmp3[i \ WINDOW_SIZE][0][axis_idx][coor_idx] + tmp3[i \ WINDOW_SIZE][1][axis_idx][coor_idx];
@@ -1411,7 +1415,6 @@ template EllipicCurveScalarGeneratorMultiplicationNonOptimised(CHUNK_SIZE, CHUNK
     signal output out[2][CHUNK_NUMBER];
     
     var STRIDE = 8;
-    
     var parts = CHUNK_NUMBER * CHUNK_SIZE \ STRIDE;
     
     dummy * dummy === 0;
@@ -1641,6 +1644,7 @@ template EllipicCurveScalarPrecomputeMultiplicationNonOptimised(CHUNK_SIZE, CHUN
 
     for (var i = 0; i < parts; i++) {
         bits2num[i] = Bits2Num(STRIDE);
+
         for (var j = 0; j < STRIDE; j++) {
             bits2num[i].in[j] <== num2bits[(i * STRIDE + j) \ CHUNK_SIZE].out[(i * STRIDE + j) % CHUNK_SIZE];
         }
@@ -1672,6 +1676,7 @@ template EllipicCurveScalarPrecomputeMultiplicationNonOptimised(CHUNK_SIZE, CHUN
             for (var axis_idx = 0; axis_idx < CHUNK_NUMBER; axis_idx++) {
                 getSumOfNElements[i][j][axis_idx] = GetSumOfNElements(2 ** STRIDE);
                 getSumOfNElements[i][j][axis_idx].dummy <== dummy;
+
                 for (var stride_idx = 0; stride_idx < 2 ** STRIDE; stride_idx++) {
                     getSumOfNElements[i][j][axis_idx].in[stride_idx] <== resultCoordinateComputation[i][stride_idx][j][axis_idx];
                 }
@@ -1827,12 +1832,14 @@ template EllipticCurveDouble(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
 
         ecDoubleOptimised.in <== in;
         ecDoubleOptimised.dummy <== dummy;
+
         out <== ecDoubleOptimised.out;
     } else {
         component ecDoubleNonOptimised = EllipticCurveDoubleNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, A, B, P);
 
         ecDoubleNonOptimised.in <== in;
         ecDoubleNonOptimised.dummy <== dummy;
+
         out <== ecDoubleNonOptimised.out;
     }
 }

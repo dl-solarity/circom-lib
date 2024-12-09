@@ -53,7 +53,6 @@ template Sha1compression() {
     for (i = 0; i <= 79; i++) {
         tTmp[i] = T(i);
         tTmp[i].dummy <== dummy;
-
     }
     
     component fSum[5];
@@ -76,9 +75,11 @@ template Sha1compression() {
             xor4[t - 16].c[k] <== w[t - 14][k];
             xor4[t - 16].d[k] <== w[t - 16][k];
         }
+        
         for (var k = 0; k < 32; k++) {
             rotl1[t - 16].in[k] <== xor4[t - 16].out[k];
         }
+        
         for (var k = 0; k < 32; k++) {
             w[t][k] <== rotl1[t - 16].out[k];
         }
@@ -125,7 +126,7 @@ template Sha1compression() {
         fSum[2].in[0][k] <== hin[31 * 3 - k + 2];
         fSum[2].in[1][k] <== c[80][31 - k];
         
-        fSum[3].in[0][k] <== hin[31 * 4 - k + 3 ];
+        fSum[3].in[0][k] <== hin[31 * 4 - k + 3];
         fSum[3].in[1][k] <== d[80][31 - k];
         
         fSum[4].in[0][k] <== hin[31 * 5 - k + 4];

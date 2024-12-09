@@ -24,8 +24,10 @@ template T(t) {
     component f = fT(t);
     
     var k;
+
     for (k = 0; k < 32; k++) {
         rotatel5.in[k] <== a[k];
+
         f.b[k] <== b[k];
         f.c[k] <== c[k];
         f.d[k] <== d[k];
@@ -33,6 +35,7 @@ template T(t) {
     
     component sumBinary = BinSum(5, 32);
     sumBinary.dummy <== dummy;
+
     var nout = 35; 
     
     for (k = 0; k < 32; k++) {
@@ -44,6 +47,7 @@ template T(t) {
     }
     
     component sum = Bits2Num(nout);
+    
     for (k = 0; k < nout; k++) {
         sum.in[k] <== sumBinary.out[k];
     }

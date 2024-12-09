@@ -73,6 +73,7 @@ template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE) {
     assert(eM[0] == 188); 
     
     var DB_MASK_LEN = EM_LEN - HASH_LEN - 1;
+
     signal dbMask[DB_MASK_LEN * 8];
     signal db[DB_MASK_LEN * 8];
     signal salt[SALT_LEN * 8];

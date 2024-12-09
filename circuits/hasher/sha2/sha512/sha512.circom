@@ -29,13 +29,13 @@ template Sha512HashChunks(BLOCK_NUM) {
         
         for (var k = 0; k < 16; k++) {
             for (var i = 0; i < 64; i++) {
-                sch[m].chunkBits[k][i] <== in[m * 1024 + k * 64 + (63 - i) ];
+                sch[m].chunkBits[k][i] <== in[m * 1024 + k * 64 + (63 - i)];
             }
         }
         
         sch[m].outWords ==> rds[m].words;
         
-        rds[m].inpHash <== states[m  ];
+        rds[m].inpHash <== states[m];
         rds[m].outHash ==> states[m + 1];
     }
     
@@ -70,18 +70,19 @@ template Sha512HashBits(LEN) {
     for (var m = 0; m < BLOCK_NUM; m++) {        
         sch[m] = Sha2_384_512Schedule();
         sch[m].dummy <== dummy;
+
         rds[m] = Sha2_384_512Rounds(80);
         rds[m].dummy <== dummy;
         
         for (var k = 0; k < 16; k++) {
             for (var i = 0; i < 64; i++) {
-                sch[m].chunkBits[k][i] <== addPadding.out[m * 1024 + k * 64 + (63 - i) ];
+                sch[m].chunkBits[k][i] <== addPadding.out[m * 1024 + k * 64 + (63 - i)];
             }
         }
         
         sch[m].outWords ==> rds[m].words;
         
-        rds[m].inpHash <== states[m  ];
+        rds[m].inpHash <== states[m];
         rds[m].outHash ==> states[m + 1];
     }
     
@@ -148,9 +149,11 @@ template Sha2_384_512Rounds(n) {
     for (var j = 0; j < 8; j++) {
         sum[j] = GetSumOfNElements(64);
         sum[j].dummy <== dummy;
+
         for (var i = 0; i < 64; i++) {
             sum[j].in[i] <== (1 << i) * inpHash[j][i];
         }
+
         hashWords[j] <== sum[j].out;
     }
     
@@ -163,22 +166,22 @@ template Sha2_384_512Rounds(n) {
         compress[k].key <== ROUND_KEYS[k];
         compress[k].dummy <== dummy;
 
-        compress[k].a <== a [k];
-        compress[k].b <== b [k];
-        compress[k].c <== c [k];
+        compress[k].a <== a[k];
+        compress[k].b <== b[k];
+        compress[k].c <== c[k];
         compress[k].dd <== dd[k];
-        compress[k].e <== e [k];
-        compress[k].f <== f [k];
-        compress[k].g <== g [k];
+        compress[k].e <== e[k];
+        compress[k].f <== f[k];
+        compress[k].g <== g[k];
         compress[k].hh <== hh[k];
         
-        compress[k].outA ==> a [k + 1];
-        compress[k].outB ==> b [k + 1];
-        compress[k].outC ==> c [k + 1];
+        compress[k].outA ==> a[k + 1];
+        compress[k].outB ==> b[k + 1];
+        compress[k].outC ==> c[k + 1];
         compress[k].outDD ==> dd[k + 1];
-        compress[k].outE ==> e [k + 1];
-        compress[k].outF ==> f [k + 1];
-        compress[k].outG ==> g [k + 1];
+        compress[k].outE ==> e[k + 1];
+        compress[k].outF ==> f[k + 1];
+        compress[k].outG ==> g[k + 1];
         compress[k].outHH ==> hh[k + 1];
     }
     
@@ -233,8 +236,10 @@ template Sha2_384_512Rounds(n) {
 // NOTE: the individual 64 bit words are in little-endian order 
 template Sha2_384_512Schedule() {    
     signal input chunkBits[16][64]; 
-    signal output outWords [80]; 
     signal input dummy;
+    
+    signal output outWords [80]; 
+
     dummy * dummy === 0;
 
     signal outBits[80][64]; 
@@ -244,21 +249,23 @@ template Sha2_384_512Schedule() {
     for (var k = 0; k < 16; k++) {
         sumN[k] = GetSumOfNElements(64);
         sumN[k].dummy <== dummy;
+
         for (var i = 0; i < 64; i++) {
             sumN[k].in[i] <== (1 << i) * chunkBits[k][i];
         }
+
         outWords[k] <== sumN[k].out;
         outBits [k] <== chunkBits[k];
     }
     
-    component s0Xor [80 - 16][64];
-    component s1Xor [80 - 16][64];
+    component s0Xor[80 - 16][64];
+    component s1Xor[80 - 16][64];
     component modulo[80 - 16];
     
     component bits2Num[80 - 16];
 
-    component s0Sum [80 - 16];
-    component s1Sum [80 - 16];
+    component s0Sum[80 - 16];
+    component s1Sum[80 - 16];
 
     for (var m = 16; m < 80; m++) {
         var r = m - 16;
@@ -272,24 +279,26 @@ template Sha2_384_512Schedule() {
         
         for (var i = 0; i < 64; i++) {
             // note: with XOR3_v2, circom optimizes away the constant zero `z` thing
-            // with XOR3_v1, it does not. But otherwise it's the same number of constraints.
-            
+            // with XOR3_v1, it does not. But otherwise it's the same number of constraints.            
             s0Xor[r][i] = XOR3_v2();
-            s0Xor[r][i].x <== outBits[k][ (i + 1) % 64 ];
-            s0Xor[r][i].y <== outBits[k][ (i + 8) % 64 ];
-            s0Xor[r][i].z <== (i < 64 - 7) ? outBits[k][ (i + 7) ] : 0;
+            s0Xor[r][i].x <== outBits[k][(i + 1) % 64];
+            s0Xor[r][i].y <== outBits[k][(i + 8) % 64];
+            s0Xor[r][i].z <== (i < 64 - 7) ? outBits[k][(i + 7)] : 0;
+
             s0Sum[m - 16].in[i] <== (1 << i) * s0Xor[r][i].out;
             
             s1Xor[r][i] = XOR3_v2();
-            s1Xor[r][i].x <== outBits[l][ (i + 19) % 64 ];
-            s1Xor[r][i].y <== outBits[l][ (i + 61) % 64 ];
-            s1Xor[r][i].z <== (i < 64 - 6) ? outBits[l][ (i + 6) ] : 0;
+            s1Xor[r][i].x <== outBits[l][(i + 19) % 64];
+            s1Xor[r][i].y <== outBits[l][(i + 61) % 64];
+            s1Xor[r][i].z <== (i < 64 - 6) ? outBits[l][(i + 6)] : 0;
+
             s1Sum[m - 16].in[i] <== (1 << i) * s1Xor[r][i].out;
         }
         
         modulo[r] = GetLastNBits(64);
         modulo[r].in <== s1Sum[r].out + outWords[m - 7] + s0Sum[r].out + outWords[m - 16];
         modulo[r].out ==> outBits[m];
+
         bits2Num[r] = Bits2Num(64);
         bits2Num[r].in <== outBits[m];
         bits2Num[r].out ==> outWords[m];

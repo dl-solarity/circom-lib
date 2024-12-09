@@ -77,15 +77,15 @@ template Sha2_384_512CompressInner() {
         mjSum.in[i] <== (1 << i) * major[i].hi;
         
         s0Xor[i] = XOR3_v2();
-        s0Xor[i].x <== a[ (i + 28) % 64 ];
-        s0Xor[i].y <== a[ (i + 34) % 64 ];
-        s0Xor[i].z <== a[ (i + 39) % 64 ];
+        s0Xor[i].x <== a[(i + 28) % 64];
+        s0Xor[i].y <== a[(i + 34) % 64];
+        s0Xor[i].z <== a[(i + 39) % 64];
         s0Sum.in[i] <== (1 << i) * s0Xor[i].out;
         
         s1Xor[i] = XOR3_v2();
-        s1Xor[i].x <== e[ (i + 14) % 64 ];
-        s1Xor[i].y <== e[ (i + 18) % 64 ];
-        s1Xor[i].z <== e[ (i + 41) % 64 ];
+        s1Xor[i].x <== e[(i + 14) % 64];
+        s1Xor[i].y <== e[(i + 18) % 64];
+        s1Xor[i].z <== e[(i + 41) % 64];
         s1Sum.in[i] <== (1 << i) * s1Xor[i].out;
     }
     

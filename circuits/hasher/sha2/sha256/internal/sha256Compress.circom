@@ -38,6 +38,7 @@ template Sha2_224_256CompressInner() {
     
     component dSum = GetSumOfNElements(32);
     dSum.dummy <== dummy;
+
     component hSum = GetSumOfNElements(32);
     hSum.dummy <== dummy;
     
@@ -57,10 +58,13 @@ template Sha2_224_256CompressInner() {
     
     component s0Sum = GetSumOfNElements(32);
     s0Sum.dummy <== dummy;
+
     component s1Sum = GetSumOfNElements(32);
     s1Sum.dummy <== dummy;
+
     component mjSum = GetSumOfNElements(32);
     mjSum.dummy <== dummy;
+
     component chSum = GetSumOfNElements(32);
     chSum.dummy <== dummy;
     
@@ -75,15 +79,15 @@ template Sha2_224_256CompressInner() {
         mjSum.in[i] <== (1 << i) * major[i].hi;
         
         s0Xor[i] = XOR3_v2();
-        s0Xor[i].x <== a[ (i + 2) % 32 ];
-        s0Xor[i].y <== a[ (i + 13) % 32 ];
-        s0Xor[i].z <== a[ (i + 22) % 32 ];
+        s0Xor[i].x <== a[(i + 2) % 32];
+        s0Xor[i].y <== a[(i + 13) % 32];
+        s0Xor[i].z <== a[(i + 22) % 32];
         s0Sum.in[i] <== (1 << i) * s0Xor[i].out;
         
         s1Xor[i] = XOR3_v2();
-        s1Xor[i].x <== e[ (i + 6) % 32 ];
-        s1Xor[i].y <== e[ (i + 11) % 32 ];
-        s1Xor[i].z <== e[ (i + 25) % 32 ];
+        s1Xor[i].x <== e[(i + 6) % 32];
+        s1Xor[i].y <== e[(i + 11) % 32];
+        s1Xor[i].z <== e[(i + 25) % 32];
         s1Sum.in[i] <== (1 << i) * s1Xor[i].out;        
     }
     

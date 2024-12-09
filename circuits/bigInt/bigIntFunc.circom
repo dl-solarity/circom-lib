@@ -624,7 +624,7 @@ function expToBits(exp) {
 
         if (bits[counter] == 1) {
             result_mul_num += 1;
-            indexes[result_counter+2] = counter;
+            indexes[result_counter + 2] = counter;
             result_counter += 1;
         }
 

@@ -53,5 +53,5 @@ template Bits2Num(LEN) {
         sum[i] <== 2 ** i * in[i] + sum[i - 1];
     }
 
-   	out <== sum[LEN-1];
+   	out <== sum[LEN - 1];
 }
