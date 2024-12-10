@@ -4,16 +4,20 @@ include "../int/arithmetic.circom";
 include "./matrixFunc.circom";
 include "../bigInt/bigIntFunc.circom";
 
-// Here are templates for matrix operations
-// Use them only if u know what are u doing!!!
-// To help with debug u can use this:
-// var print = logMatrix(out, x1, x2);
-// This will log your matrix out with dimmesions x1 x x2
-// x2 < 40; can be changed in "./matrixFunc.circom"
+/*
+* Here are templates for matrix operations
+* Use them only if you know what are you doing!!!
+* To help with debug you can use this:
+* var print = logMatrix(out, x1, x2);
+* This will log your matrix out with dimmesions x1 x x2
+* x2 < 40; can be changed in "./matrixFunc.circom"
+*/
 
-// Computes in1(n1xm1) X in2(n2xm2);
-// There is check for m1 == n2, otherwise matrixes are unable to multiply
-// Use the same template for matrix vector multiplication (n1, m1, m1, 1)
+/*
+* Computes in1(n1xm1) X in2(n2xm2);
+* There is check for m1 == n2, otherwise matrixes are unable to multiply
+* Use the same template for matrix vector multiplication (n1, m1, m1, 1).
+*/
 template MatrixMultiply(n1, m1, n2, m2) {
     assert(m1 == n2);
 
@@ -41,10 +45,12 @@ template MatrixMultiply(n1, m1, n2, m2) {
     }
 }
 
-// Computes matrix * scalar multiplication
-// in is matrix nxm
-// scalar is scalar to multiply 
-// out is matrix nxm
+/*
+* Computes matrix * scalar multiplication.
+* in is matrix nxm
+* scalar is scalar to multiply 
+* out is matrix nxm.
+*/
 template MatrixScalarMult(n, m) {
     signal input in[n][m];
     signal input scalar;
@@ -61,27 +67,29 @@ template MatrixScalarMult(n, m) {
     }
 }
 
-// computes convolution with step 1 
-// in is matrix n1xm1
-// filter is matrix n2xm2
-// step is shift between filters
-// out is matrix n1 - n2 + 1, m1 - m2 + 1
-// For example, step 1:
-// 
-//     [ [1, 2, 3]
-// in:   [4, 5, 6]    filter: [ [10, 11]
-//       [7, 8, 9] ]            [12, 13] ]
-//
-// result is:
-// [ [x1, x2]
-//   [x3, x4] ], 
-// where 
-// x1 = in[0][0] * filter[0][0] + in[1][0] * filter[1][0] + in[0][1] * filter[0][1] + in[1][1] * filter[1][1] 
-// x2 = in[1][0] * filter[0][0] + in[2][0] * filter[1][0] + in[1][1] * filter[0][1] + in[2][1] * filter[1][1] 
-// x3 = in[0][1] * filter[0][0] + in[1][1] * filter[1][0] + in[0][2] * filter[0][1] + in[1][2] * filter[1][1] 
-// x4 = in[1][1] * filter[0][0] + in[2][1] * filter[1][0] + in[1][2] * filter[0][1] + in[2][2] * filter[1][1] 
-// Will fail assert if (n1 - n2) % step != 0
-// If u have this case, reduce (or increase) input table in size;
+/*
+* Computes convolution with step 1.
+* in is matrix n1xm1
+* filter is matrix n2xm2
+* step is shift between filters
+* out is matrix n1 - n2 + 1, m1 - m2 + 1.
+* For example, step 1:
+* 
+*     [ [1, 2, 3]
+* in:   [4, 5, 6]    filter: [ [10, 11]
+*       [7, 8, 9] ]            [12, 13] ]
+*
+* result is:
+* [ [x1, x2]
+*   [x3, x4] ], 
+* where 
+* x1 = in[0][0] * filter[0][0] + in[1][0] * filter[1][0] + in[0][1] * filter[0][1] + in[1][1] * filter[1][1] 
+* x2 = in[1][0] * filter[0][0] + in[2][0] * filter[1][0] + in[1][1] * filter[0][1] + in[2][1] * filter[1][1] 
+* x3 = in[0][1] * filter[0][0] + in[1][1] * filter[1][0] + in[0][2] * filter[0][1] + in[1][2] * filter[1][1] 
+* x4 = in[1][1] * filter[0][0] + in[2][1] * filter[1][0] + in[1][2] * filter[0][1] + in[2][2] * filter[1][1] 
+* Will fail assert if (n1 - n2) % step != 0.
+* If you have this case, reduce (or increase) input table in size;
+*/
 template MatrixConvolution(n1, m1, n2, m2, step) {
     assert(n1 >= n2 && (n1 - n2) % step == 0 && m1 >= m2 && (m1 - m2) % step == 0);
     
@@ -114,8 +122,10 @@ template MatrixConvolution(n1, m1, n2, m2, step) {
     }
 }
 
-// Computes Hadamard Product for 2 matrix in1 and in2 with n x m size
-// out is matrix with each element is multiplication of elements from input matrices on the same poosition
+/*
+* Computes Hadamard Product for 2 matrix in1 and in2 with n x m size.
+* out is matrix with each element is multiplication of elements from input matrices on the same position.
+*/
 template MatrixHadamardProduct(n, m) {
     signal input in1[n][m];
     signal input in2[n][m];
@@ -129,8 +139,10 @@ template MatrixHadamardProduct(n, m) {
     }
 }
 
-// Computes addition for 2 matrix in1 and in2 with n x m size
-// out is matrix with each element is sum of elements from input matrices on the same poosition
+/*
+* Computes addition for 2 matrix in1 and in2 with n x m size.
+* out is matrix with each element is sum of elements from input matrices on the same poosition.
+*/
 template MatrixAddition(n, m) {
     signal input in1[n][m];
     signal input in2[n][m];
@@ -145,10 +157,12 @@ template MatrixAddition(n, m) {
     }
 }
 
-// return transpositioned matrix
-// 0 quadratic constraints, just copy constraints
-// in is matrix n x m
-// out is matrix m x n
+/*
+* Returns transpositioned matrix.
+* 0 quadratic constraints, just copy constraints.
+* in is matrix n x m,
+* out is matrix m x n.
+*/
 template MatrixTransposition(n, m) {
     signal input in[n][m];
 
@@ -161,10 +175,12 @@ template MatrixTransposition(n, m) {
     }
 }
 
-// Compute matrix determinant of square matrix with size n
-// out is determinant
-// U should understand, that determinant can be negative, so out can be very big (we work in field)
-// for example, -1 == 21888242871839275222246405745257275088548364400416034343698204186575808495616
+/*
+* Compute matrix determinant of square matrix with size n.
+* out is determinant.
+* You should understand, that determinant can be negative, so out can be very big (we work in field).
+* For example, -1 == 21888242871839275222246405745257275088548364400416034343698204186575808495616.
+*/
 template MatrixDeterminant(n) {
     assert(n >= 2);
     
@@ -209,9 +225,11 @@ template MatrixDeterminant(n) {
     }
 }
 
-// Computes input matrix in ^ EXP
-// EXP >= 2;
-// in is square matrix n x n 
+/*
+* Computes input matrix in ^ EXP.
+* EXP >= 2;
+* in is square matrix n x n.
+*/
 template MatrixPower(n, EXP) {
     assert(EXP >= 2);
     

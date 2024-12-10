@@ -1,6 +1,8 @@
 pragma circom 2.1.6;
 
-// log matrix m x n
+/*
+* Log matrix m x n
+*/
 function logMatrix(matrix, m, n) {
     assert(n < 40);
 

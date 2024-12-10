@@ -2,10 +2,12 @@ pragma circom 2.1.6;
 
 include "../../sha2Common.circom";
 
-// SHA384 / SHA512 compression function inner loop
-//
-// note: the d,h,inp,key inputs (and outputs) are 64 bit numbers;
-// the rest are little-endian bit vectors.
+/*
+* SHA384 / SHA512 compression function inner loop
+*
+* Note: the d,h,inp,key inputs (and outputs) are 64 bit numbers;
+* the rest are little-endian bit vectors.
+*/
 template Sha2_384_512CompressInner() {
     signal input inp;
     signal input key;

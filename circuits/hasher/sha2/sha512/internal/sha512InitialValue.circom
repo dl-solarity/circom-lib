@@ -1,6 +1,8 @@
 pragma circom 2.1.6;
 
-// initial hash value for SHA2-512 
+/*
+* Initial hash value for SHA2-512.
+*/
 template Sha512InitialValue() {    
     signal output out[8][64];
     

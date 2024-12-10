@@ -1,7 +1,9 @@
 pragma circom 2.1.6;
 
-// Constant generation for poseidon hash
-// Don`t change this without understanding what are u doing!!!
+/* 
+* Constant generation for poseidon hash
+* Don`t change this without understanding what are you doing!!!
+*/
 function POSEIDON_C(t) {
     if (t==2) {
         return 

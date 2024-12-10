@@ -4,17 +4,21 @@ include "../ec/curve.circom";
 include "../ec/get.circom";
 include "../bigInt/bigInt.circom";
 
-// Here is ecdsa signature verification
-// For now, only 256 bit curves are allowed with chunking 64 4
+/*
+* Here is ecdsa signature verification
+* For now, only 256 bit curves are allowed with chunking 64 4
+*/
 
-// Use this one if you hash message in circuit (message is bits, not chunked int)!!!
-// signature[2] = [r, s] - signature
-// pubkey[2] = [x, y] - pubkey for signature
-// hashed[ALGO] = h - hashed message by some algo (typically sha-2 256 for 256 bit curves)
-// n is curve order
-// s_inv = s ^ -1 mod n
-// (x1, y1) = h * s_inv * G + r * s_inv * (x, y)
-// x1 === r
+/*
+* Use this one if you hash message in circuit (message is bits, not chunked int)!!!
+* signature[2] = [r, s] - signature
+* pubkey[2] = [x, y] - pubkey for signature
+* hashed[ALGO] = h - hashed message by some algo (typically sha-2 256 for 256 bit curves)
+* n is curve order
+* s_inv = s ^ -1 mod n
+* (x1, y1) = h * s_inv * G + r * s_inv * (x, y)
+* x1 === r
+*/
 template verifyECDSABits(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, ALGO) {
     assert(CHUNK_SIZE == 64 && CHUNK_NUMBER == 4);
     
@@ -89,14 +93,16 @@ template verifyECDSABits(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, ALGO) {
     }
 }
 
-// Use this one if yours message is chunk bigint 
-// pubkey[2] = [x, y] - pubkey for signature
-// signature[2] = [r, s] - signature
-// hashed = h - hashed message 
-// n is curve order
-// s_inv = s ^ -1 mod n
-// (x1, y1) = h * s_inv * G + r * s_inv * (x, y)
-// x1 === r
+/*
+* Use this one if yours message is chunk bigint 
+* pubkey[2] = [x, y] - pubkey for signature
+* signature[2] = [r, s] - signature
+* hashed = h - hashed message 
+* n is curve order
+* s_inv = s ^ -1 mod n
+* (x1, y1) = h * s_inv * G + r * s_inv * (x, y)
+* x1 === r
+*/
 template verifyECDSABigInt(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     assert(CHUNK_SIZE == 64 && CHUNK_NUMBER == 4);
     

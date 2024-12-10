@@ -1,9 +1,11 @@
 
 pragma circom 2.1.6;
 
-// Get generator by curve params
-// Now there is only secp256k1 \ brainpoolP256r1 generator (64 4 chunking) and brainpoolP384r1
-// Other curves / chunking will be added later
+/*
+* Get generator by curve params.
+* Now there is only secp256k1 \ brainpoolP256r1 generator (64 4 chunking) and brainpoolP384r1.
+* Other curves / chunking will be added later.
+*/
 template EllipticCurveGetGenerator(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     assert (CHUNK_SIZE == 64);
     
@@ -39,12 +41,14 @@ template EllipticCurveGetGenerator(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     }
 }
 
-// Get "dummy" point
-// We can`t "if" signal in circom, so we always need to do all opertions, even we won`t use results of them
-// For example, in scalar mult we can have case where we shouln`t add anything (bits = [0,0, .. ,0])
-// We will ignore result, but we still should get it, so we need to pout something anyway
-// We use this dummy point for such purposes
-// Dummy point = G * 2**256
+/*
+* Get "dummy" point.
+* We can`t "if" signal in circom, so we always need to do all opertions, even we won`t use results of them.
+* For example, in scalar mult we can have case where we shouln`t add anything (bits = [0,0, .. ,0])
+* We will ignore result, but we still should get it, so we need to pout something anyway
+* We use this dummy point for such purposes.
+* Dummy point = G * 2**256/
+*/
 template EllipticCurveGetDummy(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     assert (CHUNK_SIZE == 64);
     
@@ -97,7 +101,9 @@ template EllipticCurveGetDummy(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     }
 }
 
-// Get order of eliptic curve
+/*
+* Get order of eliptic curve
+*/
 template EllipicCurveGetOrder(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     assert (CHUNK_SIZE == 64);
     

@@ -1,6 +1,8 @@
 pragma circom 2.1.6;
 
-// round constants for SHA2-384 and SHA2-512 (they are the same)
+/*
+* Round constants for SHA2-384 and SHA2-512 (they are the same).
+*/
 template SHA2_384_512RoundKeys() {
     signal output out[80];
     

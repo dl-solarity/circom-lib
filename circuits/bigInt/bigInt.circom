@@ -7,39 +7,43 @@ include "./bigIntOverflow.circom";
 include "../int/arithmetic.circom";
 include "./karatsuba.circom";
 
-// What BigInt in this lib means
-// We represent big number as array of chunks with some shunk_size (will be explained later) 
-// for this example we will use N for number, n for chunk size and k for chunk_number:
-// N[k];
-// Number can be calculated by this formula:
-// N = N[0] * 2 ** (0 * n) + N[1] * 2 ** (1 * n) + ... + N[k - 1] * 2 ** ((k-1) * n)
-// By overflow we mean situation where N[i] >= 2 ** n
-// Without overflow every number has one and only one representation
-// To reduce overflow we must leave N[i] % 2 ** n for N[i] and add N[i] // 2 ** n to N[i + 1]
-// If u want to do many operation in a row, it is better to use overflow operations from "./bigIntOverflow" and then just reduce overflow from result
+/* 
+* What BigInt in this lib means
+*
+* We represent big number as array of chunks with some shunk_size (will be explained later).
+* for this example we will use N for number, n for chunk size and k for chunk_number: N[k].
+* Number can be calculated by this formula:
+* N = N[0] * 2 ** (0 * n) + N[1] * 2 ** (1 * n) + ... + N[k - 1] * 2 ** ((k-1) * n)
+* By overflow we mean situation where N[i] >= 2 ** n.
+* Without overflow every number has one and only one representation
+* To reduce overflow we must leave N[i] % 2 ** n for N[i] and add N[i] // 2 ** n to N[i + 1]
+* If you want to do many operation in a row, it is better to use overflow operations from "./bigIntOverflow" and then just reduce overflow from result
+*
+* If you want to convert any number to this representation, you can this python3 script:
+* ```
+* def bigint_to_array(n, k, x):
+*     # Initialize mod to 1 (Python's int can handle arbitrarily large numbers)
+*     mod = 1
+*     for idx in range(n):
+*         mod *= 2
+*     # Initialize the return list
+*     ret = []
+*     x_temp = x
+*     for idx in range(k):
+*         # Append x_temp mod mod to the list
+*         ret.append(str(x_temp % mod))
+*         # Divide x_temp by mod for the next iteration
+*         x_temp //= mod  # Use integer division in Python
+*     return ret
+* ```
+*
+* Next templates are actual only for same chunk sizes of inputs, don`t use them without knowing what are you doing!!!
+*/
 
-// If u want to convert any number to this representation, u can this python3 script:
-// ```
-// def bigint_to_array(n, k, x):
-//     # Initialize mod to 1 (Python's int can handle arbitrarily large numbers)
-//     mod = 1
-//     for idx in range(n):
-//         mod *= 2
-//     # Initialize the return list
-//     ret = []
-//     x_temp = x
-//     for idx in range(k):
-//         # Append x_temp mod mod to the list
-//         ret.append(str(x_temp % mod))
-//         # Divide x_temp by mod for the next iteration
-//         x_temp //= mod  # Use integer division in Python
-//     return ret
-// ```
-
-// Next templates are actual only for same chunk sizes of inputs, don`t use them without knowing what are u doing!!!
-
-// Get sum of each chunk with same positions
-// out has overflow
+/*
+* Get sum of each chunk with same positions.
+* out has overflow.
+*/
 template BigAddNoCarry(CHUNK_SIZE, CHUNK_NUMBER) {
     assert(CHUNK_SIZE <= 253);
 
@@ -53,8 +57,10 @@ template BigAddNoCarry(CHUNK_SIZE, CHUNK_NUMBER) {
     }
 }
 
-// Get sum of each chunk with same positions
-// out has no overflow and has CHUNK_NUMBER + 1 chunks
+/*
+* Get sum of each chunk with same positions.
+* out has no overflow and has CHUNK_NUMBER + 1 chunks.
+*/
 template BigAdd(CHUNK_SIZE, CHUNK_NUMBER) {
     signal input in[2][CHUNK_NUMBER];
     signal input dummy;
@@ -90,8 +96,10 @@ template BigAdd(CHUNK_SIZE, CHUNK_NUMBER) {
     out[CHUNK_NUMBER] <== num2bits[CHUNK_NUMBER - 1].out[CHUNK_SIZE];
 }
 
-// get multiplication of 2 numbers with CHUNK_NUMBER chunks
-// out is 2 * CHUNK_NUMBER - 1 chunks with overflows
+/*
+* Get multiplication of 2 numbers with CHUNK_NUMBER chunks.
+* out is 2 * CHUNK_NUMBER - 1 chunks with overflows.
+*/
 template BigMultNoCarry(CHUNK_SIZE, CHUNK_NUMBER) { 
     assert(CHUNK_SIZE <= 126);
 
@@ -144,8 +152,10 @@ template BigMultNoCarry(CHUNK_SIZE, CHUNK_NUMBER) {
     }
 }
 
-// get multiplication of 2 numbers with CHUNK_NUMBER chunks
-// out is 2 * CHUNK_NUMBER chunks without overflows
+/*
+* Get multiplication of 2 numbers with CHUNK_NUMBER chunks.
+* out is 2 * CHUNK_NUMBER chunks without overflows.
+*/
 template BigMult(CHUNK_SIZE, CHUNK_NUMBER) {
     signal input in[2][CHUNK_NUMBER];
     signal input dummy;
@@ -202,9 +212,11 @@ template BigMult(CHUNK_SIZE, CHUNK_NUMBER) {
     }
 }
 
-// same as previous one
-// using karatsuba multiplication under the hood
-// use only for CHUNK_NUMBER == 2 ** x
+/* 
+* Same as previous one.
+* Using karatsuba multiplication under the hood.
+* Use only for CHUNK_NUMBER == 2 ** x.
+*/
 template BigMultOptimised(CHUNK_SIZE, CHUNK_NUMBER) {
     signal input dummy;
     signal input in[2][CHUNK_NUMBER];
@@ -240,8 +252,11 @@ template BigMultOptimised(CHUNK_SIZE, CHUNK_NUMBER) {
     out[CHUNK_NUMBER * 2 - 1] <== getLastNBits[CHUNK_NUMBER * 2 - 2].div;
 }
 
-// calculates div mod for base with CHUNK_NUMBER * 2 chunks by modulus with CHUNK_NUMBER chunks
-// detailed explanation of algo can be found in BigModNonEqual template from this file, they do almost the same
+/*
+* Calculates div mod for base with CHUNK_NUMBER * 2 chunks by modulus with CHUNK_NUMBER chunks.
+* Detailed explanation of algo can be found in BigModNonEqual template from this file, 
+* they do almost the same.
+*/
 template BigMod(CHUNK_SIZE, CHUNK_NUMBER) {
     assert(CHUNK_NUMBER * 2 <= 253);
 
@@ -294,9 +309,11 @@ template BigMod(CHUNK_SIZE, CHUNK_NUMBER) {
     smartEqual.out === 1;
 }
 
-// calculates in[0] * in[1] % in[2], all in[i] has CHUNK_NUMBER chunks
-// if in[2] last chunk == 0, error will occur
-// use only for CHUNK_NUMBER == 2 ** x, otherwise error will occure
+/*
+* Calculates in[0] * in[1] % in[2], all in[i] has CHUNK_NUMBER chunks.
+* If in[2] last chunk == 0, error will occur.
+* Use only for CHUNK_NUMBER == 2 ** x, otherwise error will occure.
+*/
 template BigMultModP(CHUNK_SIZE, CHUNK_NUMBER) {
     signal input in[3][CHUNK_NUMBER];
     signal input dummy;
@@ -316,9 +333,11 @@ template BigMultModP(CHUNK_SIZE, CHUNK_NUMBER) {
     out <== bigMod.mod;
 }
 
-// calculates in[0] * in[1] % in[2], all in[i] has CHUNK_NUMBER chunks
-// if in[2] last chunk == 0, error will occur
-// use only for CHUNK_NUMBER != 2 ** x, otherwise unefficient
+/* 
+* Calculates in[0] * in[1] % in[2], all in[i] has CHUNK_NUMBER chunks.
+* If in[2] last chunk == 0, error will occur.
+* Use only for CHUNK_NUMBER != 2 ** x, otherwise unefficient.
+*/
 template BigMultModPNonOptimised(CHUNK_SIZE, CHUNK_NUMBER) {
     signal input in[3][CHUNK_NUMBER];
     signal input dummy;
@@ -338,9 +357,11 @@ template BigMultModPNonOptimised(CHUNK_SIZE, CHUNK_NUMBER) {
     out <== bigMod.mod;
 }
 
-// substition of 2 nums with CHUNK_NUMBER 
-// out is CHUNK_NUMBER with overflows
-// don`t use this one outside the BigSub without knowing what are u doing!!!
+/*
+* Substition of 2 nums with CHUNK_NUMBER.
+* out is CHUNK_NUMBER with overflows.
+* Don`t use this one outside the BigSub without knowing what are you doing!!!
+*/
 template BigSubNoBorrow(CHUNK_SIZE, CHUNK_NUMBER) {
     assert (CHUNK_SIZE < 252);
 
@@ -354,9 +375,11 @@ template BigSubNoBorrow(CHUNK_SIZE, CHUNK_NUMBER) {
     }
 }
 
-// in[0] >= in[1], else will not work correctly, use only in this case!
-// substition of 2 nums with CHUNK_NUMBER 
-// out is CHUNK_NUMBER without overflows
+/*
+* in[0] >= in[1], else will not work correctly, use only in this case!
+* Substition of 2 nums with CHUNK_NUMBER.
+* out is CHUNK_NUMBER without overflows.
+*/
 template BigSub(CHUNK_SIZE, CHUNK_NUMBER) {
     signal input in[2][CHUNK_NUMBER];
     signal input dummy;
@@ -383,9 +406,11 @@ template BigSub(CHUNK_SIZE, CHUNK_NUMBER) {
     }
 }
 
-// Computes CHUNK_NUMBER number power with EXP = exponent
-// EXP is default num, not chunked bigInt!!!
-// use for CHUNK_NUMBER == 2**n, otherwise error will occur
+/*
+* Computes CHUNK_NUMBER number power with EXP = exponent.
+* EXP is default num, not chunked bigInt!!!
+* Use for CHUNK_NUMBER == 2**n, otherwise error will occur.
+*/
 template PowerMod(CHUNK_SIZE, CHUNK_NUMBER, EXP) {
     assert(EXP >= 2);
 
@@ -444,9 +469,11 @@ template PowerMod(CHUNK_SIZE, CHUNK_NUMBER, EXP) {
 }
 
 
-// use only for CHUNK_NUMBER == 2 ** x
-// calculates in ^ (-1) % modulus;
-// in, modulus has CHUNK_NUMBER
+/*
+* Use only for CHUNK_NUMBER == 2 ** x.
+* Calculates in ^ (-1) % modulus.
+* `in` modulus has CHUNK_NUMBER.
+*/
 template BigModInvOptimised(CHUNK_SIZE, CHUNK_NUMBER) {
     assert(CHUNK_SIZE <= 252);
 
@@ -479,8 +506,10 @@ template BigModInvOptimised(CHUNK_SIZE, CHUNK_NUMBER) {
 
 // Next templates are for big numbers operations for any number of chunks in inputs
 
-// Addition for non-equal chunks
-// out has no overflow
+/*
+* Addition for non-equal chunks.
+* out has no overflow
+*/
 template BigAddNonEqual(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_LESS) {
     signal input in1[CHUNK_NUMBER_GREATER];
     signal input in2[CHUNK_NUMBER_LESS];
@@ -505,9 +534,11 @@ template BigAddNonEqual(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_LESS) {
     out <== bigAdd.out;
 }
 
-// get multiplication of 2 numbers with CHUNK_NUMBER_GREATER and CHUNK_NUMBER_LESS chunks
-// in1 have CHUNK_NUMBER_GREATER chunks, in2 - CHUNK_NUMBER_LESS
-// out is CHUNK_NUMBER_GREATER + CHUNK_NUMBER_LESS - 1 chunks with overflows
+/* 
+* Get multiplication of 2 numbers with CHUNK_NUMBER_GREATER and CHUNK_NUMBER_LESS chunks.
+* `in1` have CHUNK_NUMBER_GREATER chunks, `in2` - CHUNK_NUMBER_LESS.
+* out is CHUNK_NUMBER_GREATER + CHUNK_NUMBER_LESS - 1 chunks with overflows.
+*/
 template BigMultNoCarryNonEqual(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_LESS) {
     assert(CHUNK_NUMBER_GREATER + CHUNK_NUMBER_LESS <= 252);
     assert(CHUNK_NUMBER_GREATER >= CHUNK_NUMBER_LESS);
@@ -540,7 +571,6 @@ template BigMultNoCarryNonEqual(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_L
     // result[i].length = { result[i-1].length + 1,  i <= CHUNK_NUMBER_LESS}
     //                    {  result[i-1].length - 1,  i > CHUNK_NUMBER_GREATER}
     //                    {  result[i-1].length,      CHUNK_NUMBER_LESS < i <= CHUNK_NUMBER_GREATER}
-
     signal tmpResult[CHUNK_NUMBER_GREATER + CHUNK_NUMBER_LESS - 1][CHUNK_NUMBER_LESS];
 
     for (var i = 0; i < CHUNK_NUMBER_GREATER + CHUNK_NUMBER_LESS - 1; i++) {
@@ -580,10 +610,12 @@ template BigMultNoCarryNonEqual(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_L
     }
 }
 
-// get multiplication of 2 numbers with CHUNK_NUMBER_GREATER and CHUNK_NUMBER_LESS chunks
-// in1 have CHUNK_NUMBER_GREATER chunks, in2 - CHUNK_NUMBER_LESS
-// out is CHUNK_NUMBER_GREATER + CHUNK_NUMBER_LESS chunks with overflows
-// automatic usage of otimised multiplication if CHUNK_NUMBER_GREATER == 2 ** k (karatsuba)
+/*
+* Get multiplication of 2 numbers with CHUNK_NUMBER_GREATER and CHUNK_NUMBER_LESS chunks.
+* in1 have CHUNK_NUMBER_GREATER chunks, in2 - CHUNK_NUMBER_LESS.
+* out is CHUNK_NUMBER_GREATER + CHUNK_NUMBER_LESS chunks with overflows.
+* automatic usage of otimised multiplication if CHUNK_NUMBER_GREATER == 2 ** k (karatsuba).
+*/
 template BigMultNonEqual(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_LESS) {
     signal input in1[CHUNK_NUMBER_GREATER];
     signal input in2[CHUNK_NUMBER_LESS];
@@ -674,22 +706,24 @@ template BigMultNonEqual(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_LESS) {
     }
 }
 
-// compute mod and div for bigInt, we can`t do it separatly anyway
-// use vars to compute them, and this checks to secure witness from changing:
-// a / b = c;
-// a % b = d;
-// first check: 
-// a === b * c + d
-// we still can change it for many other combinations, so we add next one:
-// a < b * (c + 1)
-// and convert it to this form:
-// a = bc + d so bc + d < bc + b so d < b
-// there should be a check that 
-// a >= bc
-// which can be convert it to this form:
-// a = bc + d so bc + d >= bc so d >= 0 
-// but we don`t need it for big nums, where we can`t have anyway
-// outs are mod with CHUNK_NUMBER_MODULUS and div with CHUNK_NUMBER_BASE - CHUNK_NUMBER_MODULUS + 1 chunks
+/*
+* Compute mod and div for bigInt, we can`t do it separatly anyway.
+* Use vars to compute them, and this checks to secure witness from changing:
+* a / b = c;
+* a % b = d;
+* first check: 
+* a === b * c + d
+* We still can change it for many other combinations, so we add next one:
+* a < b * (c + 1)
+* and convert it to this form:
+* a = bc + d so bc + d < bc + b so d < b
+* there should be a check that 
+* a >= bc
+* which can be convert it to this form:
+* a = bc + d so bc + d >= bc so d >= 0 
+* but we don`t need it for big nums, where we can`t have anyway.
+* outs are mod with CHUNK_NUMBER_MODULUS and div with CHUNK_NUMBER_BASE - CHUNK_NUMBER_MODULUS + 1 chunks
+*/
 template BigModNonEqual(CHUNK_SIZE, CHUNK_NUMBER_BASE, CHUNK_NUMBER_MODULUS) {
     assert(CHUNK_NUMBER_BASE <= 253);
     assert(CHUNK_NUMBER_MODULUS <= 253);
@@ -756,9 +790,11 @@ template BigModNonEqual(CHUNK_SIZE, CHUNK_NUMBER_BASE, CHUNK_NUMBER_MODULUS) {
     smartEqual.out === 1;
 }
 
-// computes in1 * in2 mod modulus
-// in1, in2, modulus shouldn`t contain overflow
-// out is CHUNK_NUMBER_MODULUS chunks number
+/*
+* Computes in1 * in2 mod modulus.
+* in1, in2, modulus shouldn`t contain overflow.
+* out is CHUNK_NUMBER_MODULUS chunks number.
+*/
 template BigMultModPNonEqual(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_LESS, CHUNK_NUMBER_MODULUS) {
     signal input in1[CHUNK_NUMBER_GREATER];
     signal input in2[CHUNK_NUMBER_LESS];
@@ -782,9 +818,11 @@ template BigMultModPNonEqual(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_LESS
     out <== bigMod.mod;
 }
 
-// calculates sub of unequal chunks numbers, more chunks for in1, less for in2
-// still no overflow alloved
-// in[0] >= in[1], else will not work correctly, use only in this case!
+/*
+* Сalculates sub of unequal chunks numbers, more chunks for in1, less for in2.
+* Still no overflow alloved.
+* Condition in[0] >= in[1] must be true, elsewise template will not work correctly. Use only in this case!
+*/
 template BigSubNonEqual(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_LESS) {
     signal input in1[CHUNK_NUMBER_GREATER];
     signal input in2[CHUNK_NUMBER_LESS];
@@ -805,9 +843,11 @@ template BigSubNonEqual(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_LESS) {
     out <== bigSub.out;
 }
 
-// scalar multiplication no carry
-// result will contain overflow
-// use it if u know that it will be no overflow or reduce it with RemoveOverflow from "./bigIntOverflow" or u know what are u doing
+/*
+* Scalar multiplication no carry.
+* Result will contain overflow.
+* Use it if you know that it will be no overflow, or reduce it with RemoveOverflow from "./bigIntOverflow", or you know what are you doing.
+*/
 template ScalarMultNoCarry(CHUNK_SIZE, CHUNK_NUMBER) {
     signal input in[CHUNK_NUMBER];
     signal input scalar;
@@ -819,9 +859,11 @@ template ScalarMultNoCarry(CHUNK_SIZE, CHUNK_NUMBER) {
     }
 }
 
-// Computes CHUNK_NUMBER number power with EXP = exponent
-// EXP is default num, not chunked bigInt!!!
-// use for CHUNK_NUMBER!= 2**n, otherwise use "PowerMod"
+/*
+* Computes CHUNK_NUMBER number power with EXP = exponent
+* EXP is default num, not chunked bigInt!!!
+* Use for CHUNK_NUMBER!= 2**n, otherwise use "PowerMod"
+*/
 template PowerModNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, EXP) {
     assert(EXP >= 2);
 
@@ -881,12 +923,16 @@ template PowerModNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, EXP) {
     }
 }
 
-// comparators for big numbers
+/*
+* Comparators for big numbers
+*/
 
-// For next 4 templates interface is the same, difference is only compare operation (<, <=, >, >=)
-// input are in[2][CHUNK_NUMBER]
-// there is no overflow allowed, so chunk are equal, otherwise this is no sense
-// those are very "expensive" by constraints operations, try to reduse num of usage if these if u can
+/*
+* For next 4 templates interface is the same, difference is only compare operation (<, <=, >, >=).
+* Input are in[2][CHUNK_NUMBER].
+* There is no overflow allowed, so chunk are equal, otherwise this is no sense.
+* Those are very "expensive" by constraints operations, try to reduce num of usage in these if you can.
+*/
 
 // in[0] < in[1]
 template BigLessThan(CHUNK_SIZE, CHUNK_NUMBER) {
@@ -976,9 +1022,11 @@ template BigGreaterEqThan(CHUNK_SIZE, CHUNK_NUMBER) {
     out <== 1 - lessThan.out;
 }
 
-// force equal by all chunks with same position
-// u also can do it for 3 constrains with some assumptions, check SmartEqual from "./bigIntOverflow"
-// it is possible to save some constraints by log_2(n) operations, not n 
+/*
+* Force equal by all chunks with same position.
+* You also can do it for 3 constrains with some assumptions, check SmartEqual from "./bigIntOverflow".
+* It is possible to save some constraints by log_2(n) operations instead of n.
+*/ 
 template BigIsEqual(CHUNK_SIZE, CHUNK_NUMBER) {
     signal input in[2][CHUNK_NUMBER];
 

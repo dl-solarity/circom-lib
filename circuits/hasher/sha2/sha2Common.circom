@@ -30,10 +30,12 @@ function processPadding(LEN, LEN_PADDED) {
     return padding;
 }
 
-// Universal sha-1 and sha-2 padding.
-// HASH_BLOCK_SIZE is 512 for sha-1, sha2-224, sha2-256
-// HASH_BLOCK_SIZE is 1024 for sha2-384, sha2-512
-// LEN is bit len of message
+/*
+* Universal sha-1 and sha-2 padding.
+* HASH_BLOCK_SIZE is 512 for sha-1, sha2-224, sha2-256
+* HASH_BLOCK_SIZE is 1024 for sha2-384, sha2-512
+* LEN is bit len of message.
+*/
 template ShaPadding(LEN, HASH_BLOCK_SIZE) {
     var CHUNK_NUMBER = ((LEN + 1 + 128) + HASH_BLOCK_SIZE - 1) \ HASH_BLOCK_SIZE;
 
@@ -51,7 +53,9 @@ template ShaPadding(LEN, HASH_BLOCK_SIZE) {
     }
 }
 
-// decompose a 2-bit number into a high and a low bit
+/*
+* Decompose a 2-bit number into a high and a low bit.
+*/
 template Bits2() {
     signal input xy;
 
@@ -67,7 +71,9 @@ template Bits2() {
     xy === 2 * hi + lo;
 }
 
-// XOR 3 bits together
+/*
+* XOR 3 bits together.
+*/
 template XOR3_v1() {
     signal input x;
     signal input y;
@@ -80,9 +86,11 @@ template XOR3_v1() {
     bs.lo ==> out;
 }
 
-// same number of constraints (that is, 2), in the general case
-// however circom can optimize y=0 or z=0, unlike with the above
-// and hopefully also x=0.
+/*
+* Same number of constraints (that is, 2), in the general case
+* However, circom can optimize y=0 or z=0, unlike with the above
+* and hopefully also x=0.
+*/
 template XOR3_v2() {
     signal input x;
     signal input y;
@@ -94,7 +102,9 @@ template XOR3_v2() {
     out <== x * (1 - 2 * y - 2 * z + 4 * tmp) + y + z - 2 * tmp;
 }
 
-// for many xors use this one
+/*
+* For many xors use this one:
+*/
 template XOR3_v3(n) {
     signal input a[n];
     signal input b[n];

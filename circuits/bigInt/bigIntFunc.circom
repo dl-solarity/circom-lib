@@ -38,8 +38,10 @@ function splitThreeFn(in, n, m, k) {
     return [in % (1 << n), (in \ (1 << n)) % (1 << m), (in \ (1 << n + m)) % (1 << k)];
 }
 
-// in is an m bit number
-// split into ceil(m/n) n-bit registers
+/*
+* `in` is an m bit number.
+* split into ceil(m/n) n-bit registers.
+*/
 function splitOverflowedRegister(m, n, in) {
     var out[200];
     
@@ -58,13 +60,15 @@ function splitOverflowedRegister(m, n, in) {
     return out;
 }
 
-// m bits per overflowed register (values are potentially negative)
-// n bits per properly-sized register
-// in has k registers
-// out has k + ceil(m/n) - 1 + 1 registers. highest-order potentially negative,
-// all others are positive
-// - 1 since the last register is included in the last ceil(m/n) array
-// + 1 since the carries from previous registers could push you over
+/*
+* m bits per overflowed register (values are potentially negative).
+* n bits per properly-sized register.
+* in has k registers.
+* out has k + ceil(m/n) - 1 + 1 registers. highest-order potentially negative,
+* all others are positive.
+* - 1 since the last register is included in the last ceil(m/n) array.
+* + 1 since the carries from previous registers could push you over.
+*/
 function getProperRepresentation(m, n, k, in) {
     var ceilMN = 0; 
 
@@ -148,10 +152,12 @@ function longGt(n, k, a, b) {
     return 0;
 }
 
-// n bits per register
-// a has k registers
-// b has k registers
-// a >= b
+/*
+* n bits per register
+* a has k registers
+* b has k registers
+* a >= b
+*/
 function longSub(n, k, a, b) {
     var diff[200];
     var borrow[200];
@@ -179,8 +185,10 @@ function longSub(n, k, a, b) {
     return diff;
 }
 
-// a is a n-bit scalar
-// b has k registers
+/*
+* a is a n-bit scalar
+* b has k registers
+*/
 function longScalarMult(n, k, a, b) {
     var out[200];
 
@@ -197,13 +205,15 @@ function longScalarMult(n, k, a, b) {
     return out;
 }
 
-// n bits per register
-// a has k + m registers
-// b has k registers
-// out[0] has length m + 1 -- quotient
-// out[1] has length k -- remainder
-// implements algorithm of https://people.eecs.berkeley.edu/~fateman/282/F%20Wright%20notes/week4.pdf
-// b[k-1] must be nonzero!
+/*
+* n bits per register
+* a has k + m registers
+* b has k registers
+* out[0] has length m + 1 -- quotient
+* out[1] has length k -- remainder
+* implements algorithm of https://people.eecs.berkeley.edu/~fateman/282/F%20Wright%20notes/week4.pdf
+* b[k-1] must be nonzero!
+*/
 function longDiv(n, k, m, a, b) {
     var out[2][200];
     var remainder[200];
@@ -255,11 +265,13 @@ function longDiv(n, k, m, a, b) {
     return out;
 }
 
-// n bits per register
-// a has k + 1 registers
-// b has k registers
-// assumes leading digit of b is at least 2 ** (n - 1)
-// 0 <= a < (2**n) * b
+/*
+* n bits per register
+* a has k + 1 registers
+* b has k registers
+* assumes leading digit of b is at least 2 ** (n - 1)
+* 0 <= a < (2**n) * b
+*/
 function shortDivNorm(n, k, a, b) {
     var qhat = (a[k] * (1 << n) + a[k - 1]) \ b[k - 1];
 
@@ -281,11 +293,13 @@ function shortDivNorm(n, k, a, b) {
     }
 }
 
-// n bits per register
-// a has k + 1 registers
-// b has k registers
-// assumes leading digit of b is non-zero
-// 0 <= a < (2**n) * b
+/*
+* n bits per register
+* a has k + 1 registers
+* b has k registers
+* assumes leading digit of b is non-zero
+* 0 <= a < (2**n) * b
+*/
 function shortDiv(n, k, a, b) {
     var scale = (1 << n) \ (1 + b[k - 1]);
     // k + 2 registers now
@@ -304,10 +318,12 @@ function shortDiv(n, k, a, b) {
     return ret;
 }
 
-// n bits per register
-// a and b both have k registers
-// out[0] has length 2 * k
-// adapted from BigMulShortLong and LongToShortNoEndCarry2 witness computation
+/*
+* n bits per register
+* a and b both have k registers
+* out[0] has length 2 * k
+* adapted from BigMulShortLong and LongToShortNoEndCarry2 witness computation
+*/
 function prod(n, k, a, b) {
     // first compute the intermediate values. taken from BigMulShortLong
     var prod_val[200];
@@ -357,13 +373,15 @@ function prod(n, k, a, b) {
     return out;
 }
 
-// n bits per register
-// a has k registers
-// p has k registers
-// e has k registers
-// k * n <= 500
-// p is a prime
-// computes a^e mod p
+/*
+* n bits per register
+* a has k registers
+* p has k registers
+* e has k registers
+* k * n <= 500
+* p is a prime
+* computes a^e mod p
+*/
 function modExp(n, k, a, p, e) {
     var eBits[500];
 
@@ -409,13 +427,15 @@ function modExp(n, k, a, p, e) {
     return out;
 }
 
-// n bits per register
-// a has k registers
-// p has k registers
-// k * n <= 500
-// p is a prime
-// if a == 0 mod p, returns 0
-// else computes inv = a^(p-2) mod p
+/*
+* n bits per register
+* a has k registers
+* p has k registers
+* k * n <= 500
+* p is a prime
+* if a == 0 mod p, returns 0
+* else computes inv = a^(p-2) mod p
+*/
 function modInv(n, k, a, p) {
     var isZero = 1;
 
