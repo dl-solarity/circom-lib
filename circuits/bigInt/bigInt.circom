@@ -468,7 +468,6 @@ template PowerMod(CHUNK_SIZE, CHUNK_NUMBER, EXP) {
     }
 }
 
-
 /*
 * Use only for CHUNK_NUMBER == 2 ** x.
 * Calculates in ^ (-1) % modulus.
