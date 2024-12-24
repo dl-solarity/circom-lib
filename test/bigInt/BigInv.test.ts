@@ -2,36 +2,10 @@ import { expect } from "chai";
 import { ethers, zkit } from "hardhat";
 
 import { Reverter } from "../helpers/reverter";
-import { bigIntToArray } from "../helpers/bigIntToArray";
+import { bigIntToArray, modInverse } from "../helpers/helperFunctions";
 
 import { BigModInvOptimised } from "@/generated-types/zkit";
 import { BigModInvOptimisedGroth16Verifier } from "@/generated-types/ethers";
-
-function modInverse(num: bigint, mod: bigint) {
-  let m0 = mod;
-  let x0 = 0n;
-  let x1 = 1n;
-
-  if (mod === 1n) return 0n;
-
-  while (num > 1n) {
-    let q = num / mod;
-    let t = mod;
-
-    mod = num % mod;
-    num = t;
-    t = x0;
-
-    x0 = x1 - q * x0;
-    x1 = t;
-  }
-
-  if (x1 < 0n) {
-    x1 += m0;
-  }
-
-  return x1;
-}
 
 async function testInv(input1: bigint, input2: bigint, circuit: BigModInvOptimised) {
   let input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];

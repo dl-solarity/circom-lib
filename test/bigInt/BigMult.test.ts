@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers, zkit } from "hardhat";
 
 import { Reverter } from "../helpers/reverter";
-import { bigIntToArray } from "../helpers/bigIntToArray";
+import { bigIntToArray } from "../helpers/helperFunctions";
 
 import { BigMult, BigMultNonEqual, BigMultOptimised, PowerMod } from "@/generated-types/zkit";
 import {
