@@ -825,6 +825,7 @@ template BigMultModPNonEqual(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_LESS
 template BigSubNonEqual(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_LESS) {
     signal input in1[CHUNK_NUMBER_GREATER];
     signal input in2[CHUNK_NUMBER_LESS];
+    signal input dummy;
 
     signal output out[CHUNK_NUMBER_GREATER];
 
@@ -838,6 +839,8 @@ template BigSubNonEqual(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_LESS) {
     for (var i = CHUNK_NUMBER_LESS; i < CHUNK_NUMBER_GREATER; i++) {
         bigSub.in[1][i] <== 0;
     }
+
+    bigSub.dummy <== dummy;
 
     out <== bigSub.out;
 }
