@@ -17,8 +17,8 @@ template RsaVerifyPkcs1v15(CHUNK_SIZE, CHUNK_NUMBER, EXP, HASH_TYPE) {
     assert(CHUNK_SIZE == 64);
     assert(HASH_TYPE == 256 || HASH_TYPE == 160);
     
-    signal input signature[CHUNK_NUMBER];
     signal input pubkey[CHUNK_NUMBER]; 
+    signal input signature[CHUNK_NUMBER];
     signal input hashed[HASH_TYPE];
     signal input dummy;
 
@@ -128,8 +128,8 @@ template RsaVerifyPkcs1v15(CHUNK_SIZE, CHUNK_NUMBER, EXP, HASH_TYPE) {
 template RsaVerifyPkcs1v15NonOptimised(CHUNK_SIZE, CHUNK_NUMBER, EXP, HASH_TYPE) {
     assert(CHUNK_SIZE == 64);
     
-    signal input signature[CHUNK_NUMBER];
     signal input pubkey[CHUNK_NUMBER]; 
+    signal input signature[CHUNK_NUMBER];
     signal input hashed[HASH_TYPE];
     signal input dummy;
 
