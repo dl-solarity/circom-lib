@@ -19,7 +19,7 @@ include "../bigInt/bigInt.circom";
 * (x1, y1) = h * s_inv * G + r * s_inv * (x, y)
 * x1 === r
 */
-template verifyECDSABits(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, ALGO) {
+template VerifyECDSABits(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, ALGO) {
     assert(CHUNK_SIZE == 64 && CHUNK_NUMBER == 4);
     
     signal input pubkey[2][CHUNK_NUMBER];
@@ -41,7 +41,7 @@ template verifyECDSABits(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, ALGO) {
         hashedChunked[CHUNK_NUMBER - 1 - i] <== bits2Num[i].out;
     }
     
-    component getOrder = EllipicCurveGetOrder(CHUNK_SIZE,CHUNK_NUMBER, A, B, P);
+    component getOrder = EllipticCurveGetOrder(CHUNK_SIZE,CHUNK_NUMBER, A, B, P);
 
     signal order[CHUNK_NUMBER];
     order <== getOrder.order;
@@ -71,7 +71,7 @@ template verifyECDSABits(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, ALGO) {
     mult2.dummy <== dummy;
     
     // h * s_inv * G
-    component scalarMult1 = EllipicCurveScalarGeneratorMultiplication(CHUNK_SIZE, CHUNK_NUMBER, A, B, P);
+    component scalarMult1 = EllipticCurveScalarGeneratorMultiplication(CHUNK_SIZE, CHUNK_NUMBER, A, B, P);
     scalarMult1.scalar <== mult.out;
     scalarMult1.dummy <== dummy;
     
@@ -103,7 +103,7 @@ template verifyECDSABits(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, ALGO) {
 * (x1, y1) = h * s_inv * G + r * s_inv * (x, y)
 * x1 === r
 */
-template verifyECDSABigInt(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
+template VerifyECDSABigInt(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     assert(CHUNK_SIZE == 64 && CHUNK_NUMBER == 4);
     
     signal input pubkey[2][CHUNK_NUMBER];
@@ -111,7 +111,7 @@ template verifyECDSABigInt(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     signal input hashed[CHUNK_NUMBER];
     signal input dummy;
     
-    component getOrder = EllipicCurveGetOrder(CHUNK_SIZE,CHUNK_NUMBER, A, B, P);
+    component getOrder = EllipticCurveGetOrder(CHUNK_SIZE,CHUNK_NUMBER, A, B, P);
 
     signal order[CHUNK_NUMBER];
     order <== getOrder.order;
@@ -140,7 +140,7 @@ template verifyECDSABigInt(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     mult2.dummy <== dummy;
     
     // h * s_inv * G
-    component scalarMult1 = EllipicCurveScalarGeneratorMultiplication(CHUNK_SIZE, CHUNK_NUMBER, A, B, P);
+    component scalarMult1 = EllipticCurveScalarGeneratorMultiplication(CHUNK_SIZE, CHUNK_NUMBER, A, B, P);
     scalarMult1.scalar <== mult.out;
     scalarMult1.dummy <== dummy;
     
