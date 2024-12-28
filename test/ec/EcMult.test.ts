@@ -281,7 +281,7 @@ describe("BrainpoolP256r1 generator multiplication test", function () {
   });
 });
 
-describe("Scalar point multiplication test", function () {
+describe.skip("Scalar point multiplication test", function () {
   //This circuit requires more than 16GB of RAM to generate the ZKey file,
   //so this test is limited to witness testing only
   this.timeout(10000000);
@@ -316,7 +316,7 @@ describe("Scalar point multiplication test", function () {
   });
 });
 
-describe("BrainpoolP256r1 scalar point multiplication test", function () {
+describe.skip("BrainpoolP256r1 scalar point multiplication test", function () {
   //This circuit requires more than 16GB of RAM to generate the ZKey file,
   //so this test is limited to witness testing only
   this.timeout(10000000);

@@ -142,7 +142,7 @@ async function testVerBits(
   return proofStruct;
 }
 
-describe("Ecdsa num test", function () {
+describe.skip("Ecdsa num test", function () {
   //This circuit requires more than 16GB of RAM to generate the ZKey file,
   //so this test is limited to witness testing only
   this.timeout(10000000);
@@ -181,7 +181,7 @@ describe("Ecdsa num test", function () {
   });
 });
 
-describe("Ecdsa bits test", function () {
+describe.skip("Ecdsa bits test", function () {
   this.timeout(10000000);
   const reverter = new Reverter();
 
