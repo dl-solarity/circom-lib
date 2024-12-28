@@ -20,7 +20,7 @@ jobs:
         uses: ./.github/actions/setup
       - name: Compile
         env:
-          NODE_OPTIONS: "--max_old_space_size=16384"
+          NODE_OPTIONS: "--max_old_space_size=15999"
         run: npm run compile
       - name: Run tests
         run: npm run test
