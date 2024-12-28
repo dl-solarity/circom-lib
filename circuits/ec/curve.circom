@@ -13,7 +13,7 @@ include "../int/arithmetic.circom";
 include "./get.circom";
 
 /*
-* Operation for any Weierstrass prime-field eliptic curve (for now 256-bit).
+* Operation for any Weierstrass prime-field elliptic curve (for now 256-bit).
 * A, B, P in every function - params of needed curve, chunked the same as every other chunking (64 4 for now).
 * Example usage of operation (those are params for secp256k1 ec):
 * EllipticCurveDoubleOptimised(64, 4, [0,0,0,0], [7,0,0,0], [18446744069414583343, 18446744073709551615, 18446744073709551615, 18446744073709551615]);

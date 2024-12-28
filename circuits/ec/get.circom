@@ -102,7 +102,7 @@ template EllipticCurveGetDummy(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
 }
 
 /*
-* Get order of eliptic curve
+* Get order of elliptic curve
 */
 template EllipticCurveGetOrder(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     assert (CHUNK_SIZE == 64);
