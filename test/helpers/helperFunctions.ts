@@ -67,7 +67,7 @@ export function pointAdd(x1: bigint, y1: bigint, x2: bigint, y2: bigint, p: bigi
 
 export function pointDouble(x1: bigint, y1: bigint, input: bigint, p: bigint) {
   if (y1 === 0n) {
-    return { x: null, y: null };
+    throw new Error("y = 0; got the point at infinity");
   }
 
   let lambda_num = (3n * x1 * x1 + input) % p;
@@ -104,10 +104,14 @@ export function pointScalarMul(x: bigint, y: bigint, k: bigint, input: bigint, p
     }
 
     const { x: x_temp, y: y_temp } = pointDouble(x_cur, y_cur, input, p);
-    x_cur = x_temp!;
-    y_cur = y_temp!;
+    x_cur = x_temp;
+    y_cur = y_temp;
 
     k >>= 1n; // Shift k right by 1 bit
+  }
+
+  if (x_res === null || y_res === null) {
+    throw new Error("Got the point at infinity after scalar multiplication");
   }
 
   return { x: x_res, y: y_res };

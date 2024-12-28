@@ -62,7 +62,7 @@ async function testDouble(input1: bigint, input2: bigint, circuit: EllipticCurve
     115792089237316195423570985008687907853269984665640564039457584007908834671663n,
   );
 
-  let real_result = bigIntToArray(64, 4, doubled.x!).concat(bigIntToArray(64, 4, doubled.y!));
+  let real_result = bigIntToArray(64, 4, doubled.x).concat(bigIntToArray(64, 4, doubled.y));
 
   const w = await circuit.calculateWitness({ in: input, dummy: 0n });
 
@@ -87,7 +87,7 @@ async function testDoubleBrainpoolP256r1(input1: bigint, input2: bigint, circuit
     76884956397045344220809746629001649093037950200943055203735601445031516197751n,
   );
 
-  let real_result = bigIntToArray(64, 4, doubled.x!).concat(bigIntToArray(64, 4, doubled.y!));
+  let real_result = bigIntToArray(64, 4, doubled.x).concat(bigIntToArray(64, 4, doubled.y));
 
   const w = await circuit.calculateWitness({ in: input, dummy: 0n });
 

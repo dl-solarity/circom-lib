@@ -32,7 +32,7 @@ async function testGenMult(input1: bigint, circuit: EllipticCurveScalarGenerator
     115792089237316195423570985008687907853269984665640564039457584007908834671663n,
   );
 
-  let real_result = bigIntToArray(64, 4, mult.x!).concat(bigIntToArray(64, 4, mult.y!));
+  let real_result = bigIntToArray(64, 4, mult.x).concat(bigIntToArray(64, 4, mult.y));
 
   const w = await circuit.calculateWitness({ scalar: bigIntToArray(64, 4, input1), dummy: 0n });
 
@@ -56,7 +56,7 @@ async function testGenMultBrainpoolP256r1(input1: bigint, circuit: generatorMult
     76884956397045344220809746629001649093037950200943055203735601445031516197751n,
   );
 
-  let real_result = bigIntToArray(64, 4, mult.x!).concat(bigIntToArray(64, 4, mult.y!));
+  let real_result = bigIntToArray(64, 4, mult.x).concat(bigIntToArray(64, 4, mult.y));
 
   const w = await circuit.calculateWitness({ scalar: bigIntToArray(64, 4, input1), dummy: 0n });
 
@@ -85,7 +85,7 @@ async function testScalarMult(input1: bigint, input2: bigint, input3: bigint, ci
     115792089237316195423570985008687907853269984665640564039457584007908834671663n,
   );
 
-  let real_result = bigIntToArray(64, 4, mult.x!).concat(bigIntToArray(64, 4, mult.y!));
+  let real_result = bigIntToArray(64, 4, mult.x).concat(bigIntToArray(64, 4, mult.y));
 
   const w = await circuit.calculateWitness({ in: input, scalar: bigIntToArray(64, 4, input3), dummy: 0n });
 
@@ -112,7 +112,7 @@ async function testScalarMultBrainpoolP256r1(
     76884956397045344220809746629001649093037950200943055203735601445031516197751n,
   );
 
-  let real_result = bigIntToArray(64, 4, mult.x!).concat(bigIntToArray(64, 4, mult.y!));
+  let real_result = bigIntToArray(64, 4, mult.x).concat(bigIntToArray(64, 4, mult.y));
 
   const w = await circuit.calculateWitness({ in: input, scalar: bigIntToArray(64, 4, input3), dummy: 0n });
 
@@ -140,7 +140,7 @@ async function testPrecomputeMult(
     115792089237316195423570985008687907853269984665640564039457584007908834671663n,
   );
 
-  let real_result = bigIntToArray(64, 4, mult.x!).concat(bigIntToArray(64, 4, mult.y!));
+  let real_result = bigIntToArray(64, 4, mult.x).concat(bigIntToArray(64, 4, mult.y));
 
   const w = await circuit.calculateWitness({
     scalar: bigIntToArray(64, 4, input3),
@@ -182,7 +182,7 @@ async function testPrecomputeMultBrainpoolP256r1(
     76884956397045344220809746629001649093037950200943055203735601445031516197751n,
   );
 
-  let real_result = bigIntToArray(64, 4, mult.x!).concat(bigIntToArray(64, 4, mult.y!));
+  let real_result = bigIntToArray(64, 4, mult.x).concat(bigIntToArray(64, 4, mult.y));
 
   const w = await circuit.calculateWitness({
     scalar: bigIntToArray(64, 4, input3),
