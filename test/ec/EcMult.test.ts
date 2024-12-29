@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { ethers, zkit } from "hardhat";
+import { ethers, zkit, run } from "hardhat";
 
 import { readFileSync } from "fs";
 import path = require("path");
@@ -18,9 +18,7 @@ import { EllipticCurvePipingerMult as pipingerMultBrainpool } from "@/generated-
 
 import {
   EllipticCurveScalarGeneratorMultiplication_64_4_0_0_0_0_7_0_0_0_18446744069414583343_18446744073709551615_18446744073709551615_18446744073709551615_Groth16Verifier,
-  EllipticCurveScalarGeneratorMultiplicationBrainpoolGroth16Verifier,
   EllipticCurveScalarPrecomputeMultiplication_64_4_0_0_0_0_7_0_0_0_18446744069414583343_18446744073709551615_18446744073709551615_18446744073709551615_Groth16Verifier,
-  EllipticCurveScalarPrecomputeMultiplicationBrainpoolGroth16Verifier,
 } from "@/generated-types/ethers";
 
 async function testGenMult(input1: bigint, circuit: EllipticCurveScalarGeneratorMultiplication) {
@@ -247,18 +245,21 @@ describe("BrainpoolP256r1 generator multiplication test", function () {
   this.timeout(10000000);
   const reverter = new Reverter();
 
-  let verifier: EllipticCurveScalarGeneratorMultiplicationBrainpoolGroth16Verifier; //typo fix
+  let verifier: any;
   let circuit: generatorMultBrainpool;
 
   before("setup", async () => {
-    const MockVerifier = await ethers.getContractFactory(
-      "EllipticCurveScalarGeneratorMultiplicationBrainpoolGroth16Verifier",
-    );
-
-    verifier = await MockVerifier.deploy();
     circuit = await zkit.getCircuit(
       "circuits/mock/ec/generatorMultBrainpoolP256r1.circom:EllipticCurveScalarGeneratorMultiplication",
     );
+
+    await circuit.createVerifier("sol", "Brainpool");
+    await run("compile");
+
+    const MockVerifier = await ethers.getContractFactory(
+      "EllipticCurveScalarGeneratorMultiplicationBrainpoolGroth16Verifier",
+    );
+    verifier = await MockVerifier.deploy();
 
     await reverter.snapshot();
   });
@@ -382,18 +383,21 @@ describe("Precompute scalar point multiplication test BrainpoolP256r1", function
   this.timeout(10000000);
   const reverter = new Reverter();
 
-  let verifier: EllipticCurveScalarPrecomputeMultiplicationBrainpoolGroth16Verifier;
+  let verifier: any;
   let circuit: precomputeBrainpool;
 
   before("setup", async () => {
-    const MockVerifier = await ethers.getContractFactory(
-      "EllipticCurveScalarPrecomputeMultiplicationBrainpoolGroth16Verifier",
-    );
-
-    verifier = await MockVerifier.deploy();
     circuit = await zkit.getCircuit(
       "circuits/mock/ec/precomputeMultBrainpoolP256r1.circom:EllipticCurveScalarPrecomputeMultiplication",
     );
+
+    await circuit.createVerifier("sol", "Brainpool");
+    await run("compile");
+
+    const MockVerifier = await ethers.getContractFactory(
+      "EllipticCurveScalarPrecomputeMultiplicationBrainpoolGroth16Verifier",
+    );
+    verifier = await MockVerifier.deploy();
 
     await reverter.snapshot();
   });

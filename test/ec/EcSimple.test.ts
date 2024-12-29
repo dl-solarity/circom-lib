@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { ethers, zkit } from "hardhat";
+import { ethers, zkit, run } from "hardhat";
 
 import { Reverter } from "../helpers/reverter";
 import { bigIntToArray, pointAdd, pointDouble } from "../helpers/helperFunctions";
@@ -10,9 +10,7 @@ import { EllipticCurveDouble as doubleBrainpool } from "@/generated-types/zkit/c
 import { EllipticCurveAdd as addBrainpool } from "@/generated-types/zkit/core/mock/ec/addBrainpoolP256r1.circom";
 import {
   EllipticCurveAdd_64_4_0_0_0_0_7_0_0_0_18446744069414583343_18446744073709551615_18446744073709551615_18446744073709551615_Groth16Verifier,
-  EllipticCurveAddBrainpoolGroth16Verifier,
   EllipticCurveDouble_64_4_0_0_0_0_7_0_0_0_18446744069414583343_18446744073709551615_18446744073709551615_18446744073709551615_Groth16Verifier,
-  EllipticCurveDoubleBrainpoolGroth16Verifier,
   PointOnCurveGroth16Verifier,
 } from "@/generated-types/ethers";
 
@@ -220,14 +218,17 @@ describe("Secp256r1 Add test", function () {
 describe("Brainpool Add test", function () {
   const reverter = new Reverter();
 
-  let verifier: EllipticCurveAddBrainpoolGroth16Verifier;
+  let verifier: any;
   let circuit: addBrainpool;
 
   before("setup", async () => {
-    const MockVerifier = await ethers.getContractFactory("EllipticCurveAddBrainpoolGroth16Verifier");
-
-    verifier = await MockVerifier.deploy();
     circuit = await zkit.getCircuit("circuits/mock/ec/addBrainpoolP256r1.circom:EllipticCurveAdd");
+
+    await circuit.createVerifier("sol", "Brainpool");
+    await run("compile");
+
+    const MockVerifier = await ethers.getContractFactory("EllipticCurveAddBrainpoolGroth16Verifier");
+    verifier = await MockVerifier.deploy();
 
     await reverter.snapshot();
   });
@@ -290,14 +291,17 @@ describe("Secp256r1 Double test", function () {
 describe("Brainpool Double test", function () {
   const reverter = new Reverter();
 
-  let verifier: EllipticCurveDoubleBrainpoolGroth16Verifier;
+  let verifier: any;
   let circuit: doubleBrainpool;
 
   before("setup", async () => {
-    const MockVerifier = await ethers.getContractFactory("EllipticCurveDoubleBrainpoolGroth16Verifier");
-
-    verifier = await MockVerifier.deploy();
     circuit = await zkit.getCircuit("circuits/mock/ec/doubleBrainpoolP256r1.circom:EllipticCurveDouble");
+
+    await circuit.createVerifier("sol", "Brainpool");
+    await run("compile");
+
+    const MockVerifier = await ethers.getContractFactory("EllipticCurveDoubleBrainpoolGroth16Verifier");
+    verifier = await MockVerifier.deploy();
 
     await reverter.snapshot();
   });
