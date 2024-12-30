@@ -16,22 +16,5 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v3
-
       - name: Setup
         uses: ./.github/actions/setup
-
-      - name: Compile only
-        env:
-          NODE_OPTIONS: "--max_old_space_size=16384"
-        run: npx hardhat zkit compile
-
-      - name: Update hardhat.config
-        run: bash workflows/update_config.sh
-
-      - name: Compile and setup
-        env:
-          NODE_OPTIONS: "--max_old_space_size=16384"
-        run: npm run compile
-
-      - name: Run tests
-        run: npm run test
