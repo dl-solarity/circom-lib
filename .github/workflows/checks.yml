@@ -16,11 +16,24 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v3
+
       - name: Setup
         uses: ./.github/actions/setup
-      - name: Compile
+
+      - name: Compile only
+        env:
+          NODE_OPTIONS: "--max_old_space_size=16384"
+        run: npx hardhat zkit compile
+
+      - name: Update hardhat.config
+        run: |
+        sed -i "/compilationSettings: {/a \ skipFiles:\n[\n\"mock\/ec\/scalarMult.circom\",\n\"mock\/ec\/scalarMultBrainpoolP256r1.circom\",\n\"mock\/signatures\/ecdsaNum.circom\",\n]," hardhat.config.ts
+        cat hardhat.config.ts
+
+      - name: Compile and setup
         env:
           NODE_OPTIONS: "--max_old_space_size=16384"
         run: npm run compile
+
       - name: Run tests
         run: npm run test

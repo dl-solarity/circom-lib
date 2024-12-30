@@ -41,14 +41,7 @@ const config: HardhatUserConfig = {
   },
   zkit: {
     compilationSettings: {
-      //onlyFiles: [],
-      skipFiles: [
-        "mock/ec/scalarMult.circom",
-        "mock/ec/scalarMultBrainpoolP256r1.circom",
-        "mock/signatures/ecdsaBits.circom",
-        "mock/signatures/ecdsaNum.circom",
-      ],
-    },
+    }
   },
 };
 
