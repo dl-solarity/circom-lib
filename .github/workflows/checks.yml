@@ -26,9 +26,7 @@ jobs:
         run: npx hardhat zkit compile
 
       - name: Update hardhat.config
-        run: |
-        sed -i "/compilationSettings: {/a \ skipFiles:\n[\n\"mock\/ec\/scalarMult.circom\",\n\"mock\/ec\/scalarMultBrainpoolP256r1.circom\",\n\"mock\/signatures\/ecdsaNum.circom\",\n]," hardhat.config.ts
-        cat hardhat.config.ts
+        run: bash workflows/update_config.sh
 
       - name: Compile and setup
         env:
