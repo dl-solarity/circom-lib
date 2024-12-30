@@ -31,34 +31,34 @@ async function testVerNum(
 
   let n = 76884956397045344220809746629001649092737531784414529538755519063063536359079n;
 
-  let sinv = modInverse(input4, n);
-  let sh = (sinv * input5) % n;
-  let sr = (sinv * input3) % n;
-  let p1 = pointScalarMul(
+  const sinv = modInverse(input4, n);
+  const sh = (sinv * input5) % n;
+  const sr = (sinv * input3) % n;
+  const p1 = pointScalarMul(
     input1,
     input2,
     sr,
     56698187605326110043627228396178346077120614539475214109386828188763884139993n,
     76884956397045344220809746629001649093037950200943055203735601445031516197751n,
   );
-  let p2 = pointScalarMul(
+  const p2 = pointScalarMul(
     63243729749562333355292243550312970334778175571054726587095381623627144114786n,
     38218615093753523893122277964030810387585405539772602581557831887485717997975n,
     sh,
     56698187605326110043627228396178346077120614539475214109386828188763884139993n,
     76884956397045344220809746629001649093037950200943055203735601445031516197751n,
   );
-  let p3 = pointAdd(
+  const p3 = pointAdd(
     p1.x,
     p1.y,
     p2.x,
     p2.y,
     76884956397045344220809746629001649093037950200943055203735601445031516197751n,
   );
-  let real_result = p3.x == input3;
+  const real_result = p3.x == input3;
 
   try {
-    const w = await circuit.calculateWitness({ pubkey: pubkey, signature: signature, hashed: hashed, dummy: 0n });
+    await circuit.calculateWitness({ pubkey: pubkey, signature: signature, hashed: hashed, dummy: 0n });
 
     if (!real_result) {
       throw new Error(
@@ -82,42 +82,42 @@ async function testVerBits(
   input5: bigint[],
   circuit: VerifyECDSABits,
 ) {
-  let pubkey = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
-  let signature = [bigIntToArray(64, 4, input3), bigIntToArray(64, 4, input4)];
-  let hashed = input5;
+  const pubkey = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
+  const signature = [bigIntToArray(64, 4, input3), bigIntToArray(64, 4, input4)];
+  const hashed = input5;
 
-  let n = 76884956397045344220809746629001649092737531784414529538755519063063536359079n;
-  let hn = BigInt(bitArrToNum(input5));
-  let sinv = modInverse(input4, n);
-  let sh = (sinv * hn) % n;
-  let sr = (sinv * input3) % n;
-  let p1 = pointScalarMul(
+  const n = 76884956397045344220809746629001649092737531784414529538755519063063536359079n;
+  const hn = BigInt(bitArrToNum(input5));
+  const sinv = modInverse(input4, n);
+  const sh = (sinv * hn) % n;
+  const sr = (sinv * input3) % n;
+  const p1 = pointScalarMul(
     input1,
     input2,
     sr,
     56698187605326110043627228396178346077120614539475214109386828188763884139993n,
     76884956397045344220809746629001649093037950200943055203735601445031516197751n,
   );
-  let p2 = pointScalarMul(
+  const p2 = pointScalarMul(
     63243729749562333355292243550312970334778175571054726587095381623627144114786n,
     38218615093753523893122277964030810387585405539772602581557831887485717997975n,
     sh,
     56698187605326110043627228396178346077120614539475214109386828188763884139993n,
     76884956397045344220809746629001649093037950200943055203735601445031516197751n,
   );
-  let p3 = pointAdd(
+  const p3 = pointAdd(
     p1.x,
     p1.y,
     p2.x,
     p2.y,
     76884956397045344220809746629001649093037950200943055203735601445031516197751n,
   );
-  let real_result = p3.x == input3;
+  const real_result = p3.x == input3;
 
   let proofStruct;
 
   try {
-    const w = await circuit.calculateWitness({ pubkey: pubkey, signature: signature, hashed: hashed, dummy: 0n });
+    await circuit.calculateWitness({ pubkey: pubkey, signature: signature, hashed: hashed, dummy: 0n });
 
     proofStruct = await circuit.generateProof({
       pubkey: pubkey,

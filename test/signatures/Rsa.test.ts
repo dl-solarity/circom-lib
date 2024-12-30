@@ -25,11 +25,11 @@ function stringArrToBigint(input: string[]): bigint[] {
 }
 
 async function testRsa(input1: bigint, input2: bigint, input3: string[], real_result: boolean, circuit: rsa) {
-  let input: bigint[][] = [bigIntToArray(64, 64, input1), bigIntToArray(64, 64, input2), stringArrToBigint(input3)];
+  const input: bigint[][] = [bigIntToArray(64, 64, input1), bigIntToArray(64, 64, input2), stringArrToBigint(input3)];
   let proofStruct;
 
   try {
-    const w = await circuit.calculateWitness({ signature: input[1], pubkey: input[0], hashed: input[2], dummy: 0n });
+    await circuit.calculateWitness({ signature: input[1], pubkey: input[0], hashed: input[2], dummy: 0n });
 
     proofStruct = await circuit.generateProof({
       signature: input[1],
@@ -53,11 +53,11 @@ async function testRsa(input1: bigint, input2: bigint, input3: string[], real_re
 }
 
 async function testRsaSha1(input1: bigint, input2: bigint, input3: string[], real_result: boolean, circuit: rsaSha1) {
-  let input = [bigIntToArray(64, 32, input1), bigIntToArray(64, 32, input2), stringArrToBigint(input3)];
+  const input = [bigIntToArray(64, 32, input1), bigIntToArray(64, 32, input2), stringArrToBigint(input3)];
   let proofStruct;
 
   try {
-    const w = await circuit.calculateWitness({ pubkey: input[0], signature: input[1], hashed: input[2], dummy: 0n });
+    await circuit.calculateWitness({ pubkey: input[0], signature: input[1], hashed: input[2], dummy: 0n });
 
     proofStruct = await circuit.generateProof({
       signature: input[1],
@@ -87,11 +87,11 @@ async function testRsaPss(
   real_result: boolean,
   circuit: VerifyRsaPssSigNonOptimised,
 ) {
-  let input = [bigIntToArray(64, 48, input1), bigIntToArray(64, 48, input2), stringArrToBigint(input3)];
+  const input = [bigIntToArray(64, 48, input1), bigIntToArray(64, 48, input2), stringArrToBigint(input3)];
   let proofStruct;
 
   try {
-    const w = await circuit.calculateWitness({ pubkey: input[0], signature: input[1], hashed: input[2], dummy: 0n });
+    await circuit.calculateWitness({ pubkey: input[0], signature: input[1], hashed: input[2], dummy: 0n });
 
     proofStruct = await circuit.generateProof({ pubkey: input[0], signature: input[1], hashed: input[2], dummy: 0n });
 

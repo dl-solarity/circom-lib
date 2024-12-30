@@ -18,14 +18,13 @@ export function bigIntToArray(pow: number, size: number, input: bigint) {
 }
 
 export function modInverse(num: bigint, mod: bigint) {
-  let m0 = mod;
   let x0 = 0n;
   let x1 = 1n;
 
   if (mod === 1n) return 0n;
 
   while (num > 1n) {
-    let q = num / mod;
+    const q = num / mod;
     let t = mod;
 
     mod = num % mod;
@@ -37,7 +36,7 @@ export function modInverse(num: bigint, mod: bigint) {
   }
 
   if (x1 < 0n) {
-    x1 += m0;
+    x1 += mod;
   }
 
   return x1;
@@ -52,9 +51,9 @@ export function pointAdd(x1: bigint, y1: bigint, x2: bigint, y2: bigint, p: bigi
     return { x: null, y: null };
   }
 
-  let lambda_num = (p + y2 - y1) % p;
-  let lambda_den = modInverse((p + x2 - x1) % p, p);
-  let lam = (lambda_num * lambda_den) % p;
+  const lambda_num = (p + y2 - y1) % p;
+  const lambda_den = modInverse((p + x2 - x1) % p, p);
+  const lam = (lambda_num * lambda_den) % p;
 
   let x3 = (2n * p + lam * lam - x1 - x2) % p;
   let y3 = (p + lam * (x1 - x3) - y1) % p;
@@ -70,9 +69,9 @@ export function pointDouble(x1: bigint, y1: bigint, input: bigint, p: bigint) {
     throw new Error("y = 0; got the point at infinity");
   }
 
-  let lambda_num = (3n * x1 * x1 + input) % p;
-  let lambda_den = modInverse(2n * y1, p);
-  let lam = (lambda_num * lambda_den) % p;
+  const lambda_num = (3n * x1 * x1 + input) % p;
+  const lambda_den = modInverse(2n * y1, p);
+  const lam = (lambda_num * lambda_den) % p;
 
   let x3 = (lam * lam - 2n * x1) % p;
   let y3 = (lam * (x1 - x3) - y1) % p;
