@@ -7,7 +7,7 @@ import { Bits2Num, Num2Bits } from "@/generated-types/zkit";
 import { Bits2NumGroth16Verifier, Num2BitsGroth16Verifier } from "@/generated-types/ethers";
 
 async function testNum2Bits(input: bigint, circuit: Num2Bits) {
-  let real_result = [];
+  const real_result = [];
   let inp_clone = input;
 
   for (var i = 0; i < 5; i++) {
@@ -15,13 +15,7 @@ async function testNum2Bits(input: bigint, circuit: Num2Bits) {
     inp_clone = (inp_clone - (inp_clone % 2n)) / 2n;
   }
 
-  const w = await circuit.calculateWitness({ in: input });
-
-  let circuit_result = w.slice(1, 1 + 5);
-
-  for (var i = 0; i < 5; i++) {
-    expect(circuit_result[i]).to.be.eq(real_result[i], `n2b`);
-  }
+  await expect(circuit).with.witnessInputs({ in: input }).to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,
@@ -37,15 +31,7 @@ async function testBits2Num(input: bigint[], circuit: Bits2Num) {
     real_result += 2n ** BigInt(i) * input[i];
   }
 
-  const real_result_array = [real_result];
-
-  const w = await circuit.calculateWitness({ in: input });
-
-  let circuit_result = w.slice(1, 1 + 1);
-
-  for (var i = 0; i < 1; i++) {
-    expect(circuit_result[i]).to.be.eq(real_result_array[i], `b2n`);
-  }
+  await expect(circuit).with.witnessInputs({ in: input }).to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,

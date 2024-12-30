@@ -8,20 +8,11 @@ import { BigSub } from "@/generated-types/zkit";
 import { BigSubGroth16Verifier } from "@/generated-types/ethers";
 
 async function testSub(input1: bigint, input2: bigint, circuit: BigSub) {
-  let input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
+  const input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
 
-  let real_result = bigIntToArray(64, 4, input1 - input2);
+  const real_result = bigIntToArray(64, 4, input1 - input2);
 
-  const w = await circuit.calculateWitness({ in: input, dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + 4);
-
-  for (var i = 0; i < 4; i++) {
-    expect(circuit_result[i]).to.be.eq(
-      real_result[i],
-      `${input1} - ${input2}: ${circuit_result[i]}, ${real_result[i]}`,
-    );
-  }
+  await expect(circuit).with.witnessInputs({ in: input, dummy: 0n }).to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,

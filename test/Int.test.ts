@@ -13,19 +13,13 @@ import {
 } from "@/generated-types/ethers";
 
 async function testInverse(input: bigint, circuit: Inverse) {
-  let real_result = [1n];
+  let real_result = 1n;
 
   if (input == 2n) {
-    real_result = [10944121435919637611123202872628637544274182200208017171849102093287904247809n];
+    real_result = 10944121435919637611123202872628637544274182200208017171849102093287904247809n;
   }
 
-  const w = await circuit.calculateWitness({ in: input });
-
-  let circuit_result = w.slice(1, 1 + 1);
-
-  for (var i = 0; i < 1; i++) {
-    expect(circuit_result[i]).to.be.eq(real_result[i], `1 / ${input}`);
-  }
+  await expect(circuit).with.witnessInputs({ in: input }).to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,
@@ -35,17 +29,11 @@ async function testInverse(input: bigint, circuit: Inverse) {
 }
 
 async function testDivision(input1: bigint, input2: bigint, circuit: Division) {
-  let input = [input1, input2];
+  const input = [input1, input2];
 
-  let real_result = [input1 / input2, input1 % input2];
-
-  const w = await circuit.calculateWitness({ in: input });
-
-  let circuit_result = w.slice(1, 1 + 2);
-
-  for (var i = 0; i < 2; i++) {
-    expect(circuit_result[i]).to.be.eq(real_result[i], `in: ${input1} / ${input2}`);
-  }
+  await expect(circuit)
+    .with.witnessInputs({ in: input })
+    .to.have.witnessOutputs({ div: input1 / input2, mod: input1 % input2 });
 
   const proofStruct = await circuit.generateProof({
     in: input,
@@ -55,17 +43,11 @@ async function testDivision(input1: bigint, input2: bigint, circuit: Division) {
 }
 
 async function testDivisionStrict(input1: bigint, input2: bigint, circuit: DivisionStrict) {
-  let input = [input1, input2];
+  const input = [input1, input2];
 
-  let real_result = [input1 / input2, input1 % input2];
-
-  const w = await circuit.calculateWitness({ in: input });
-
-  let circuit_result = w.slice(1, 1 + 2);
-
-  for (var i = 0; i < 2; i++) {
-    expect(circuit_result[i]).to.be.eq(real_result[1 - i], `in: ${input1} / ${input2}, ${i}: ${real_result[i]}`);
-  }
+  await expect(circuit)
+    .with.witnessInputs({ in: input })
+    .to.have.witnessOutputs({ div: input1 / input2, mod: input1 % input2 });
 
   const proofStruct = await circuit.generateProof({
     in: input,
@@ -75,20 +57,14 @@ async function testDivisionStrict(input1: bigint, input2: bigint, circuit: Divis
 }
 
 async function testLog(input: bigint, circuit: Log2CeilStrict) {
-  let real_result = [0n];
+  let real_result = 0n;
 
   if (input != 1n) {
     const result = BigInt(Math.log2(Number(input - 1n)) - (Math.log2(Number(input - 1n)) % 1) + 1);
-    real_result = [result];
+    real_result = result;
   }
 
-  const w = await circuit.calculateWitness({ in: input });
-
-  let circuit_result = w.slice(1, 1 + 1);
-
-  for (var i = 0; i < 1; i++) {
-    expect(circuit_result[i]).to.be.eq(real_result[i], `log(${input}), ${real_result[i]}, ${circuit_result[i]}`);
-  }
+  await expect(circuit).with.witnessInputs({ in: input }).to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,
@@ -98,20 +74,14 @@ async function testLog(input: bigint, circuit: Log2CeilStrict) {
 }
 
 async function testLogRange(input: bigint, circuit: Log2Ceil) {
-  let real_result = [0n];
+  let real_result = 0n;
 
   if (input != 1n) {
     const result = BigInt(Math.log2(Number(input - 1n)) - (Math.log2(Number(input - 1n)) % 1) + 1);
-    real_result = [result];
+    real_result = result;
   }
 
-  const w = await circuit.calculateWitness({ in: input });
-
-  let circuit_result = w.slice(1, 1 + 1);
-
-  for (var i = 0; i < 1; i++) {
-    expect(circuit_result[i]).to.be.eq(real_result[i], `log(${input}), ${real_result[i]}`);
-  }
+  await expect(circuit).with.witnessInputs({ in: input }).to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,

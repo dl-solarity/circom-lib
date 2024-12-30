@@ -14,17 +14,13 @@ import {
 import { BigMod, BigModNonEqual, BigMultModP, BigMultModPNonEqual } from "@/generated-types/zkit";
 
 async function testMod(input1: bigint, input2: bigint, circuit: BigMod) {
-  let input = [bigIntToArray(64, 8, input1), bigIntToArray(64, 4, input2)];
+  const input = [bigIntToArray(64, 8, input1), bigIntToArray(64, 4, input2)];
 
-  let real_result = bigIntToArray(64, 4, input1 % input2);
+  const real_result = bigIntToArray(64, 4, input1 % input2);
 
-  const w = await circuit.calculateWitness({ base: input[0], modulus: input[1], dummy: 0n });
-
-  let circuit_result = w.slice(1 + 5, 1 + 5 + 4);
-
-  for (var i = 0; i < 4; i++) {
-    expect(circuit_result[i]).to.be.eq(real_result[i], `${input1} % ${input2}, equal`);
-  }
+  await expect(circuit)
+    .with.witnessInputs({ base: input[0], modulus: input[1], dummy: 0n })
+    .to.have.witnessOutputs({ mod: real_result });
 
   const proofStruct = await circuit.generateProof({ base: input[0], modulus: input[1], dummy: 0n });
 
@@ -32,17 +28,13 @@ async function testMod(input1: bigint, input2: bigint, circuit: BigMod) {
 }
 
 async function testModNonEqual(input1: bigint, input2: bigint, circuit: BigModNonEqual) {
-  let input = [bigIntToArray(64, 6, input1), bigIntToArray(64, 4, input2)];
+  const input = [bigIntToArray(64, 6, input1), bigIntToArray(64, 4, input2)];
 
-  let real_result = bigIntToArray(64, 4, input1 % input2);
+  const real_result = bigIntToArray(64, 4, input1 % input2);
 
-  const w = await circuit.calculateWitness({ base: input[0], modulus: input[1], dummy: 0n });
-
-  let circuit_result = w.slice(1 + 3, 1 + 3 + 4);
-
-  for (var i = 0; i < 4; i++) {
-    expect(circuit_result[i]).to.be.eq(real_result[i], `${input1} % ${input2}, non equal`);
-  }
+  await expect(circuit)
+    .with.witnessInputs({ base: input[0], modulus: input[1], dummy: 0n })
+    .to.have.witnessOutputs({ mod: real_result });
 
   const proofStruct = await circuit.generateProof({ base: input[0], modulus: input[1], dummy: 0n });
 
@@ -50,17 +42,11 @@ async function testModNonEqual(input1: bigint, input2: bigint, circuit: BigModNo
 }
 
 async function testMultiplyingMod(input1: bigint, input2: bigint, input3: bigint, circuit: BigMultModP) {
-  let input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2), bigIntToArray(64, 4, input3)];
+  const input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2), bigIntToArray(64, 4, input3)];
 
-  let real_result = bigIntToArray(64, 4, (input1 * input2) % input3);
+  const real_result = bigIntToArray(64, 4, (input1 * input2) % input3);
 
-  const w = await circuit.calculateWitness({ in: input, dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + 4);
-
-  for (var i = 0; i < 4; i++) {
-    expect(circuit_result[i]).to.be.eq(real_result[i]);
-  }
+  await expect(circuit).with.witnessInputs({ in: input, dummy: 0n }).to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({ in: input, dummy: 0n });
 
@@ -73,17 +59,13 @@ async function testNonEqualMultiplyingMod(
   input3: bigint,
   circuit: BigMultModPNonEqual,
 ) {
-  let input = [bigIntToArray(64, 6, input1), bigIntToArray(64, 4, input2), bigIntToArray(64, 5, input3)];
+  const input = [bigIntToArray(64, 6, input1), bigIntToArray(64, 4, input2), bigIntToArray(64, 5, input3)];
 
-  let real_result = bigIntToArray(64, 5, (input1 * input2) % input3);
+  const real_result = bigIntToArray(64, 5, (input1 * input2) % input3);
 
-  const w = await circuit.calculateWitness({ in1: input[0], in2: input[1], modulus: input[2], dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + 5);
-
-  for (var i = 0; i < 5; i++) {
-    expect(circuit_result[i]).to.be.eq(real_result[i], `${input1} * ${input2} % ${input3}`);
-  }
+  await expect(circuit)
+    .with.witnessInputs({ in1: input[0], in2: input[1], modulus: input[2], dummy: 0n })
+    .to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({ in1: input[0], in2: input[1], modulus: input[2], dummy: 0n });
 

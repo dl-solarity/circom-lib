@@ -46,19 +46,10 @@ import {
 } from "@/generated-types/ethers";
 
 async function testA(input1: bigint, input2: bigint, circuit: A) {
-  let input = [input1, input2];
+  const input = [input1, input2];
+  const real_result = input1;
 
-  const w = await circuit.calculateWitness({ in: input });
-
-  let real_result = [input1];
-  let circuit_result = w.slice(1, 1 + 1);
-
-  for (var i = 0; i < 1; i++) {
-    expect(circuit_result[i]).to.be.eq(
-      real_result[i],
-      `A(${input1} ${input2}): ${circuit_result[i]}, ${real_result[i]}`,
-    );
-  }
+  await expect(circuit).with.witnessInputs({ in: input }).to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,
@@ -68,19 +59,10 @@ async function testA(input1: bigint, input2: bigint, circuit: A) {
 }
 
 async function testAnd(input1: bigint, input2: bigint, circuit: AND) {
-  let input = [input1, input2];
-  let real_result = [input1 * input2];
+  const input = [input1, input2];
+  const real_result = input1 * input2;
 
-  const w = await circuit.calculateWitness({ in: input });
-
-  let circuit_result = w.slice(1, 1 + 1);
-
-  for (var i = 0; i < 1; i++) {
-    expect(circuit_result[i]).to.be.eq(
-      real_result[i],
-      `And(${input1} ${input2}): ${circuit_result[i]}, ${real_result[i]}`,
-    );
-  }
+  await expect(circuit).with.witnessInputs({ in: input }).to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,
@@ -90,19 +72,10 @@ async function testAnd(input1: bigint, input2: bigint, circuit: AND) {
 }
 
 async function testB(input1: bigint, input2: bigint, circuit: B) {
-  let input = [input1, input2];
+  const input = [input1, input2];
+  const real_result = input2;
 
-  const w = await circuit.calculateWitness({ in: input });
-
-  let real_result = [input2];
-  let circuit_result = w.slice(1, 1 + 1);
-
-  for (var i = 0; i < 1; i++) {
-    expect(circuit_result[i]).to.be.eq(
-      real_result[i],
-      `$B({input1} ${input2}): ${circuit_result[i]}, ${real_result[i]}`,
-    );
-  }
+  await expect(circuit).with.witnessInputs({ in: input }).to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,
@@ -112,17 +85,9 @@ async function testB(input1: bigint, input2: bigint, circuit: B) {
 }
 
 async function testBuffer(input1: bigint, circuit: BUFFER) {
-  const w = await circuit.calculateWitness({ in: input1 });
+  const real_result = input1;
 
-  let real_result = [input1];
-  let circuit_result = w.slice(1, 1 + 1);
-
-  for (var i = 0; i < 1; i++) {
-    expect(circuit_result[i]).to.be.eq(
-      real_result[i],
-      `${input1} -> ${real_result[i]}: ${circuit_result[i]}, ${real_result[i]}`,
-    );
-  }
+  await expect(circuit).with.witnessInputs({ in: input1 }).to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: input1,
@@ -132,17 +97,11 @@ async function testBuffer(input1: bigint, circuit: BUFFER) {
 }
 
 async function testFalse(input1: bigint, input2: bigint, circuit: FALSE) {
-  const w = await circuit.calculateWitness({ in: [input1, input2] });
+  const real_result = 0n;
 
-  let real_result = [0n];
-  let circuit_result = w.slice(1, 1 + 1);
-
-  for (var i = 0; i < 1; i++) {
-    expect(circuit_result[i]).to.be.eq(
-      real_result[i],
-      `false(${input1} ${input2}): ${circuit_result[i]}, ${real_result[i]}`,
-    );
-  }
+  await expect(circuit)
+    .with.witnessInputs({ in: [input1, input2] })
+    .to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: [input1, input2],
@@ -152,17 +111,11 @@ async function testFalse(input1: bigint, input2: bigint, circuit: FALSE) {
 }
 
 async function testNimply(input1: bigint, input2: bigint, circuit: NIMPLY) {
-  const w = await circuit.calculateWitness({ in: [input1, input2] });
+  const real_result = input1 - input2 + (1n - input1) * input2;
 
-  let real_result = [input1 - input2 + (1n - input1) * input2];
-  let circuit_result = w.slice(1, 1 + 1);
-
-  for (var i = 0; i < 1; i++) {
-    expect(circuit_result[i]).to.be.eq(
-      real_result[i],
-      `Imply(${input1} ${input2}): ${circuit_result[i]}, ${real_result[i]}`,
-    );
-  }
+  await expect(circuit)
+    .with.witnessInputs({ in: [input1, input2] })
+    .to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: [input1, input2],
@@ -172,17 +125,11 @@ async function testNimply(input1: bigint, input2: bigint, circuit: NIMPLY) {
 }
 
 async function testImply(input1: bigint, input2: bigint, circuit: IMPLY) {
-  const w = await circuit.calculateWitness({ in: [input1, input2] });
+  const real_result = 1n - input1 + input2 - (1n - input1) * input2;
 
-  let real_result = [1n - input1 + input2 - (1n - input1) * input2];
-  let circuit_result = w.slice(1, 1 + 1);
-
-  for (var i = 0; i < 1; i++) {
-    expect(circuit_result[i]).to.be.eq(
-      real_result[i],
-      `Imply(${input1} ${input2}): ${circuit_result[i]}, ${real_result[i]}`,
-    );
-  }
+  await expect(circuit)
+    .with.witnessInputs({ in: [input1, input2] })
+    .to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: [input1, input2],
@@ -192,17 +139,11 @@ async function testImply(input1: bigint, input2: bigint, circuit: IMPLY) {
 }
 
 async function testInvImply(input1: bigint, input2: bigint, circuit: INVIMPLY) {
-  const w = await circuit.calculateWitness({ in: [input1, input2] });
+  const real_result = 1n - input2 + input1 - (1n - input2) * input1;
 
-  let real_result = [1n - input2 + input1 - (1n - input2) * input1];
-  let circuit_result = w.slice(1, 1 + 1);
-
-  for (var i = 0; i < 1; i++) {
-    expect(circuit_result[i]).to.be.eq(
-      real_result[i],
-      `InvImply(${input1} ${input2}): ${circuit_result[i]}, ${real_result[i]}`,
-    );
-  }
+  await expect(circuit)
+    .with.witnessInputs({ in: [input1, input2] })
+    .to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: [input1, input2],
@@ -212,17 +153,11 @@ async function testInvImply(input1: bigint, input2: bigint, circuit: INVIMPLY) {
 }
 
 async function testNinvImply(input1: bigint, input2: bigint, circuit: NINVNIMPLY) {
-  const w = await circuit.calculateWitness({ in: [input1, input2] });
+  const real_result = input2 - input1 + (1n - input2) * input1;
 
-  let real_result = [input2 - input1 + (1n - input2) * input1];
-  let circuit_result = w.slice(1, 1 + 1);
-
-  for (var i = 0; i < 1; i++) {
-    expect(circuit_result[i]).to.be.eq(
-      real_result[i],
-      `NInvImply(${input1} ${input2}): ${circuit_result[i]}, ${real_result[i]}`,
-    );
-  }
+  await expect(circuit)
+    .with.witnessInputs({ in: [input1, input2] })
+    .to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: [input1, input2],
@@ -232,17 +167,11 @@ async function testNinvImply(input1: bigint, input2: bigint, circuit: NINVNIMPLY
 }
 
 async function testNor(input1: bigint, input2: bigint, circuit: NOR) {
-  const w = await circuit.calculateWitness({ in: [input1, input2] });
+  const real_result = 1n - input1 + input2 + input1 * input2;
 
-  let real_result = [1n - input1 + input2 + input1 * input2];
-  let circuit_result = w.slice(1, 1 + 1);
-
-  for (var i = 0; i < 1; i++) {
-    expect(circuit_result[i]).to.be.eq(
-      real_result[i],
-      `Nor(${input1} ${input2}): ${circuit_result[i]}, ${real_result[i]}`,
-    );
-  }
+  await expect(circuit)
+    .with.witnessInputs({ in: [input1, input2] })
+    .to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: [input1, input2],
@@ -252,17 +181,9 @@ async function testNor(input1: bigint, input2: bigint, circuit: NOR) {
 }
 
 async function testNot(input1: bigint, circuit: NOT) {
-  const w = await circuit.calculateWitness({ in: input1 });
+  const real_result = 1n - input1;
 
-  let real_result = [1n - input1];
-  let circuit_result = w.slice(1, 1 + 1);
-
-  for (var i = 0; i < 1; i++) {
-    expect(circuit_result[i]).to.be.eq(
-      real_result[i],
-      `!${input1} ${real_result[i]}: ${circuit_result[i]}, ${real_result[i]}`,
-    );
-  }
+  await expect(circuit).with.witnessInputs({ in: input1 }).to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: input1,
@@ -272,17 +193,11 @@ async function testNot(input1: bigint, circuit: NOT) {
 }
 
 async function testNotA(input1: bigint, input2: bigint, circuit: NOTA) {
-  const w = await circuit.calculateWitness({ in: [input1, input2] });
+  const real_result = 1n - input1;
 
-  let real_result = [1n - input1];
-  let circuit_result = w.slice(1, 1 + 1);
-
-  for (var i = 0; i < 1; i++) {
-    expect(circuit_result[i]).to.be.eq(
-      real_result[i],
-      `NotA(${input1} ${input2}): ${circuit_result[i]}, ${real_result[i]}`,
-    );
-  }
+  await expect(circuit)
+    .with.witnessInputs({ in: [input1, input2] })
+    .to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: [input1, input2],
@@ -292,17 +207,11 @@ async function testNotA(input1: bigint, input2: bigint, circuit: NOTA) {
 }
 
 async function testNotB(input1: bigint, input2: bigint, circuit: NOTB) {
-  const w = await circuit.calculateWitness({ in: [input1, input2] });
+  const real_result = 1n - input2;
 
-  let real_result = [1n - input2];
-  let circuit_result = w.slice(1, 1 + 1);
-
-  for (var i = 0; i < 1; i++) {
-    expect(circuit_result[i]).to.be.eq(
-      real_result[i],
-      `NotB(${input1} ${input2}): ${circuit_result[i]}, ${real_result[i]}`,
-    );
-  }
+  await expect(circuit)
+    .with.witnessInputs({ in: [input1, input2] })
+    .to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: [input1, input2],
@@ -312,17 +221,11 @@ async function testNotB(input1: bigint, input2: bigint, circuit: NOTB) {
 }
 
 async function testOr(input1: bigint, input2: bigint, circuit: OR) {
-  const w = await circuit.calculateWitness({ in: [input1, input2] });
+  const real_result = input1 + input2 - input1 * input2;
 
-  let real_result = [input1 + input2 - input1 * input2];
-  let circuit_result = w.slice(1, 1 + 1);
-
-  for (var i = 0; i < 1; i++) {
-    expect(circuit_result[i]).to.be.eq(
-      real_result[i],
-      `Or(${input1} ${input2}): ${circuit_result[i]}, ${real_result[i]}`,
-    );
-  }
+  await expect(circuit)
+    .with.witnessInputs({ in: [input1, input2] })
+    .to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: [input1, input2],
@@ -332,17 +235,11 @@ async function testOr(input1: bigint, input2: bigint, circuit: OR) {
 }
 
 async function testTrue(input1: bigint, input2: bigint, circuit: TRUE) {
-  const w = await circuit.calculateWitness({ in: [input1, input2] });
+  const real_result = 1n;
 
-  let real_result = [1n];
-  let circuit_result = w.slice(1, 1 + 1);
-
-  for (var i = 0; i < 1; i++) {
-    expect(circuit_result[i]).to.be.eq(
-      real_result[i],
-      `True(${input1} ${input2}): ${circuit_result[i]}, ${real_result[i]}`,
-    );
-  }
+  await expect(circuit)
+    .with.witnessInputs({ in: [input1, input2] })
+    .to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: [input1, input2],
@@ -352,17 +249,11 @@ async function testTrue(input1: bigint, input2: bigint, circuit: TRUE) {
 }
 
 async function testXnor(input1: bigint, input2: bigint, circuit: XNOR) {
-  const w = await circuit.calculateWitness({ in: [input1, input2] });
+  const real_result = 1n - input1 - input2 + 2n * input1 * input2;
 
-  let real_result = [1n - input1 - input2 + 2n * input1 * input2];
-  let circuit_result = w.slice(1, 1 + 1);
-
-  for (var i = 0; i < 1; i++) {
-    expect(circuit_result[i]).to.be.eq(
-      real_result[i],
-      `True(${input1} ${input2}): ${circuit_result[i]}, ${real_result[i]}`,
-    );
-  }
+  await expect(circuit)
+    .with.witnessInputs({ in: [input1, input2] })
+    .to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: [input1, input2],
@@ -372,17 +263,11 @@ async function testXnor(input1: bigint, input2: bigint, circuit: XNOR) {
 }
 
 async function testXor(input1: bigint, input2: bigint, circuit: XOR) {
-  const w = await circuit.calculateWitness({ in: [input1, input2] });
+  const real_result = input1 + input2 - 2n * input1 * input2;
 
-  let real_result = [input1 + input2 - 2n * input1 * input2];
-  let circuit_result = w.slice(1, 1 + 1);
-
-  for (var i = 0; i < 1; i++) {
-    expect(circuit_result[i]).to.be.eq(
-      real_result[i],
-      `True(${input1} ${input2}): ${circuit_result[i]}, ${real_result[i]}`,
-    );
-  }
+  await expect(circuit)
+    .with.witnessInputs({ in: [input1, input2] })
+    .to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: [input1, input2],
@@ -392,17 +277,11 @@ async function testXor(input1: bigint, input2: bigint, circuit: XOR) {
 }
 
 async function testNAnd(input1: bigint, input2: bigint, circuit: NAND) {
-  const w = await circuit.calculateWitness({ in: [input1, input2] });
+  const real_result = 1n - input1 * input2;
 
-  let real_result = [1n - input1 * input2];
-  let circuit_result = w.slice(1, 1 + 1);
-
-  for (var i = 0; i < 1; i++) {
-    expect(circuit_result[i]).to.be.eq(
-      real_result[i],
-      `True(${input1} ${input2}): ${circuit_result[i]}, ${real_result[i]}`,
-    );
-  }
+  await expect(circuit)
+    .with.witnessInputs({ in: [input1, input2] })
+    .to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: [input1, input2],

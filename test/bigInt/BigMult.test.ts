@@ -13,17 +13,11 @@ import {
 } from "@/generated-types/ethers";
 
 async function testMultiplying(input1: bigint, input2: bigint, circuit: BigMult | BigMultOptimised) {
-  let input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
+  const input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
 
-  let real_result = bigIntToArray(64, 8, input1 * input2);
+  const real_result = bigIntToArray(64, 8, input1 * input2);
 
-  const w = await circuit.calculateWitness({ in: input, dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + 8);
-
-  for (var i = 0; i < 8; i++) {
-    expect(circuit_result[i]).to.be.eq(real_result[i], `${input1} * ${input2}`);
-  }
+  await expect(circuit).with.witnessInputs({ in: input, dummy: 0n }).to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,
@@ -34,17 +28,13 @@ async function testMultiplying(input1: bigint, input2: bigint, circuit: BigMult 
 }
 
 async function testPowMod(input1: bigint, input2: bigint, circuit: PowerMod) {
-  let input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
+  const input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
 
-  let real_result = bigIntToArray(64, 4, input1 ** 65537n % input2);
+  const real_result = bigIntToArray(64, 4, input1 ** 65537n % input2);
 
-  const w = await circuit.calculateWitness({ base: input[0], modulus: input[1], dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + 4);
-
-  for (var i = 0; i < 4; i++) {
-    expect(circuit_result[i]).to.be.eq(real_result[i], `${input1} * ${input2}`);
-  }
+  await expect(circuit)
+    .with.witnessInputs({ base: input[0], modulus: input[1], dummy: 0n })
+    .to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     base: input[0],
@@ -56,17 +46,13 @@ async function testPowMod(input1: bigint, input2: bigint, circuit: PowerMod) {
 }
 
 async function testNonEqualMultiplying(input1: bigint, input2: bigint, circuit: BigMultNonEqual) {
-  let input = [bigIntToArray(64, 6, input1), bigIntToArray(64, 4, input2)];
+  const input = [bigIntToArray(64, 6, input1), bigIntToArray(64, 4, input2)];
 
-  let real_result = bigIntToArray(64, 10, input1 * input2);
+  const real_result = bigIntToArray(64, 10, input1 * input2);
 
-  const w = await circuit.calculateWitness({ in1: input[0], in2: input[1], dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + 10);
-
-  for (var i = 0; i < 10; i++) {
-    expect(circuit_result[i]).to.be.eq(real_result[i]);
-  }
+  await expect(circuit)
+    .with.witnessInputs({ in1: input[0], in2: input[1], dummy: 0n })
+    .to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in1: input[0],

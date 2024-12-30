@@ -19,9 +19,9 @@ function onCurveCheck(x1: bigint, y1: bigint, a: bigint, b: bigint, p: bigint) {
 }
 
 async function testOnCurve(input1: bigint, input2: bigint, circuit: PointOnCurve) {
-  let input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
+  const input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
 
-  let real_result = onCurveCheck(
+  const real_result = onCurveCheck(
     input1,
     input2,
     0n,
@@ -32,7 +32,7 @@ async function testOnCurve(input1: bigint, input2: bigint, circuit: PointOnCurve
   let proofStruct;
 
   try {
-    const w = await circuit.calculateWitness({ in: input, dummy: 0n });
+    await circuit.calculateWitness({ in: input, dummy: 0n });
 
     proofStruct = await circuit.generateProof({ in: input, dummy: 0n });
 
@@ -51,24 +51,18 @@ async function testOnCurve(input1: bigint, input2: bigint, circuit: PointOnCurve
 }
 
 async function testDouble(input1: bigint, input2: bigint, circuit: EllipticCurveDouble) {
-  let input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
+  const input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
 
-  let doubled = pointDouble(
+  const doubled = pointDouble(
     input1,
     input2,
     0n,
     115792089237316195423570985008687907853269984665640564039457584007908834671663n,
   );
 
-  let real_result = bigIntToArray(64, 4, doubled.x).concat(bigIntToArray(64, 4, doubled.y));
+  const real_result = [bigIntToArray(64, 4, doubled.x), bigIntToArray(64, 4, doubled.y)];
 
-  const w = await circuit.calculateWitness({ in: input, dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + 8);
-
-  for (var i = 0; i < 8; i++) {
-    expect(circuit_result[i]).to.be.eq(real_result[i], `double(${input1}; ${input2})`);
-  }
+  await expect(circuit).with.witnessInputs({ in: input, dummy: 0n }).to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({ in: input, dummy: 0n });
 
@@ -76,24 +70,18 @@ async function testDouble(input1: bigint, input2: bigint, circuit: EllipticCurve
 }
 
 async function testDoubleBrainpoolP256r1(input1: bigint, input2: bigint, circuit: doubleBrainpool) {
-  let input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
+  const input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
 
-  let doubled = pointDouble(
+  const doubled = pointDouble(
     input1,
     input2,
     56698187605326110043627228396178346077120614539475214109386828188763884139993n,
     76884956397045344220809746629001649093037950200943055203735601445031516197751n,
   );
 
-  let real_result = bigIntToArray(64, 4, doubled.x).concat(bigIntToArray(64, 4, doubled.y));
+  const real_result = [bigIntToArray(64, 4, doubled.x), bigIntToArray(64, 4, doubled.y)];
 
-  const w = await circuit.calculateWitness({ in: input, dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + 8);
-
-  for (var i = 0; i < 8; i++) {
-    expect(circuit_result[i]).to.be.eq(real_result[i], `BrainpoolP256r1 double(${input1}; ${input2})`);
-  }
+  await expect(circuit).with.witnessInputs({ in: input, dummy: 0n }).to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,
@@ -104,7 +92,7 @@ async function testDoubleBrainpoolP256r1(input1: bigint, input2: bigint, circuit
 }
 
 async function testAdd(input1: bigint, input2: bigint, input3: bigint, input4: bigint, circuit: EllipticCurveAdd) {
-  let added = pointAdd(
+  const added = pointAdd(
     input1,
     input2,
     input3,
@@ -112,19 +100,15 @@ async function testAdd(input1: bigint, input2: bigint, input3: bigint, input4: b
     115792089237316195423570985008687907853269984665640564039457584007908834671663n,
   );
 
-  let real_result = bigIntToArray(64, 4, added.x!).concat(bigIntToArray(64, 4, added.y!));
+  const real_result = [bigIntToArray(64, 4, added.x!), bigIntToArray(64, 4, added.y!)];
 
-  const w = await circuit.calculateWitness({
-    in1: [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)],
-    in2: [bigIntToArray(64, 4, input3), bigIntToArray(64, 4, input4)],
-    dummy: 0n,
-  });
-
-  let circuit_result = w.slice(1, 1 + 8);
-
-  for (var i = 0; i < 8; i++) {
-    expect(circuit_result[i]).to.be.eq(real_result[i], `add(${input1}; ${input2}) + (${input3}, ${input4})`);
-  }
+  await expect(circuit)
+    .with.witnessInputs({
+      in1: [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)],
+      in2: [bigIntToArray(64, 4, input3), bigIntToArray(64, 4, input4)],
+      dummy: 0n,
+    })
+    .to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in1: [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)],
@@ -142,7 +126,7 @@ async function testAddBrainpoolP256r1(
   input4: bigint,
   circuit: addBrainpool,
 ) {
-  let added = pointAdd(
+  const added = pointAdd(
     input1,
     input2,
     input3,
@@ -150,19 +134,15 @@ async function testAddBrainpoolP256r1(
     76884956397045344220809746629001649093037950200943055203735601445031516197751n,
   );
 
-  let real_result = bigIntToArray(64, 4, added.x!).concat(bigIntToArray(64, 4, added.y!));
+  const real_result = [bigIntToArray(64, 4, added.x!), bigIntToArray(64, 4, added.y!)];
 
-  const w = await circuit.calculateWitness({
-    in1: [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)],
-    in2: [bigIntToArray(64, 4, input3), bigIntToArray(64, 4, input4)],
-    dummy: 0n,
-  });
-
-  let circuit_result = w.slice(1, 1 + 8);
-
-  for (var i = 0; i < 8; i++) {
-    expect(circuit_result[i]).to.be.eq(real_result[i], `BrainpoolP256r1 double(${input1}; ${input2})`);
-  }
+  await expect(circuit)
+    .with.witnessInputs({
+      in1: [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)],
+      in2: [bigIntToArray(64, 4, input3), bigIntToArray(64, 4, input4)],
+      dummy: 0n,
+    })
+    .to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in1: [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)],

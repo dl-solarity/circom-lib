@@ -70,25 +70,32 @@ function shaPadding(hexStr: string, blockSize: number) {
   return paddedHex;
 }
 
+function stringToBigint(input: string): bigint[] {
+  let intArr = [];
+
+  for (let i = 0; i < input.length; i++) {
+    intArr[i] = BigInt(input.at(i)!);
+  }
+
+  return intArr;
+}
+
 async function testHash160Chunks(input1: string, circuit: hashChunks160) {
   const input = hexToBitArray(shaPadding(input1, 512));
 
-  const w = await circuit.calculateWitness({ in: input, dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + 160).join("");
-
   const buffer = Buffer.from(input1, "hex");
-
   const hashBuffer = createHash("sha1").update(buffer).digest("hex");
 
-  let real_result = hashBuffer
+  const real_result = hashBuffer
     .split("")
     .map((hexChar) => {
       return parseInt(hexChar, 16).toString(2).padStart(4, "0");
     })
     .join("");
 
-  expect(circuit_result).to.be.eq(real_result, `${real_result} != ${circuit_result}`);
+  const real_int_result = stringToBigint(real_result);
+
+  await expect(circuit).with.witnessInputs({ in: input, dummy: 0n }).to.have.witnessOutputs({ out: real_int_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,
@@ -101,22 +108,19 @@ async function testHash160Chunks(input1: string, circuit: hashChunks160) {
 async function testHash160Bits(input1: string, circuit: hashBits160) {
   const input = hexToBitArray(input1);
 
-  const w = await circuit.calculateWitness({ in: input, dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + 160).join("");
-
   const buffer = Buffer.from(input1, "hex");
-
   const hashBuffer = createHash("sha1").update(buffer).digest("hex");
 
-  let real_result = hashBuffer
+  const real_result = hashBuffer
     .split("")
     .map((hexChar) => {
       return parseInt(hexChar, 16).toString(2).padStart(4, "0");
     })
     .join("");
 
-  expect(circuit_result).to.be.eq(real_result, `${real_result} != ${circuit_result}`);
+  const real_int_result = stringToBigint(real_result);
+
+  await expect(circuit).with.witnessInputs({ in: input, dummy: 0n }).to.have.witnessOutputs({ out: real_int_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,
@@ -129,22 +133,19 @@ async function testHash160Bits(input1: string, circuit: hashBits160) {
 async function testHash224Chunks(input1: string, circuit: hashChunks224) {
   const input = hexToBitArray(shaPadding(input1, 512));
 
-  const w = await circuit.calculateWitness({ in: input, dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + 224).join("");
-
   const buffer = Buffer.from(input1, "hex");
-
   const hashBuffer = createHash("sha224").update(buffer).digest("hex");
 
-  let real_result = hashBuffer
+  const real_result = hashBuffer
     .split("")
     .map((hexChar) => {
       return parseInt(hexChar, 16).toString(2).padStart(4, "0");
     })
     .join("");
 
-  expect(circuit_result).to.be.eq(real_result, `${real_result} != ${circuit_result}`);
+  const real_int_result = stringToBigint(real_result);
+
+  await expect(circuit).with.witnessInputs({ in: input, dummy: 0n }).to.have.witnessOutputs({ out: real_int_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,
@@ -157,22 +158,19 @@ async function testHash224Chunks(input1: string, circuit: hashChunks224) {
 async function testHash224Bits(input1: string, circuit: hashBits224) {
   const input = hexToBitArray(input1);
 
-  const w = await circuit.calculateWitness({ in: input, dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + 224).join("");
-
   const buffer = Buffer.from(input1, "hex");
-
   const hashBuffer = createHash("sha224").update(buffer).digest("hex");
 
-  let real_result = hashBuffer
+  const real_result = hashBuffer
     .split("")
     .map((hexChar) => {
       return parseInt(hexChar, 16).toString(2).padStart(4, "0");
     })
     .join("");
 
-  expect(circuit_result).to.be.eq(real_result, `${real_result} != ${circuit_result}`);
+  const real_int_result = stringToBigint(real_result);
+
+  await expect(circuit).with.witnessInputs({ in: input, dummy: 0n }).to.have.witnessOutputs({ out: real_int_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,
@@ -185,22 +183,19 @@ async function testHash224Bits(input1: string, circuit: hashBits224) {
 async function testHash256Chunks(input1: string, circuit: hashChunks256) {
   const input = hexToBitArray(shaPadding(input1, 512));
 
-  const w = await circuit.calculateWitness({ in: input, dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + 256).join("");
-
   const buffer = Buffer.from(input1, "hex");
-
   const hashBuffer = createHash("sha256").update(buffer).digest("hex");
 
-  let real_result = hashBuffer
+  const real_result = hashBuffer
     .split("")
     .map((hexChar) => {
       return parseInt(hexChar, 16).toString(2).padStart(4, "0");
     })
     .join("");
 
-  expect(circuit_result).to.be.eq(real_result, `${real_result} != ${circuit_result}`);
+  const real_int_result = stringToBigint(real_result);
+
+  await expect(circuit).with.witnessInputs({ in: input, dummy: 0n }).to.have.witnessOutputs({ out: real_int_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,
@@ -213,22 +208,19 @@ async function testHash256Chunks(input1: string, circuit: hashChunks256) {
 async function testHash256Bits(input1: string, circuit: hashBits256) {
   const input = hexToBitArray(input1);
 
-  const w = await circuit.calculateWitness({ in: input, dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + 256).join("");
-
   const buffer = Buffer.from(input1, "hex");
-
   const hashBuffer = createHash("sha256").update(buffer).digest("hex");
 
-  let real_result = hashBuffer
+  const real_result = hashBuffer
     .split("")
     .map((hexChar) => {
       return parseInt(hexChar, 16).toString(2).padStart(4, "0");
     })
     .join("");
 
-  expect(circuit_result).to.be.eq(real_result, `${real_result} != ${circuit_result}`);
+  const real_int_result = stringToBigint(real_result);
+
+  await expect(circuit).with.witnessInputs({ in: input, dummy: 0n }).to.have.witnessOutputs({ out: real_int_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,
@@ -241,22 +233,19 @@ async function testHash256Bits(input1: string, circuit: hashBits256) {
 async function testHash384Chunks(input1: string, circuit: hashChunks384) {
   const input = hexToBitArray(shaPadding(input1, 1024));
 
-  const w = await circuit.calculateWitness({ in: input, dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + 384).join("");
-
   const buffer = Buffer.from(input1, "hex");
-
   const hashBuffer = createHash("sha384").update(buffer).digest("hex");
 
-  let real_result = hashBuffer
+  const real_result = hashBuffer
     .split("")
     .map((hexChar) => {
       return parseInt(hexChar, 16).toString(2).padStart(4, "0");
     })
     .join("");
 
-  expect(circuit_result).to.be.eq(real_result, `${real_result} != ${circuit_result}`);
+  const real_int_result = stringToBigint(real_result);
+
+  await expect(circuit).with.witnessInputs({ in: input, dummy: 0n }).to.have.witnessOutputs({ out: real_int_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,
@@ -269,22 +258,19 @@ async function testHash384Chunks(input1: string, circuit: hashChunks384) {
 async function testHash384Bits(input1: string, circuit: hashBits384) {
   const input = hexToBitArray(input1);
 
-  const w = await circuit.calculateWitness({ in: input, dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + 384).join("");
-
   const buffer = Buffer.from(input1, "hex");
-
   const hashBuffer = createHash("sha384").update(buffer).digest("hex");
 
-  let real_result = hashBuffer
+  const real_result = hashBuffer
     .split("")
     .map((hexChar) => {
       return parseInt(hexChar, 16).toString(2).padStart(4, "0");
     })
     .join("");
 
-  expect(circuit_result).to.be.eq(real_result, `${real_result} != ${circuit_result}`);
+  const real_int_result = stringToBigint(real_result);
+
+  await expect(circuit).with.witnessInputs({ in: input, dummy: 0n }).to.have.witnessOutputs({ out: real_int_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,
@@ -297,22 +283,19 @@ async function testHash384Bits(input1: string, circuit: hashBits384) {
 async function testHash512Chunks(input1: string, circuit: hashChunks512) {
   const input = hexToBitArray(shaPadding(input1, 1024));
 
-  const w = await circuit.calculateWitness({ in: input, dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + 512).join("");
-
   const buffer = Buffer.from(input1, "hex");
-
   const hashBuffer = createHash("sha512").update(buffer).digest("hex");
 
-  let real_result = hashBuffer
+  const real_result = hashBuffer
     .split("")
     .map((hexChar) => {
       return parseInt(hexChar, 16).toString(2).padStart(4, "0");
     })
     .join("");
 
-  expect(circuit_result).to.be.eq(real_result, `${real_result} != ${circuit_result}`);
+  const real_int_result = stringToBigint(real_result);
+
+  await expect(circuit).with.witnessInputs({ in: input, dummy: 0n }).to.have.witnessOutputs({ out: real_int_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,
@@ -325,22 +308,19 @@ async function testHash512Chunks(input1: string, circuit: hashChunks512) {
 async function testHash512Bits(input1: string, circuit: hashBits512) {
   const input = hexToBitArray(input1);
 
-  const w = await circuit.calculateWitness({ in: input, dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + 512).join("");
-
   const buffer = Buffer.from(input1, "hex");
-
   const hashBuffer = createHash("sha512").update(buffer).digest("hex");
 
-  let real_result = hashBuffer
+  const real_result = hashBuffer
     .split("")
     .map((hexChar) => {
       return parseInt(hexChar, 16).toString(2).padStart(4, "0");
     })
     .join("");
 
-  expect(circuit_result).to.be.eq(real_result, `${real_result} != ${circuit_result}`);
+  const real_int_result = stringToBigint(real_result);
+
+  await expect(circuit).with.witnessInputs({ in: input, dummy: 0n }).to.have.witnessOutputs({ out: real_int_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,
@@ -354,14 +334,10 @@ async function testPoseidon(input1: bigint[], circuit: poseidon1 | poseidon2) {
   const hash_0 = 19014214495641488759237505126948346942972912379615652741039992445865937985820n;
   const hash_0_1 = 12583541437132735734108669866114103169564651237895298778035846191048104863326n;
 
-  const w = await circuit.calculateWitness({ in: input1, dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + 1);
-
   if (input1[0] == 0n && input1[1] == 1n) {
-    expect(circuit_result[0]).to.be.eq(hash_0_1, `${hash_0_1} != ${circuit_result}`);
+    await expect(circuit).with.witnessInputs({ in: input1, dummy: 0n }).to.have.witnessOutputs({ out: hash_0_1 });
   } else {
-    expect(circuit_result[0]).to.be.eq(hash_0, `${hash_0} != ${circuit_result}`);
+    await expect(circuit).with.witnessInputs({ in: input1, dummy: 0n }).to.have.witnessOutputs({ out: hash_0 });
   }
 
   const proofStruct = await circuit.generateProof({

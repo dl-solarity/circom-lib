@@ -8,17 +8,11 @@ import { BigAddGroth16Verifier, BigAddNonEqualGroth16Verifier } from "@/generate
 import { BigAdd, BigAddNonEqual } from "@/generated-types/zkit";
 
 async function testAdding(input1: bigint, input2: bigint, circuit: BigAdd) {
-  let input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
+  const input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
 
-  let real_result = bigIntToArray(64, 5, input1 + input2);
+  const real_result = bigIntToArray(64, 5, input1 + input2);
 
-  const w = await circuit.calculateWitness({ in: input, dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + 5);
-
-  for (var i = 0; i < 5; i++) {
-    expect(circuit_result[i]).to.be.eq(real_result[i]);
-  }
+  await expect(circuit).with.witnessInputs({ in: input, dummy: 0n }).to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,
@@ -29,17 +23,13 @@ async function testAdding(input1: bigint, input2: bigint, circuit: BigAdd) {
 }
 
 async function testAddingNonEqual(input1: bigint, input2: bigint, circuit: BigAddNonEqual) {
-  let input = [bigIntToArray(64, 6, input1), bigIntToArray(64, 4, input2)];
+  const input = [bigIntToArray(64, 6, input1), bigIntToArray(64, 4, input2)];
 
-  let real_result = bigIntToArray(64, 7, input1 + input2);
+  const real_result = bigIntToArray(64, 7, input1 + input2);
 
-  const w = await circuit.calculateWitness({ in1: input[0], in2: input[1], dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + 7);
-
-  for (var i = 0; i < 7; i++) {
-    expect(circuit_result[i]).to.be.eq(real_result[i]);
-  }
+  await expect(circuit)
+    .with.witnessInputs({ in1: input[0], in2: input[1], dummy: 0n })
+    .to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in1: input[0],

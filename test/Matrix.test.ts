@@ -11,10 +11,10 @@ import {
   MatrixScalarMult,
   MatrixTransposition,
 } from "@/generated-types/zkit";
-import { MatrixMultiply as multiplyVec } from "@/generated-types/zkit/core/mock/matrix/multiplyVec.circom";
-import { MatrixMultiply } from "@/generated-types/zkit/core/mock/matrix/MatrixMultiply";
-import { MatrixConvolution as MatrixConvolution2 } from "@/generated-types/zkit/core/mock/matrix/convolution2.circom";
 import { MatrixConvolution } from "@/generated-types/zkit/core/mock/matrix";
+import { MatrixMultiply } from "@/generated-types/zkit/core/mock/matrix/MatrixMultiply";
+import { MatrixMultiply as multiplyVec } from "@/generated-types/zkit/core/mock/matrix/multiplyVec.circom";
+import { MatrixConvolution as MatrixConvolution2 } from "@/generated-types/zkit/core/mock/matrix/convolution2.circom";
 
 import {
   MatrixAdditionGroth16Verifier,
@@ -82,11 +82,13 @@ function matrixMultiply(A: number[][], B: number[][]) {
 }
 
 function performConvolution(matrix: number[][], filter: number[][], step: number) {
-  const output = [];
+  let output: number[][] = [];
   const filterSize = filter.length;
   const matrixSize = matrix.length;
 
   for (let i = 0; i <= matrixSize - filterSize; i += step) {
+    output[i] = [];
+
     for (let j = 0; j <= matrixSize - filterSize; j += step) {
       let sum = 0;
 
@@ -96,7 +98,7 @@ function performConvolution(matrix: number[][], filter: number[][], step: number
         }
       }
 
-      output.push(sum);
+      output[i].push(sum);
     }
   }
 
@@ -119,21 +121,19 @@ function transposeMatrix(matrix: number[][]) {
 }
 
 async function testMatrixAdd(input1: number[][], input2: number[][], circuit: MatrixAddition) {
-  const real_result = [];
+  let real_result: number[][] = [];
 
   for (let i = 0; i < input1.length; i++) {
+    real_result[i] = [];
+
     for (let j = 0; j < input1[i].length; j++) {
-      real_result.push(input1[i][j] + input2[i][j]);
+      real_result[i][j] = input1[i][j] + input2[i][j];
     }
   }
 
-  const w = await circuit.calculateWitness({ in1: input1, in2: input2, dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + 16);
-
-  for (var i = 0; i < 16; i++) {
-    expect(circuit_result[i]).to.be.equal(real_result[i], `${input1} + ${input2}`);
-  }
+  await expect(circuit)
+    .with.witnessInputs({ in1: input1, in2: input2, dummy: 0n })
+    .to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({ in1: input1, in2: input2, dummy: 0n });
 
@@ -141,15 +141,9 @@ async function testMatrixAdd(input1: number[][], input2: number[][], circuit: Ma
 }
 
 async function testMatrixDeterminant(input1: number[][], circuit: MatrixDeterminant) {
-  let real_result = determinant(input1);
+  const real_result = determinant(input1);
 
-  const w = await circuit.calculateWitness({ in: input1, dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + 1);
-
-  for (var i = 0; i < 1; i++) {
-    expect(circuit_result[i]).to.be.equal(BigInt(real_result), `det(${input1})`);
-  }
+  await expect(circuit).with.witnessInputs({ in: input1, dummy: 0n }).to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({ in: input1, dummy: 0n });
 
@@ -164,13 +158,9 @@ async function testMatrixConvolation(
 ) {
   const real_result = performConvolution(input1, input2, step);
 
-  const w = await circuit.calculateWitness({ in: input1, filter: input2, dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + real_result.length);
-
-  for (var i = 0; i < real_result.length; i++) {
-    expect(circuit_result[i]).to.be.equal(real_result[i], `${input1} conv ${input2}, step = ${step}`);
-  }
+  await expect(circuit)
+    .with.witnessInputs({ in: input1, filter: input2, dummy: 0n })
+    .to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({ in: input1, filter: input2, dummy: 0n });
 
@@ -178,21 +168,17 @@ async function testMatrixConvolation(
 }
 
 async function testMatrixHadamard(input1: number[][], input2: number[][], circuit: MatrixHadamardProduct) {
-  const real_result = [];
+  const real_result: number[][] = [];
 
   for (let i = 0; i < input1.length; i++) {
+    real_result[i] = [];
+
     for (let j = 0; j < input1[i].length; j++) {
-      real_result.push(input1[i][j] * input2[i][j]);
+      real_result[i].push(input1[i][j] * input2[i][j]);
     }
   }
 
-  const w = await circuit.calculateWitness({ in1: input1, in2: input2 });
-
-  let circuit_result = w.slice(1, 1 + 16);
-
-  for (var i = 0; i < 16; i++) {
-    expect(circuit_result[i]).to.be.equal(real_result[i], `${input1} hadamard ${input2}`);
-  }
+  await expect(circuit).with.witnessInputs({ in1: input1, in2: input2 }).to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({ in1: input1, in2: input2 });
 
@@ -200,15 +186,11 @@ async function testMatrixHadamard(input1: number[][], input2: number[][], circui
 }
 
 async function testMatrixMultiply(input1: number[][], input2: number[][], circuit: MatrixMultiply) {
-  let real_result = matrixMultiply(input1, input2).flat();
+  const real_result = matrixMultiply(input1, input2).flat();
 
-  const w = await circuit.calculateWitness({ in1: input1, in2: input2, dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + 16);
-
-  for (var i = 0; i < 16; i++) {
-    expect(circuit_result[i]).to.be.equal(BigInt(real_result[i]), `${input1} * ${input2}`);
-  }
+  await expect(circuit)
+    .with.witnessInputs({ in1: input1, in2: input2, dummy: 0n })
+    .to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({ in1: input1, in2: input2, dummy: 0n });
 
@@ -216,15 +198,11 @@ async function testMatrixMultiply(input1: number[][], input2: number[][], circui
 }
 
 async function testMatrixVecMultiply(input1: number[][], input2: number[][], circuit: multiplyVec) {
-  let real_result = matrixMultiply(input1, input2).flat();
+  const real_result = matrixMultiply(input1, input2).flat();
 
-  const w = await circuit.calculateWitness({ in1: input1, in2: input2, dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + real_result.length);
-
-  for (var i = 0; i < real_result.length; i++) {
-    expect(circuit_result[i]).to.be.equal(BigInt(real_result[i]), `${input1} * ${input2}`);
-  }
+  await expect(circuit)
+    .with.witnessInputs({ in1: input1, in2: input2, dummy: 0n })
+    .to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({ in1: input1, in2: input2, dummy: 0n });
 
@@ -232,15 +210,9 @@ async function testMatrixVecMultiply(input1: number[][], input2: number[][], cir
 }
 
 async function testMatrixPow(input1: number[][], circuit: MatrixPower) {
-  let real_result = matrixMultiply(matrixMultiply(input1, input1), input1).flat();
+  const real_result = matrixMultiply(matrixMultiply(input1, input1), input1).flat();
 
-  const w = await circuit.calculateWitness({ in: input1, dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + 16);
-
-  for (var i = 0; i < 16; i++) {
-    expect(circuit_result[i]).to.be.equal(BigInt(real_result[i]), `${input1} ** 3`);
-  }
+  await expect(circuit).with.witnessInputs({ in: input1, dummy: 0n }).to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({ in: input1, dummy: 0n });
 
@@ -248,21 +220,19 @@ async function testMatrixPow(input1: number[][], circuit: MatrixPower) {
 }
 
 async function testMatrixScalar(input1: number[][], input2: number, circuit: MatrixScalarMult) {
-  const real_result = [];
+  const real_result: number[][] = [];
 
   for (let i = 0; i < input1.length; i++) {
+    real_result[i] = [];
+
     for (let j = 0; j < input1[i].length; j++) {
-      real_result.push(input1[i][j] * input2);
+      real_result[i].push(input1[i][j] * input2);
     }
   }
 
-  const w = await circuit.calculateWitness({ in: input1, scalar: input2, dummy: 0n });
-
-  let circuit_result = w.slice(1, 1 + 16);
-
-  for (var i = 0; i < 16; i++) {
-    expect(circuit_result[i]).to.be.equal(real_result[i], `${input1} scalar ${input2}`);
-  }
+  await expect(circuit)
+    .with.witnessInputs({ in: input1, scalar: input2, dummy: 0n })
+    .to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({ in: input1, scalar: input2, dummy: 0n });
 
@@ -272,13 +242,7 @@ async function testMatrixScalar(input1: number[][], input2: number, circuit: Mat
 async function testMatrixTransposition(input1: number[][], circuit: MatrixTransposition) {
   const real_result = transposeMatrix(input1).flat();
 
-  const w = await circuit.calculateWitness({ in: input1 });
-
-  let circuit_result = w.slice(1, 1 + 12);
-
-  for (var i = 0; i < 12; i++) {
-    expect(circuit_result[i]).to.be.equal(real_result[i], `${input1} ^ T`);
-  }
+  await expect(circuit).with.witnessInputs({ in: input1 }).to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({ in: input1 });
 

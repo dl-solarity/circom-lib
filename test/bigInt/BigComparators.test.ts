@@ -15,7 +15,7 @@ import {
 import { BigGreaterEqThan, BigGreaterThan, BigIsEqual, BigLessEqThan, BigLessThan } from "@/generated-types/zkit";
 
 async function testIsEqual(input1: bigint, input2: bigint, circuit: BigIsEqual) {
-  let input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
+  const input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
 
   let real_result = 1n;
 
@@ -23,11 +23,7 @@ async function testIsEqual(input1: bigint, input2: bigint, circuit: BigIsEqual) 
     real_result = 0n;
   }
 
-  const w = await circuit.calculateWitness({ in: input });
-
-  let circuit_result = w[1];
-
-  expect(circuit_result, `${input1} == ${input2}`).to.be.eq(real_result);
+  await expect(circuit).with.witnessInputs({ in: input }).to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,
@@ -37,7 +33,7 @@ async function testIsEqual(input1: bigint, input2: bigint, circuit: BigIsEqual) 
 }
 
 async function testLessThan(input1: bigint, input2: bigint, circuit: BigLessThan) {
-  let input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
+  const input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
 
   let real_result = 1n;
 
@@ -45,11 +41,7 @@ async function testLessThan(input1: bigint, input2: bigint, circuit: BigLessThan
     real_result = 0n;
   }
 
-  const w = await circuit.calculateWitness({ in: input });
-
-  let circuit_result = w[1];
-
-  expect(circuit_result).to.be.eq(real_result, `${input1} < ${input2}`);
+  await expect(circuit).with.witnessInputs({ in: input }).to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,
@@ -59,7 +51,7 @@ async function testLessThan(input1: bigint, input2: bigint, circuit: BigLessThan
 }
 
 async function testLessEqThan(input1: bigint, input2: bigint, circuit: BigLessEqThan) {
-  let input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
+  const input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
 
   let real_result = 1n;
 
@@ -67,11 +59,7 @@ async function testLessEqThan(input1: bigint, input2: bigint, circuit: BigLessEq
     real_result = 0n;
   }
 
-  const w = await circuit.calculateWitness({ in: input });
-
-  let circuit_result = w[1];
-
-  expect(circuit_result).to.be.eq(real_result, `${input1} <= ${input2}`);
+  await expect(circuit).with.witnessInputs({ in: input }).to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,
@@ -81,7 +69,7 @@ async function testLessEqThan(input1: bigint, input2: bigint, circuit: BigLessEq
 }
 
 async function testGreaterThan(input1: bigint, input2: bigint, circuit: BigGreaterThan) {
-  let input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
+  const input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
 
   let real_result = 1n;
 
@@ -89,11 +77,7 @@ async function testGreaterThan(input1: bigint, input2: bigint, circuit: BigGreat
     real_result = 0n;
   }
 
-  const w = await circuit.calculateWitness({ in: input });
-
-  let circuit_result = w[1];
-
-  expect(circuit_result).to.be.eq(real_result, `${input1} > ${input2}`);
+  await expect(circuit).with.witnessInputs({ in: input }).to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,
@@ -103,7 +87,7 @@ async function testGreaterThan(input1: bigint, input2: bigint, circuit: BigGreat
 }
 
 async function testGreaterEqThan(input1: bigint, input2: bigint, circuit: BigGreaterEqThan) {
-  let input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
+  const input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
 
   let real_result = 1n;
 
@@ -111,11 +95,7 @@ async function testGreaterEqThan(input1: bigint, input2: bigint, circuit: BigGre
     real_result = 0n;
   }
 
-  const w = await circuit.calculateWitness({ in: input });
-
-  let circuit_result = w[1];
-
-  expect(circuit_result).to.be.eq(real_result, `${input1} >= ${input2}`);
+  await expect(circuit).with.witnessInputs({ in: input }).to.have.witnessOutputs({ out: real_result });
 
   const proofStruct = await circuit.generateProof({
     in: input,
