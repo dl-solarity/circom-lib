@@ -348,7 +348,7 @@ async function testPoseidon(input1: bigint[], circuit: poseidon1 | poseidon2) {
   return proofStruct;
 }
 
-describe("Hash 160 test", function () {
+describe("Hash 160 test", () => {
   const reverter = new Reverter();
 
   let verifierBits: ShaHashBits_8_160_Groth16Verifier;
@@ -372,20 +372,20 @@ describe("Hash 160 test", function () {
 
   afterEach(reverter.revert);
 
-  it("Hash bits sha-1 (0x00)", async function () {
+  it("Hash bits sha-1 (0x00)", async () => {
     const proof = await testHash160Bits("00", circuitBits);
 
     await expect(circuitBits).to.useSolidityVerifier(verifierBits).and.verifyProof(proof);
   });
 
-  it("Hash chunks sha-1 (0x00)", async function () {
+  it("Hash chunks sha-1 (0x00)", async () => {
     const proof = await testHash160Chunks("00", circuitChunks);
 
     await expect(circuitChunks).to.useSolidityVerifier(verifierChunks).and.verifyProof(proof);
   });
 });
 
-describe("Hash 224 test", function () {
+describe("Hash 224 test", () => {
   const reverter = new Reverter();
 
   let verifierBits: ShaHashBits_8_224_Groth16Verifier;
@@ -409,20 +409,20 @@ describe("Hash 224 test", function () {
 
   afterEach(reverter.revert);
 
-  it("Hash bits sha2-224 (0x00)", async function () {
+  it("Hash bits sha2-224 (0x00)", async () => {
     const proof = await testHash224Bits("00", circuitBits);
 
     await expect(circuitBits).to.useSolidityVerifier(verifierBits).and.verifyProof(proof);
   });
 
-  it("Hash chunks sha2-224 (0x00)", async function () {
+  it("Hash chunks sha2-224 (0x00)", async () => {
     const proof = await testHash224Chunks("00", circuitChunks);
 
     await expect(circuitChunks).to.useSolidityVerifier(verifierChunks).and.verifyProof(proof);
   });
 });
 
-describe("Hash 256 test", function () {
+describe("Hash 256 test", () => {
   const reverter = new Reverter();
 
   let verifierChunks: ShaHashChunks_1_256_Groth16Verifier;
@@ -446,20 +446,20 @@ describe("Hash 256 test", function () {
 
   afterEach(reverter.revert);
 
-  it("Hash bits sha2-256 (0x00)", async function () {
+  it("Hash bits sha2-256 (0x00)", async () => {
     const proof = await testHash256Bits("00", circuitBits);
 
     await expect(circuitBits).to.useSolidityVerifier(verifierBits).and.verifyProof(proof);
   });
 
-  it("Hash chunks sha2-256 (0x00)", async function () {
+  it("Hash chunks sha2-256 (0x00)", async () => {
     const proof = await testHash256Chunks("00", circuitChunks);
 
     await expect(circuitChunks).to.useSolidityVerifier(verifierChunks).and.verifyProof(proof);
   });
 });
 
-describe("Hash 384 test", function () {
+describe("Hash 384 test", () => {
   const reverter = new Reverter();
 
   let verifierChunks: ShaHashChunks_1_384_Groth16Verifier;
@@ -483,20 +483,20 @@ describe("Hash 384 test", function () {
 
   afterEach(reverter.revert);
 
-  it("Hash bits sha2-384 (0x00)", async function () {
+  it("Hash bits sha2-384 (0x00)", async () => {
     const proof = await testHash384Bits("00", circuitBits);
 
     await expect(circuitBits).to.useSolidityVerifier(verifierBits).and.verifyProof(proof);
   });
 
-  it("Hash chunks sha2-384 (0x00)", async function () {
+  it("Hash chunks sha2-384 (0x00)", async () => {
     const proof = await testHash384Chunks("00", circuitChunks);
 
     await expect(circuitChunks).to.useSolidityVerifier(verifierChunks).and.verifyProof(proof);
   });
 });
 
-describe("Hash 512 test", function () {
+describe("Hash 512 test", () => {
   const reverter = new Reverter();
 
   let verifierChunks: ShaHashChunks_1_512_Groth16Verifier;
@@ -520,20 +520,20 @@ describe("Hash 512 test", function () {
 
   afterEach(reverter.revert);
 
-  it("Hash bits sha2-512 (0x00)", async function () {
+  it("Hash bits sha2-512 (0x00)", async () => {
     const proof = await testHash512Bits("00", circuitBits);
 
     await expect(circuitBits).to.useSolidityVerifier(verifierBits).and.verifyProof(proof);
   });
 
-  it("Hash chunks sha2-512 (0x00)", async function () {
+  it("Hash chunks sha2-512 (0x00)", async () => {
     const proof = await testHash512Chunks("00", circuitChunks);
 
     await expect(circuitChunks).to.useSolidityVerifier(verifierChunks).and.verifyProof(proof);
   });
 });
 
-describe("Poseidon test", function () {
+describe("Poseidon test", () => {
   const reverter = new Reverter();
 
   let verifier1: PoseidonHash_1_Groth16Verifier;
@@ -557,13 +557,13 @@ describe("Poseidon test", function () {
 
   afterEach(reverter.revert);
 
-  it("Poseidon([0])", async function () {
+  it("Poseidon([0])", async () => {
     const proof = await testPoseidon([0n], circuit1);
 
     await expect(circuit1).to.useSolidityVerifier(verifier1).and.verifyProof(proof);
   });
 
-  it("Poseidon([0, 1])", async function () {
+  it("Poseidon([0, 1])", async () => {
     const proof = await testPoseidon([0n, 1n], circuit2);
 
     await expect(circuit2).to.useSolidityVerifier(verifier2).and.verifyProof(proof);

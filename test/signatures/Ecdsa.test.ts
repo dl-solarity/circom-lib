@@ -158,7 +158,7 @@ describe("Ecdsa num test", function () {
 
   afterEach(reverter.revert);
 
-  it("Ver correct signature", async function () {
+  it("Ver correct signature", async () => {
     await testVerNum(
       31374990377422060663897166666788812921270243020104798068084951911347116539007n,
       41157152733927076370846415947227885284998856909034587685323725392788996793783n,
@@ -169,7 +169,7 @@ describe("Ecdsa num test", function () {
     );
   });
 
-  it("Ver incorrect signature, should handle failture", async function () {
+  it("Ver incorrect signature, should handle failture", async () => {
     await testVerNum(
       31374990377422060663897166666788812921270243020104798068084951911347116539007n,
       41157152733927076370846415947227885284998856909034587685323725392788996793783n,
@@ -199,7 +199,7 @@ describe("Ecdsa bits test", function () {
 
   afterEach(reverter.revert);
 
-  it("Ver correct signature", async function () {
+  it("Ver correct signature", async () => {
     const proof = await testVerBits(
       31374990377422060663897166666788812921270243020104798068084951911347116539007n,
       41157152733927076370846415947227885284998856909034587685323725392788996793783n,
@@ -473,7 +473,7 @@ describe("Ecdsa bits test", function () {
     await expect(circuit).to.useSolidityVerifier(verifier).and.verifyProof(proof);
   });
 
-  it("Ver incorrect signature, should handle failture", async function () {
+  it("Ver incorrect signature, should handle failture", async () => {
     await testVerBits(
       31374990377422060663897166666788812921270243020104798068084951911347116539007n,
       41157152733927076370846415947227885284998856909034587685323725392788996793783n,
