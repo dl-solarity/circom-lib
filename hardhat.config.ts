@@ -9,6 +9,11 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 const config: HardhatUserConfig = {
+  networks: {
+    hardhat: {
+      allowUnlimitedContractSize: true,
+    },
+  },
   solidity: {
     compilers: [
       {
@@ -33,6 +38,10 @@ const config: HardhatUserConfig = {
     target: "ethers-v6",
     alwaysGenerateOverloads: true,
     discriminateTypes: true,
+  },
+  zkit: {
+    compilationSettings: {
+    }
   },
 };
 
