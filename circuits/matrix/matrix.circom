@@ -1,7 +1,6 @@
 pragma circom 2.1.6;
 
 include "../int/arithmetic.circom";
-include "./matrixFunc.circom";
 include "../bigInt/bigIntFunc.circom";
 
 /*
@@ -10,7 +9,7 @@ include "../bigInt/bigIntFunc.circom";
 * To help with debug you can use this:
 * var print = logMatrix(out, x1, x2);
 * This will log your matrix out with dimmesions x1 x x2
-* x2 < 40; can be changed in "./matrixFunc.circom"
+* x2 < 40; can be changed in "../mock/matrix/matrixFunc.circom"
 */
 
 /*
