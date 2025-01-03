@@ -76,7 +76,7 @@ template VerifyECDSABits(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, ALGO) {
     scalarMult1.dummy <== dummy;
     
     // r * s_inv * (x, y)
-    component scalarMult2 = EllipticCurvePipingerMult(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, 4);
+    component scalarMult2 = EllipticCurvePippengerMult(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, 4);
     scalarMult2.scalar <== mult2.out;
     scalarMult2.in <== pubkey;
     scalarMult2.dummy <== dummy;
@@ -145,7 +145,7 @@ template VerifyECDSABigInt(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     scalarMult1.dummy <== dummy;
     
     // r * s_inv * (x, y)
-    component scalarMult2 = EllipticCurvePipingerMult(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, 4);
+    component scalarMult2 = EllipticCurvePippengerMult(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, 4);
     scalarMult2.scalar <== mult2.out;
     scalarMult2.in <== pubkey;
     scalarMult2.dummy <== dummy;

@@ -213,10 +213,10 @@ template AdditionCheck(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
 */
 
 /*
-* Precomputes for pipinger optimised multiplication.
+* Precomputes for pippenger optimised multiplication.
 * Computes 0 * G, 1 * G, 2 * G, ... (2 ** WINDOW_SIZE - 1) * G
 */
-template EllipticCurvePrecomputePipinger(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, WINDOW_SIZE) {
+template EllipticCurvePrecomputePippenger(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, WINDOW_SIZE) {
     signal input in[2][CHUNK_NUMBER];
     signal input dummy;
     
@@ -753,7 +753,7 @@ template EllipticCurveScalarGeneratorMultiplicationOptimised(CHUNK_SIZE, CHUNK_N
 /*
 * Optimised scalar point multiplication, use it if you can`t add precompute table.
 * Algo:
-* Precompute (see "PrecomputePipinger" template)
+* Precompute (see "PrecomputePippenger" template)
 * Convert each WINDOW_SIZE bits into num IDX, double WINDOW_SIZE times, add to result IDX * G (from precomputes), repeat
 * Double add and algo complexity:
 * 255 doubles + 256 adds
@@ -761,7 +761,7 @@ template EllipticCurveScalarGeneratorMultiplicationOptimised(CHUNK_SIZE, CHUNK_N
 * 256 - WINDOW_SIZE doubles, 256 / WINDOW_SIZE adds, 2 ** WINDOW_SIZE - 2 adds and doubles for precompute
 * for 256 curve best WINDOW_SIZE with 330 operations with points.
 */
-template EllipticCurvePipingerMult(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, WINDOW_SIZE) {
+template EllipticCurvePippengerMult(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, WINDOW_SIZE) {
     assert(WINDOW_SIZE == 4);
     
     signal input in[2][CHUNK_NUMBER];
@@ -774,7 +774,7 @@ template EllipticCurvePipingerMult(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, WINDOW_SIZ
     
     signal precomputed[PRECOMPUTE_NUMBER][2][CHUNK_NUMBER];
     
-    component precompute = EllipticCurvePrecomputePipinger(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, WINDOW_SIZE);
+    component precompute = EllipticCurvePrecomputePippenger(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, WINDOW_SIZE);
     precompute.in <== in;
     precompute.dummy <== dummy;
     precompute.out ==> precomputed;

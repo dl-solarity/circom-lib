@@ -8,13 +8,13 @@ import { Reverter } from "../helpers/reverter";
 import { bigIntToArray, pointScalarMul } from "../helpers/helperFunctions";
 
 import {
-  EllipticCurvePipingerMult,
+  EllipticCurvePippengerMult,
   EllipticCurveScalarGeneratorMultiplication,
   EllipticCurveScalarPrecomputeMultiplication,
 } from "@/generated-types/zkit/core/mock/ec";
 import { EllipticCurveScalarGeneratorMultiplication as generatorMultBrainpool } from "@/generated-types/zkit/core/mock/ec/generatorMultBrainpoolP256r1.circom";
 import { EllipticCurveScalarPrecomputeMultiplication as precomputeBrainpool } from "@/generated-types/zkit/core/mock/ec/precomputeMultBrainpoolP256r1.circom";
-import { EllipticCurvePipingerMult as pipingerMultBrainpool } from "@/generated-types/zkit/core/mock/ec/scalarMultBrainpoolP256r1.circom";
+import { EllipticCurvePippengerMult as pippengerMultBrainpool } from "@/generated-types/zkit/core/mock/ec/scalarMultBrainpoolP256r1.circom";
 
 import {
   EllipticCurveScalarGeneratorMultiplication_64_4_0_0_0_0_7_0_0_0_18446744069414583343_18446744073709551615_18446744073709551615_18446744073709551615_Groth16Verifier,
@@ -64,7 +64,7 @@ async function testGenMultBrainpoolP256r1(input1: bigint, circuit: generatorMult
   return proofStruct;
 }
 
-async function testScalarMult(input1: bigint, input2: bigint, input3: bigint, circuit: EllipticCurvePipingerMult) {
+async function testScalarMult(input1: bigint, input2: bigint, input3: bigint, circuit: EllipticCurvePippengerMult) {
   const input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
 
   const mult = pointScalarMul(
@@ -86,7 +86,7 @@ async function testScalarMultBrainpoolP256r1(
   input1: bigint,
   input2: bigint,
   input3: bigint,
-  circuit: pipingerMultBrainpool,
+  circuit: pippengerMultBrainpool,
 ) {
   const input = [bigIntToArray(64, 4, input1), bigIntToArray(64, 4, input2)];
 
@@ -264,10 +264,10 @@ describe("Scalar point multiplication test", function () {
   this.timeout(10000000);
   const reverter = new Reverter();
 
-  let circuit: EllipticCurvePipingerMult;
+  let circuit: EllipticCurvePippengerMult;
 
   before("setup", async () => {
-    circuit = await zkit.getCircuit("circuits/mock/ec/scalarMult.circom:EllipticCurvePipingerMult");
+    circuit = await zkit.getCircuit("circuits/mock/ec/scalarMult.circom:EllipticCurvePippengerMult");
 
     await reverter.snapshot();
   });
@@ -299,10 +299,10 @@ describe("BrainpoolP256r1 scalar point multiplication test", function () {
   this.timeout(10000000);
   const reverter = new Reverter();
 
-  let circuit: pipingerMultBrainpool;
+  let circuit: pippengerMultBrainpool;
 
   before("setup", async () => {
-    circuit = await zkit.getCircuit("circuits/mock/ec/scalarMultBrainpoolP256r1.circom:EllipticCurvePipingerMult");
+    circuit = await zkit.getCircuit("circuits/mock/ec/scalarMultBrainpoolP256r1.circom:EllipticCurvePippengerMult");
 
     await reverter.snapshot();
   });
