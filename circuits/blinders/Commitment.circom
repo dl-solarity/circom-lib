@@ -40,7 +40,7 @@ template Hash2() {
  * This circuit is a simple commitment circuit that takes a nullifier and a secret and returns a commitment.
  * The commitment is the result of hashing the secret and the nullifier together using a Poseidon hash function.
  */
-template CommitmentVerifier() {
+template Commitment() {
     signal input nullifier;
     signal input secret;
     signal input dummy;
