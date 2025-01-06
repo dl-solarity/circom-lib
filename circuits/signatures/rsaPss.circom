@@ -5,17 +5,17 @@ include "../bitify/bitGates.circom";
 include "../hasher/hash.circom";
 include "./mask/mgf1.circom";
 
-/*
-* Verification for RSAPSS signature.
-* hashed is hashed message of hash_type algo, hash_type is algo hash algo for mgf1 mask generation.
-* There is no assert for CHUNK_SIZE == 64 and it may work with other chunking, but this one wasn`t tested, 
-* so better use 64 signature and pubkey - chunked numbers (CHUNK_SIZE, CHUNK_NUMBER).
-* default exp = 65537 
-* SALT_LEN is salt lenght in bytes! (NOT IN BITES LIKE HASH_TYPE!).
-* This is because salt len can`t be % 8 != 0 so we use bytes len (8 bites).
-* For now, only HASH_TYPE == 384 && SALT_LEN == 48, HASH_TYPE == 256 && SALT_LEN == 64, HASH_TYPE == 256 && SALT_LEN == 32 cases supported.
-* Use this for CHUNK_NUMBER == 2**n, otherwise error will occur.
-*/
+/**
+ * Verification for RSAPSS signature.
+ * hashed is hashed message of hash_type algo, hash_type is algo hash algo for mgf1 mask generation.
+ * There is no assert for CHUNK_SIZE == 64 and it may work with other chunking, but this one wasn`t tested,
+ * so better use 64 signature and pubkey - chunked numbers (CHUNK_SIZE, CHUNK_NUMBER).
+ * default exp = 65537.
+ * SALT_LEN is salt lenght in bytes! (NOT IN BITES LIKE HASH_TYPE!).
+ * This is because salt len can`t be % 8 != 0 so we use bytes len (8 bites).
+ * For now, only HASH_TYPE == 384 && SALT_LEN == 48, HASH_TYPE == 256 && SALT_LEN == 64, HASH_TYPE == 256 && SALT_LEN == 32 cases supported.
+ * Use this for CHUNK_NUMBER == 2**n, otherwise error will occur.
+ */
 template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE) {
     assert((HASH_TYPE == 384 && SALT_LEN == 48) || (HASH_TYPE == 256 && SALT_LEN == 64) || (HASH_TYPE == 256 && SALT_LEN == 32));
     
@@ -34,7 +34,7 @@ template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE) {
     signal eM[EM_LEN];
     signal eMsgInBits[EM_LEN_BITS];
     
-    //computing encoded message
+    // computing encoded message
     component powerMod;
     powerMod = PowerMod(CHUNK_SIZE, CHUNK_NUMBER, EXP);
     powerMod.base <== signature;
@@ -67,10 +67,10 @@ template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE) {
         eM[EM_LEN - i - 1] <== bits2Num[i].out;
     }
  
-    //should be more than HLEN + SLEN + 2
+    // should be more than HLEN + SLEN + 2
     assert(EM_LEN >= HASH_LEN + SALT_LEN + 2);
     
-    //should end with 0xBC (188 in decimal)
+    // should end with 0xBC (188 in decimal)
     assert(eM[0] == 188); 
     
     var DB_MASK_LEN = EM_LEN - HASH_LEN - 1;
@@ -86,12 +86,12 @@ template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE) {
     
     signal hash[HASH_LEN * 8];
     
-    //inserting hash
+    // inserting hash
     for (var i = 0; i < HASH_TYPE; i++) {
         hash[i] <== eMsgInBits[(EM_LEN_BITS) - HASH_TYPE - 8 + i];
     }
     
-    //getting mask
+    // getting mask
     if (HASH_TYPE == 256) {
         component MGF1_256 = Mgf1Sha256(HASH_LEN, DB_MASK_LEN);
         MGF1_256.dummy <== dummy;
@@ -125,7 +125,7 @@ template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE) {
     }
 
     for (var i = 0; i < DB_MASK_LEN * 8; i++) {
-        //setting the first leftmost byte to 0
+        // setting the first leftmost byte to 0
         if (i == 0) {
             db[i] <== 0;
         } else {
@@ -133,30 +133,30 @@ template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE) {
         }
     }
     
-    //inserting salt
+    // inserting salt
     for (var i = 0; i < SALT_LEN_BITS; i++) {
         salt[SALT_LEN_BITS - 1 - i] <== db[(DB_MASK_LEN * 8) - 1 - i];
     }
     
     signal mDash[1024];
-    //adding 0s
+    // adding 0s
     for (var i = 0; i < 64; i++) {
         mDash[i] <== 0;
     }
 
-    //adding message hash
+    // adding message hash
     for (var i = 0; i < HASH_LEN * 8; i++) {
         mDash[64 + i] <== hashed[i];
     }
 
-    //adding salt
+    // adding salt
     for (var i = 0; i < SALT_LEN * 8; i++) {
         mDash[64 + HASH_LEN * 8 + i] <== salt[i];
     }
     
     if (HASH_TYPE == 256 && SALT_LEN == 32) {
-        //adding padding
-        //len = 64+512 = 576 = 1001000000
+        // adding padding
+        // len = 64+512 = 576 = 1001000000
         for (var i = 577; i < 1014; i++) {
             mDash[i] <== 0;
         }
@@ -173,7 +173,7 @@ template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE) {
         mDash[1015] <== 0;
         mDash[1014] <== 1;
         
-        //hashing
+        // hashing
         component hDash256 = ShaHashChunks(2, HASH_TYPE);
         hDash256.dummy <== dummy;
         hDash256.in <== mDash;
@@ -206,8 +206,8 @@ template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE) {
     }
 
     if (HASH_TYPE == 384 && SALT_LEN == 48) {        
-        //padding
-        //len = 64+48*16 = 832 = 1101000000
+        // padding
+        // len = 64+48*16 = 832 = 1101000000
         for (var i = 833; i < 1014; i++) {
             mDash[i] <== 0;
         }
@@ -224,7 +224,7 @@ template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE) {
         mDash[1015] <== 1;
         mDash[1014] <== 1;
         
-        //hashing mDash
+        // hashing mDash
         component hDash384 = ShaHashChunks(1, HASH_TYPE);
         hDash384.dummy <== dummy;
         hDash384.in <== mDash;
@@ -233,18 +233,18 @@ template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE) {
     }
 }
 
-/*
-* Verification for RSAPSS signature.
-* hashed is hashed message of hash_type algo, hash_type is algo hash algo for mgf1 mask generation.
-* There is no assert for CHUNK_SIZE == 64 and it may work with other chunking, but this one wasn`t tested,
-* so better use 64 signature and pubkey - chunked numbers (CHUNK_SIZE, CHUNK_NUMBER).
-* e_bits - Len of bit representation of exponent with 1 highest and lowest bits, other are 0 (2^(e_bits - 1) + 1).
-* default exp = 65537 (e_bits = 17)
-* SALT_LEN is salt lenght in bytes! (NOT IN BITES LIKE HASH_TYPE!)
-* This is because salt len can`t be % 8 != 0 so we use bytes len (8 bites).
-* For now, only HASH_TYPE == 384 && SALT_LEN == 48,  HASH_TYPE == 256 && SALT_LEN == 64, HASH_TYPE == 256 && SALT_LEN == 32 cases supported.
-* Use this for CHUNK_NUMBER != 2**n, otherwise use previous template.
-*/
+/**
+ * Verification for RSAPSS signature.
+ * hashed is hashed message of hash_type algo, hash_type is algo hash algo for mgf1 mask generation.
+ * There is no assert for CHUNK_SIZE == 64 and it may work with other chunking, but this one wasn`t tested,
+ * so better use 64 signature and pubkey - chunked numbers (CHUNK_SIZE, CHUNK_NUMBER).
+ * e_bits - Len of bit representation of exponent with 1 highest and lowest bits, other are 0 (2^(e_bits - 1) + 1).
+ * default exp = 65537 (e_bits = 17)
+ * SALT_LEN is salt lenght in bytes! (NOT IN BITES LIKE HASH_TYPE!)
+ * This is because salt len can`t be % 8 != 0 so we use bytes len (8 bites).
+ * For now, only HASH_TYPE == 384 && SALT_LEN == 48,  HASH_TYPE == 256 && SALT_LEN == 64, HASH_TYPE == 256 && SALT_LEN == 32 cases supported.
+ * Use this for CHUNK_NUMBER != 2**n, otherwise use previous template.
+ */
 template VerifyRsaPssSigNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE) {
     assert((HASH_TYPE == 384 && SALT_LEN == 48) || (HASH_TYPE == 256 && SALT_LEN == 64) || (HASH_TYPE == 256 && SALT_LEN == 32));
     
@@ -263,7 +263,7 @@ template VerifyRsaPssSigNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HA
     signal eM[EM_LEN];
     signal eMsgInBits[EM_LEN_BITS];
     
-    //computing encoded message
+    // computing encoded message
     component powerMod;
     powerMod = PowerModNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, EXP);
     powerMod.base <== signature;
@@ -296,10 +296,10 @@ template VerifyRsaPssSigNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HA
         eM[EM_LEN - i - 1] <== bits2Num[i].out;
     }
     
-    //should be more than HLEN + SLEN + 2
+    // should be more than HLEN + SLEN + 2
     assert(EM_LEN >= HASH_LEN + SALT_LEN + 2);
     
-    //should end with 0xBC (188 in decimal)
+    // should end with 0xBC (188 in decimal)
     assert(eM[0] == 188); 
     
     var DB_MASK_LEN = EM_LEN - HASH_LEN - 1;
@@ -314,12 +314,12 @@ template VerifyRsaPssSigNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HA
     
     signal hash[HASH_LEN * 8];
     
-    //inserting hash
+    // inserting hash
     for (var i = 0; i < HASH_TYPE; i++) {
         hash[i] <== eMsgInBits[(EM_LEN_BITS) - HASH_TYPE - 8 + i];
     }
     
-    //getting mask
+    // getting mask
     if (HASH_TYPE == 256) {
         component MGF1_256 = Mgf1Sha256(HASH_LEN, DB_MASK_LEN);
         MGF1_256.dummy <== dummy;
@@ -353,7 +353,7 @@ template VerifyRsaPssSigNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HA
     }
 
     for (var i = 0; i < DB_MASK_LEN * 8; i++) {
-        //setting the first leftmost byte to 0
+        // setting the first leftmost byte to 0
         if (i == 0) {
             db[i] <== 0;
         } else {
@@ -361,31 +361,31 @@ template VerifyRsaPssSigNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HA
         }
     }
     
-    //inserting salt
+    // inserting salt
     for (var i = 0; i < SALT_LEN_BITS; i++) {
         salt[SALT_LEN_BITS - 1 - i] <== db[(DB_MASK_LEN * 8) - 1 - i];
     }
     
     signal mDash[1024];
-    //adding 0s
+    // adding 0s
     for (var i = 0; i < 64; i++) {
         mDash[i] <== 0;
     }
 
-    //adding message hash
+    // adding message hash
     for (var i = 0; i < HASH_LEN * 8; i++) {
         mDash[64 + i] <== hashed[i];
         
     }
 
-    //adding salt
+    // adding salt
     for (var i = 0; i < SALT_LEN * 8; i++) {
         mDash[64 + HASH_LEN * 8 + i] <== salt[i];  
     }
 
     if (HASH_TYPE == 256 && SALT_LEN == 32) {
-        //adding padding
-        //len = 64+512 = 576 = 1001000000
+        // adding padding
+        // len = 64+512 = 576 = 1001000000
         for (var i = 577; i < 1014; i++) {
             mDash[i] <== 0;
         }
@@ -402,7 +402,7 @@ template VerifyRsaPssSigNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HA
         mDash[1015] <== 0;
         mDash[1014] <== 1;
         
-        //hashing
+        // hashing
         component hDash256 = ShaHashChunks(2, HASH_TYPE);
         hDash256.dummy <== dummy;
         hDash256.in <== mDash;
@@ -434,8 +434,8 @@ template VerifyRsaPssSigNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HA
     }
 
     if (HASH_TYPE == 384 && SALT_LEN == 48) {        
-        //padding
-        //len = 64+48*16 = 832 = 1101000000
+        // padding
+        // len = 64+48*16 = 832 = 1101000000
         for (var i = 833; i < 1014; i++) {
             mDash[i] <== 0;
         }
@@ -452,7 +452,7 @@ template VerifyRsaPssSigNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HA
         mDash[1015] <== 1;
         mDash[1014] <== 1;
         
-        //hashing mDash
+        // hashing mDash
         component hDash384 = ShaHashChunks(1, HASH_TYPE);
         hDash384.dummy <== dummy;
         hDash384.in <== mDash;

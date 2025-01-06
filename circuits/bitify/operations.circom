@@ -2,10 +2,10 @@ pragma circom 2.1.6;
 
 include "./bitify.circom";
 
-/*
-* Calculates bin sum of NUM numbers each LEN BITS.
-* out is LEN + NUM - 1 LEN bit number.
-*/
+/**
+ * Calculates bin sum of NUM numbers each LEN BITS.
+ * out is LEN + NUM - 1 LEN bit number.
+ */
 template BinSum(NUM, LEN) {
     assert (LEN + NUM - 1 <= 253);
 

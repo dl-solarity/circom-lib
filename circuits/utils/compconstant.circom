@@ -3,8 +3,8 @@ pragma circom 2.1.6;
 include "../bitify/bitify.circom";
 
 /**
-* Source: https://github.com/iden3/circomlib/blob/v2.0.5/circuits/compconstant.circom
-*/
+ * Source: https://github.com/iden3/circomlib/blob/v2.0.5/circuits/compconstant.circom
+ */
 template CompConstant(ct) {
     signal input in[254];
     signal output out;

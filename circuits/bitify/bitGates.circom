@@ -1,15 +1,15 @@
 pragma circom 2.1.6;
 
-/*
-* Here are templates for all bit gates for any 1 or 2 inputs.
-* For 1-input gates interface is input in and output out.
-* For 2-input gates interface is input in[2] and output out.
-* 3-input gates may be added later.
-*/
+/**
+ * Here are templates for all bit gates for any 1 or 2 inputs.
+ * For 1-input gates interface is input in and output out.
+ * For 2-input gates interface is input in[2] and output out.
+ * 3-input gates may be added later.
+ */
 
-/*
-* One input gates
-*/
+/**
+ * One input gates
+ */
 
 // a
 // 0 -> 0
@@ -31,9 +31,9 @@ template NOT() {
     out <== 1 - in;
 }
 
-/*
-* Two input gates
-*/
+/**
+ * Two input gates
+ */
 
 // a ∧ b
 // 0 ∧ 0 = 0
@@ -240,8 +240,8 @@ template Xor2(n) {
 }
 
 /**
-* Source: https://github.com/iden3/circomlib/blob/v2.0.5/circuits/gates.circom
-*/
+ * Source: https://github.com/iden3/circomlib/blob/v2.0.5/circuits/gates.circom
+ */
 template MultiAND(n) {
     signal input in[n];
     signal output out;

@@ -3,14 +3,14 @@ pragma circom 2.1.6;
 include "./poseidonConstants.circom";
 include "../../int/arithmetic.circom";
 
-/*
-* Poseidon hash for less than 16 inputs
-*/
+/**
+ * Poseidon hash for less than 16 inputs
+ */
 
-/*
-* Next templates are helpers, don`t use them not in poseidon hash without understanding what are you doing!
-* Use Poseidon() below to get poseidon hash!
-*/
+/**
+ * Next templates are helpers, don`t use them not in poseidon hash without understanding what are you doing!
+ * Use Poseidon() below to get poseidon hash!
+ */
 template Sigma() {
     signal input in;
 
@@ -243,10 +243,10 @@ template PoseidonEx(nInputs, nOuts) {
     }   
 }
 
-/*
-* Secured version of Poseidon hash circomlib implementation.
-* Use this template to calculate to calculate Poseidon hash of your vector (1 elememnt array for one num).
-*/
+/**
+ * Secured version of Poseidon hash circomlib implementation.
+ * Use this template to calculate to calculate Poseidon hash of your vector (1 elememnt array for one num).
+ */
 template Poseidon(nInputs) {
     signal input in[nInputs];
     signal input dummy;

@@ -3,14 +3,14 @@ pragma circom 2.1.6;
 include "../bitify/comparators.circom";
 include "../bitify/bitify.circom";
 
-/*
-* Some templates for num operations.
-*/
+/**
+ * Some templates for num operations.
+ */
 
-/*
-* Gets inversion in circom prime field.
-* out * in === 1
-*/
+/**
+ * Gets inversion in circom prime field.
+ * out * in === 1
+ */
 template Inverse() {
     signal input in;
     
@@ -20,11 +20,11 @@ template Inverse() {
     out * in === 1;
 }
 
-/*
-* THIS IS UNSECURE VERSION, NEVER (NEVER!!!!!!!!!!!!!) USE IT IN PRODUCTION!!!!
-* I hope secure version will appear later.
-* Use if you don`t know what is len of bit representation of in[0] is.
-*/
+/**
+ * THIS IS UNSECURE VERSION, NEVER (NEVER!!!!!!!!!!!!!) USE IT IN PRODUCTION!!!!
+ * I hope secure version will appear later.
+ * Use if you don`t know what is len of bit representation of in[0] is.
+ */
 template DivisionStrict() {
     signal input in[2];
     
@@ -47,11 +47,11 @@ template DivisionStrict() {
     check2.out === 1;    
 }
 
-/*
-* THIS IS UNSECURE VERSION, NEVER (NEVER!!!!!!!!!!!!!) USE IT IN PRODUCTION!!!!!
-* I hope secure version will appear later.
-* Use this if you know what len of bit representation of in[1] is.
-*/
+/**
+ * THIS IS UNSECURE VERSION, NEVER (NEVER!!!!!!!!!!!!!) USE IT IN PRODUCTION!!!!!
+ * I hope secure version will appear later.
+ * Use this if you know what len of bit representation of in[1] is.
+ */
 template Division(LEN) {    
     assert (LEN < 253);
 
@@ -76,11 +76,11 @@ template Division(LEN) {
     check2.out === 1;
 }
 
-/*
-* Calculated log_2 rounded down (for example, 2.3 ===> 2),
-* also can be used as index of first 1 bit in number.
-* Don`t use it for 0!!!
-*/
+/**
+ * Calculated log_2 rounded down (for example, 2.3 ===> 2),
+ * also can be used as index of first 1 bit in number.
+ * Don`t use it for 0!!!
+ */
 template Log2CeilStrict() {
     signal input in;
 
@@ -106,11 +106,11 @@ template Log2CeilStrict() {
     out <== sum[251];
 }
 
-/*
-* To calculate log ceil, we should convert num to bits, and if we know it`s len, we already know the answer,
-* but if you know estimed range of num, you can use this to reduce num of constraints (num < 2 ** RANGE).
-* For example, you don`t need to use convert num to 254 bits if you know that is always less that 1000.
-*/
+/**
+ * To calculate log ceil, we should convert num to bits, and if we know it`s len, we already know the answer,
+ * but if you know estimed range of num, you can use this to reduce num of constraints (num < 2 ** RANGE).
+ * For example, you don`t need to use convert num to 254 bits if you know that is always less that 1000.
+ */
 template Log2Ceil(RANGE) {
     signal input in;
     signal output out;
@@ -135,10 +135,10 @@ template Log2Ceil(RANGE) {
     out <== sum[RANGE - 1];
 }
 
-/*
-* Computes last bit of num with any bit len for 2 constraints.
-* Returns bit (0 or 1) and div = num \ 2.
-*/
+/**
+ * Computes last bit of num with any bit len for 2 constraints.
+ * Returns bit (0 or 1) and div = num \ 2.
+ */
 template GetLastBit() {
     signal input in;
 
@@ -152,11 +152,11 @@ template GetLastBit() {
     div * 2 + bit * bit === in;
 }
 
-/*
-* Computes last n bits of any num, returns array of bits and div.
-* In fact, this is also just a div for (2 ** N).
-* For now, this is only one secured div that can be used.
-*/
+/**
+ * Computes last n bits of any num, returns array of bits and div.
+ * In fact, this is also just a div for (2 ** N).
+ * For now, this is only one secured div that can be used.
+ */
 template GetLastNBits(N) {
     signal input in;
     
@@ -178,12 +178,12 @@ template GetLastNBits(N) {
     div <== getLastBit[N - 1].div;
 }
 
-/*
-* Get sum of N elements with 1 constraint.
-* Use this instead of a + b + ... + c;
-* Circom will drop linear constaraint because of optimisation.
-* This one adds dummy * dummy (0) to make it quadratic.
-*/
+/**
+ * Get sum of N elements with 1 constraint.
+ * Use this instead of a + b + ... + c;
+ * Circom will drop linear constaraint because of optimisation.
+ * This one adds dummy * dummy (0) to make it quadratic.
+ */
 template GetSumOfNElements(N) { 
     assert (N >= 2);
     

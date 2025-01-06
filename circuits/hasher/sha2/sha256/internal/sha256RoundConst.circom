@@ -1,8 +1,8 @@
 pragma circom 2.1.6;
 
-/*
-* Round constants for SHA2-224 and SHA2-256 (they are the same).
-*/
+/**
+ * Round constants for SHA2-224 and SHA2-256 (they are the same).
+ */
 template Sha2_224_256RoundKeys() {    
     signal output out[64];
     

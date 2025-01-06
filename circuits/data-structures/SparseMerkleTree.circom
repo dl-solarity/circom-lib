@@ -9,7 +9,7 @@ function inverse(a) {
     return 1 - a;
 }
 
-/*
+/**
  * Hash2 = Poseidon(H_L | H_R)
  */
 template Hash2() {
@@ -27,7 +27,7 @@ template Hash2() {
     out <== h.out;
 }
 
-/*
+/**
  * Hash2 = Poseidon(key | value | 1)
  * 1 is added to the end of the leaf value to make the hash unique
  */
@@ -51,8 +51,8 @@ template Hash3() {
 }
 
 /**
-* Source: https://github.com/iden3/circomlib/blob/v2.0.5/circuits/switcher.circom
-*/
+ * Source: https://github.com/iden3/circomlib/blob/v2.0.5/circuits/switcher.circom
+ */
 template Switcher() {
     signal input sel;
     signal input L;
@@ -68,10 +68,10 @@ template Switcher() {
     outR <== -aux + R;
 }
 
-/*
-* Returns an array of bits, where the index of `1` bit 
-* is the current depth of the tree
-*/
+/**
+ * Returns an array of bits, where the index of `1` bit 
+ * is the current depth of the tree
+ */
 template DepthDeterminer(depth) {
     assert(depth > 1);
 
@@ -103,7 +103,7 @@ template DepthDeterminer(depth) {
     desiredDepth[0] <== inverse(done[0]);
 }
 
-/*
+/**
  * Determines the type of the node
  */
 template NodeTypeDeterminer() {
@@ -145,7 +145,7 @@ template NodeTypeDeterminer() {
     empty <== isDesiredDepth * auxIsEmpty;
 }
 
-/*
+/**
  * Gets hash at the current depth, based on the type of the node
  * If the mode is a empty, then the hash is 0
  */
@@ -187,7 +187,7 @@ template DepthHasher() {
     root <== res[0] + res[1] + res[2];
 }
 
-/*
+/**
  * Checks the sparse merkle proof against the given root
  */
 template SparseMerkleTree(depth) {

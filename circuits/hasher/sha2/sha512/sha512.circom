@@ -93,8 +93,10 @@ template Sha512HashBits(LEN) {
     }
 }
 
-// execute `n` rounds of the SHA384 / SHA512 inner loop
-// NOTE: hash state is stored as 8 qwords, each little-endian
+/**
+ * execute `n` rounds of the SHA384 / SHA512 inner loop
+ * NOTE: hash state is stored as 8 qwords, each little-endian
+ */
 template Sha2_384_512Rounds(n) {
     assert(n > 0);
     assert(n <= 80);
@@ -232,8 +234,10 @@ template Sha2_384_512Rounds(n) {
     }   
 }
 
-// message schedule for SHA384 / SHA512
-// NOTE: the individual 64 bit words are in little-endian order 
+/**
+ * message schedule for SHA384 / SHA512
+ * NOTE: the individual 64 bit words are in little-endian order
+ */
 template Sha2_384_512Schedule() {    
     signal input chunkBits[16][64]; 
     signal input dummy;

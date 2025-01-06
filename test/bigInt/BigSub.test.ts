@@ -105,7 +105,7 @@ describe("Big sub non equal test", () => {
   });
 
   afterEach(reverter.revert);
-  
+
   it("15 - 15", async () => {
     const proof = await testBigSubNonEqual(15n, 15n, circuit);
 

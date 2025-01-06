@@ -1,8 +1,8 @@
 pragma circom 2.1.6;
 
-/*
-* Initial hash value for SHA2-224.
-*/
+/**
+ * Initial hash value for SHA2-224.
+ */
 template Sha224InitialValue() {    
     signal output out[8][32];
     

@@ -2,7 +2,7 @@ pragma circom 2.1.6;
 
 include "../hasher/poseidon/poseidon.circom";
 
-/*
+/**
  * Hash1 = Poseidon(nullifier)
  */
 template Hash1() {
@@ -18,7 +18,7 @@ template Hash1() {
     out <== h.out;
 }
 
-/*
+/**
  * Hash2 = Poseidon(nullifier | secret)
  */
 template Hash2() {
@@ -36,7 +36,7 @@ template Hash2() {
     out <== h.out;
 }
 
-/*
+/**
  * This circuit is a simple commitment circuit that takes a nullifier and a secret and returns a commitment.
  * The commitment is the result of hashing the secret and the nullifier together using a Poseidon hash function.
  */

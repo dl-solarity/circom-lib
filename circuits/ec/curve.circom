@@ -12,44 +12,44 @@ include "../bitify/comparators.circom";
 include "../int/arithmetic.circom";
 include "./get.circom";
 
-/*
-* Operation for any Weierstrass prime-field elliptic curve (for now 256-bit).
-* A, B, P in every function - params of needed curve, chunked the same as every other chunking (64 4 for now).
-* Example usage of operation (those are params for secp256k1 ec):
-* EllipticCurveDoubleOptimised(64, 4, [0,0,0,0], [7,0,0,0], [18446744069414583343, 18446744073709551615, 18446744073709551615, 18446744073709551615]);
-* EllipticCurveDoubleOptimised(64, 4, [0,0,0,0], [7,0,0,0], [18446744069414583343, 18446744073709551615, 18446744073709551615, 18446744073709551615]);
-*
-* To add a new curve you should do next steps:
-* Get curve params(A, B, P) in chunked representation
-* Change params at 1..8 lines in "../../helpers/generate_get_for_new_curve.py" for your curve params, then execute script from root, this will update ./get.circom file
-* DON`T USE FOR ALREADY ADDED CURVE, THIS WILL LEAD TO ERROR!!!!!
-* Script also will not work for new chunking (for now 64 4 and 64 6), add first one by yourself 
-* (truly, this is actual not for whole chunking, but for chunk_number, chunk_size doesn`t matter, just check for asserts in templates if you need to add an other one)
-* Change params at 4..8 lines in "../../helpers/generate_pow_table_for_curve.py" for your curve params, then execute script from root, this will create file in ./powers
-* Add import to it here:
-* include "./powers/{curve name}pows.circom";
-* in template "EllipticCurveScalarGeneratorMultiplicationOptimised" for 64 4 chunking or "EllipticCurveScalarGeneratorMultiplicationNonOptimised" for other add new if for getting powers
-*
-* var powers[parts][2 ** STRIDE][2][CHUNK_NUMBER];
-* if (P[0] == 18446744069414583343 && P[1] == 18446744073709551615 && P[2] == 18446744073709551615 && P[3] == 18446744073709551615) { // change to your P chunking
-*     powers = getGPowStride8TableSecp256k1(CHUNK_SIZE, CHUNK_NUMBER);                                                      // change to your func name
-* }
-*
-* Now you can succesfully execute all functions for your curve.
-* EllipticCurveScalarPrecomputeMultiplication still needs precomputed table.
-*
-* Don`t use next templates within default point operations without understanding what are you doing, default curve operations will be below/
-*
-* They work fine, were used for deprecated methods.
-* THEY ARE NOT ENOUGHT TO CHECK ADDITION / DOUBLING, ANY Y CALCULATED BY CORRECT FORMULA FOR ANY WILL GIVE CORRECT RESULT
-*/
+/**
+ * Operation for any Weierstrass prime-field elliptic curve (for now 256-bit).
+ * A, B, P in every function - params of needed curve, chunked the same as every other chunking (64 4 for now).
+ * Example usage of operation (those are params for secp256k1 ec):
+ * EllipticCurveDoubleOptimised(64, 4, [0,0,0,0], [7,0,0,0], [18446744069414583343, 18446744073709551615, 18446744073709551615, 18446744073709551615]);
+ * EllipticCurveDoubleOptimised(64, 4, [0,0,0,0], [7,0,0,0], [18446744069414583343, 18446744073709551615, 18446744073709551615, 18446744073709551615]);
+ *
+ * To add a new curve you should do next steps:
+ * Get curve params(A, B, P) in chunked representation
+ * Change params at 1..8 lines in "../../helpers/generate_get_for_new_curve.py" for your curve params, then execute script from root, this will update ./get.circom file
+ * DON`T USE FOR ALREADY ADDED CURVE, THIS WILL LEAD TO ERROR!!!!!
+ * Script also will not work for new chunking (for now 64 4 and 64 6), add first one by yourself 
+ * (truly, this is actual not for whole chunking, but for chunk_number, chunk_size doesn`t matter, just check for asserts in templates if you need to add an other one)
+ * Change params at 4..8 lines in "../../helpers/generate_pow_table_for_curve.py" for your curve params, then execute script from root, this will create file in ./powers
+ * Add import to it here:
+ * include "./powers/{curve name}pows.circom";
+ * in template "EllipticCurveScalarGeneratorMultiplicationOptimised" for 64 4 chunking or "EllipticCurveScalarGeneratorMultiplicationNonOptimised" for other add new if for getting powers
+ *
+ * var powers[parts][2 ** STRIDE][2][CHUNK_NUMBER];
+ * if (P[0] == 18446744069414583343 && P[1] == 18446744073709551615 && P[2] == 18446744073709551615 && P[3] == 18446744073709551615) { // change to your P chunking
+ *     powers = getGPowStride8TableSecp256k1(CHUNK_SIZE, CHUNK_NUMBER);                                                      // change to your func name
+ * }
+ *
+ * Now you can succesfully execute all functions for your curve.
+ * EllipticCurveScalarPrecomputeMultiplication still needs precomputed table.
+ *
+ * Don`t use next templates within default point operations without understanding what are you doing, default curve operations will be below/
+ *
+ * They work fine, were used for deprecated methods.
+ * THEY ARE NOT ENOUGHT TO CHECK ADDITION / DOUBLING, ANY Y CALCULATED BY CORRECT FORMULA FOR ANY WILL GIVE CORRECT RESULT
+ */
 
-/*
-* Check is point on tangent (for doubling check).
-* (x, y), point that was doubled, (x3, y3) - result 
-* λ = (3 * x ** 2 + a) / (2 * y)
-* y3 = λ * (x - x3) - y
-*/
+/**
+ * Check is point on tangent (for doubling check).
+ * (x, y), point that was doubled, (x3, y3) - result 
+ * λ = (3 * x ** 2 + a) / (2 * y)
+ * y3 = λ * (x - x3) - y
+ */
 template TangentCheck(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {    
     assert(CHUNK_SIZE == 64);
     
@@ -132,12 +132,12 @@ template TangentCheck(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     smartEqual.out * smartEqual.out + smartEqual2.out === 1;
 }
 
-/*
-* Check is point on slope (for adding check).
-* (x1, y1), (x2, y2) - point that were added to each other, (x3, y3) - result 
-* λ = (y2 - y1) / (x2 - x1)
-* y3​ == λ * (x1 ​− x3​) − y1
-*/
+/**
+ * Check is point on slope (for adding check).
+ * (x1, y1), (x2, y2) - point that were added to each other, (x3, y3) - result 
+ * λ = (y2 - y1) / (x2 - x1)
+ * y3​ == λ * (x1 ​− x3​) − y1
+ */
 template AdditionCheck(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     // assert(CHUNK_SIZE == 64); todo
     
@@ -208,14 +208,14 @@ template AdditionCheck(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     smartEqual.out * smartEqual.out + smartEqual2.out === 1;
 }
 
-/*
-* Helpers templates, don`t use them outside if you don`t know what are you doing
-*/
+/**
+ * Helpers templates, don`t use them outside if you don`t know what are you doing
+ */
 
-/*
-* Precomputes for pippenger optimised multiplication.
-* Computes 0 * G, 1 * G, 2 * G, ... (2 ** WINDOW_SIZE - 1) * G
-*/
+/**
+ * Precomputes for pippenger optimised multiplication.
+ * Computes 0 * G, 1 * G, 2 * G, ... (2 ** WINDOW_SIZE - 1) * G
+ */
 template EllipticCurvePrecomputePippenger(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, WINDOW_SIZE) {
     signal input in[2][CHUNK_NUMBER];
     signal input dummy;
@@ -253,15 +253,15 @@ template EllipticCurvePrecomputePippenger(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, WIN
     }
 }
 
-/*
-* Default point operations, use them for ec calculations
-*/
+/**
+ * Default point operations, use them for ec calculations
+ */
 
-/*
-* Check if given point lies on curve.
-* y ** 2 % p === (x ** 3 + a * x + b) % p
-* Fails if point isn`t on curve, otherwise pass.
-*/
+/**
+ * Check if given point lies on curve.
+ * y ** 2 % p === (x ** 3 + a * x + b) % p
+ * Fails if point isn`t on curve, otherwise pass.
+ */
 template PointOnCurveOptimised(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     assert(CHUNK_SIZE == 64);
     
@@ -314,12 +314,12 @@ template PointOnCurveOptimised(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     }
 }
 
-/*
-* λ = (3 * x ** 2 + a) / (2 * y)
-* x3 = λ * λ - 2 * x
-* y3 = λ * (x - x3) - y
-* Calculates doubled point.
-*/
+/**
+ * λ = (3 * x ** 2 + a) / (2 * y)
+ * x3 = λ * λ - 2 * x
+ * y3 = λ * (x - x3) - y
+ * Calculates doubled point.
+ */
 template EllipticCurveDoubleOptimised(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     signal input in[2][CHUNK_NUMBER];
     signal input dummy;
@@ -435,12 +435,12 @@ template EllipticCurveDoubleOptimised(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     out[1] <== mod3.mod;
 }
 
-/*
-* λ = (y2 - y1) / (x2 - x1)
-* x3 = λ * λ - x1 - x2
-* y3 = λ * (x1 - x3) - y1
-* Calculates sum of 2 points.
-*/
+/**
+ * λ = (y2 - y1) / (x2 - x1)
+ * x3 = λ * λ - x1 - x2
+ * y3 = λ * (x1 - x3) - y1
+ * Calculates sum of 2 points.
+ */
 template EllipticCurveAddOptimised(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     signal input in1[2][CHUNK_NUMBER];
     signal input in2[2][CHUNK_NUMBER];
@@ -557,14 +557,14 @@ template EllipticCurveAddOptimised(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     out[1] <== mod3.mod;
 }
 
-/*
-* Calculates G * scalar.
-* Now works for secp256k1 and BrainpoolP256r1, to add other curve see header.
-* To make it work for other curve you should generate generator pow table.
-* Other curves will be added by ourself soon.
-* Will fail if scalar == 0, don`t do it.
-* Complexity is 31 additions.
-*/
+/**
+ * Calculates G * scalar.
+ * Now works for secp256k1 and BrainpoolP256r1, to add other curve see header.
+ * To make it work for other curve you should generate generator pow table.
+ * Other curves will be added by ourself soon.
+ * Will fail if scalar == 0, don`t do it.
+ * Complexity is 31 additions.
+ */
 template EllipticCurveScalarGeneratorMultiplicationOptimised(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {    
     assert(CHUNK_SIZE == 64 && CHUNK_NUMBER == 4);
     
@@ -750,17 +750,17 @@ template EllipticCurveScalarGeneratorMultiplicationOptimised(CHUNK_SIZE, CHUNK_N
     out <== resultingPoints[parts - 2];
 }
 
-/*
-* Optimised scalar point multiplication, use it if you can`t add precompute table.
-* Algo:
-* Precompute (see "PrecomputePippenger" template)
-* Convert each WINDOW_SIZE bits into num IDX, double WINDOW_SIZE times, add to result IDX * G (from precomputes), repeat
-* Double add and algo complexity:
-* 255 doubles + 256 adds
-* Our algo complexity:
-* 256 - WINDOW_SIZE doubles, 256 / WINDOW_SIZE adds, 2 ** WINDOW_SIZE - 2 adds and doubles for precompute
-* for 256 curve best WINDOW_SIZE with 330 operations with points.
-*/
+/**
+ * Optimised scalar point multiplication, use it if you can`t add precompute table.
+ * Algo:
+ * Precompute (see "PrecomputePippenger" template)
+ * Convert each WINDOW_SIZE bits into num IDX, double WINDOW_SIZE times, add to result IDX * G (from precomputes), repeat
+ * Double add and algo complexity:
+ * 255 doubles + 256 adds
+ * Our algo complexity:
+ * 256 - WINDOW_SIZE doubles, 256 / WINDOW_SIZE adds, 2 ** WINDOW_SIZE - 2 adds and doubles for precompute
+ * for 256 curve best WINDOW_SIZE with 330 operations with points.
+ */
 template EllipticCurvePippengerMult(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, WINDOW_SIZE) {
     assert(WINDOW_SIZE == 4);
     
@@ -923,26 +923,26 @@ template EllipticCurvePippengerMult(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, WINDOW_SI
     out <== res[ADDRES_NUMBER];
 }
 
-/*
-* Our elliptic scalar mult cost almost ~5 000 000 constarints
-* There is a way to reduce it if can make some precomputations off-circuit
-* One of examples is Generator multiplication, which costs almost ~550 000 (10 times less!)
-* So, solution is next:
-* If you know point at the moment of compilation, you can precompute this table as same, then insert it as input
-* We should understand that it can be insecure, cause this table size (256 * 32 points of 512 bytes each -> 4kb) is too big to make it public input
-* Our decision is to make result public and input public, so you can check if result was calculated in right way anywhere else (on smart contracts, for example)
-* This can prevent fake table adding
-* There is no problem of making result point output, but making input point public may cause other zk idea problems:
-* For example, we want to verify ECDSA, and have message, signature and pubkey.
-* If you do it with defauld scalar mult, it will take ~ 5 600 000 constraints, while if you use precomputed table - ~ 1 200 000
-* But you need to make pubkey public in this case
-* I you have no problem with it, use this one, and you will get 5 times less consraints verification
-* But pubkey reveal leads to other problem: it is zk now, and you can know who signer is
-* This can be crutial, so be careful with it
-* To generate table for input, use script located in "../helpers/generate_mult_input.py"
-* Change lines 127..132 to get input
-* Note that Gx and Gy is your point, not generator (you can simply use generator multiplication without generating other table for generator).
-*/
+/**
+ * Our elliptic scalar mult cost almost ~5 000 000 constarints
+ * There is a way to reduce it if can make some precomputations off-circuit
+ * One of examples is Generator multiplication, which costs almost ~550 000 (10 times less!)
+ * So, solution is next:
+ * If you know point at the moment of compilation, you can precompute this table as same, then insert it as input
+ * We should understand that it can be insecure, cause this table size (256 * 32 points of 512 bytes each -> 4kb) is too big to make it public input
+ * Our decision is to make result public and input public, so you can check if result was calculated in right way anywhere else (on smart contracts, for example)
+ * This can prevent fake table adding
+ * There is no problem of making result point output, but making input point public may cause other zk idea problems:
+ * For example, we want to verify ECDSA, and have message, signature and pubkey.
+ * If you do it with defauld scalar mult, it will take ~ 5 600 000 constraints, while if you use precomputed table - ~ 1 200 000
+ * But you need to make pubkey public in this case
+ * I you have no problem with it, use this one, and you will get 5 times less consraints verification
+ * But pubkey reveal leads to other problem: it is zk now, and you can know who signer is
+ * This can be crutial, so be careful with it
+ * To generate table for input, use script located in "../helpers/generate_mult_input.py"
+ * Change lines 127..132 to get input
+ * Note that Gx and Gy is your point, not generator (you can simply use generator multiplication without generating other table for generator).
+ */
 template EllipticCurveScalarPrecomputeMultiplicationOptimised(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) { 
     assert(CHUNK_SIZE == 64 && CHUNK_NUMBER == 4);
 
@@ -1128,16 +1128,16 @@ template EllipticCurveScalarPrecomputeMultiplicationOptimised(CHUNK_SIZE, CHUNK_
     out <== resultingPoints[parts - 2];
 }
 
-/*
-* Non Optimised templates (for not CHUNK_SIZE == 64 and CHUNK_NUMBER == 4).
-* Will be changed to autodetect optimised version and use it if need, but use this for now.
-*/
+/**
+ * Non Optimised templates (for not CHUNK_SIZE == 64 and CHUNK_NUMBER == 4).
+ * Will be changed to autodetect optimised version and use it if need, but use this for now.
+ */
 
-/*
-* Check if given point lies on curve.
-* y ** 2 % p === (x ** 3 + a * x + b) % p
-* Fails if point isn`t on curve, otherwise pass.
-*/
+/**
+ * Check if given point lies on curve.
+ * y ** 2 % p === (x ** 3 + a * x + b) % p
+ * Fails if point isn`t on curve, otherwise pass.
+ */
 template PointOnCurveNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {    
     assert(CHUNK_SIZE == 64);
     
@@ -1191,12 +1191,12 @@ template PointOnCurveNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     }
 }
 
-/*
-* λ = (3 * x ** 2 + a) / (2 * y)
-* x3 = λ * λ - 2 * x
-* y3 = λ * (x - x3) - y
-* Calculates doubled point.
-*/
+/**
+ * λ = (3 * x ** 2 + a) / (2 * y)
+ * x3 = λ * λ - 2 * x
+ * y3 = λ * (x - x3) - y
+ * Calculates doubled point.
+ */
 template EllipticCurveDoubleNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     signal input in[2][CHUNK_NUMBER];
     signal output out[2][CHUNK_NUMBER];
@@ -1312,12 +1312,12 @@ template EllipticCurveDoubleNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     out[1] <== mod3.mod;
 }
 
-/*
-* λ = (y2 - y1) / (x2 - x1)
-* x3 = λ * λ - x1 - x2
-* y3 = λ * (x1 - x3) - y1
-* Calculate sum of 2 points.
-*/
+/**
+ * λ = (y2 - y1) / (x2 - x1)
+ * x3 = λ * λ - x1 - x2
+ * y3 = λ * (x1 - x3) - y1
+ * Calculate sum of 2 points.
+ */
 template EllipticCurveAddNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {    
     signal input in1[2][CHUNK_NUMBER];
     signal input in2[2][CHUNK_NUMBER];
@@ -1434,16 +1434,16 @@ template EllipticCurveAddNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     out[1] <== mod3.mod;
 }
 
-/*
-* Calculates G * scalar.
-* To make it work for other curve you should generate generator pow table.
-* Other curves will be added by ourself soon.
-* Will fail if scalar == 0, don`t do it.
-* Use chunking that CHUNK_NUMBER * CHUNK_SIZE == FIELD.
-* And don`t use for 43 * 6 != 256, for example.
-* This chunking will be added late.
-* Complexity is field \ 8 - 1 additions.
-*/
+/**
+ * Calculates G * scalar.
+ * To make it work for other curve you should generate generator pow table.
+ * Other curves will be added by ourself soon.
+ * Will fail if scalar == 0, don`t do it.
+ * Use chunking that CHUNK_NUMBER * CHUNK_SIZE == FIELD.
+ * And don`t use for 43 * 6 != 256, for example.
+ * This chunking will be added late.
+ * Complexity is field \ 8 - 1 additions.
+ */
 template EllipticCurveScalarGeneratorMultiplicationNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     signal input scalar[CHUNK_NUMBER];
     signal input dummy;
@@ -1627,26 +1627,26 @@ template EllipticCurveScalarGeneratorMultiplicationNonOptimised(CHUNK_SIZE, CHUN
     out <== resultingPoints[parts - 2];
 }
 
-/*
-* Our elliptic scalar mult cost almost ~5 000 000 constarints.
-* There is a way to reduce it if can make some precomputations off-circuit.
-* One of examples is Generator multiplication, which costs almost ~550 000 (10 times less!)
-* So, solution is next:
-* If you know point at the moment of compilation, you can precompute this table as same, then insert it as input.
-* We should understand that it can be insecure, cause this table size (256 * 32 points of 512 bytes each -> 4kb) is too big to make it public input.
-* Our decision is to make result public and input public, so you can check if result was calculated in right way anywhere else (on smart contracts, for example).
-* This can prevent fake table adding.
-* There is no problem of making result point output, but making input point public may cause other zk idea problems:
-* For example, we want to verify ECDSA, and have message, signature and pubkey.
-* If you do it with defauld scalar mult, it will take ~ 5 600 000 constraints, while if you use precomputed table - ~ 1 200 000.
-* But you need to make pubkey public in this case.
-* I you have no problem with it, use this one, and you will get 5 times less consraints verification.
-* But pubkey reveal leads to other problem: it is zk now, and you can know who signer is.
-* This can be crutial, so be careful with it.
-* To generate table for input, use script located in "../helpers/generate_mult_input.py".
-* Change lines 127..132 to get input.
-* Note that Gx and Gy is your point, not generator (you can simply use generator multiplication without generating other table for generator).
-*/
+/**
+ * Our elliptic scalar mult cost almost ~5 000 000 constarints.
+ * There is a way to reduce it if can make some precomputations off-circuit.
+ * One of examples is Generator multiplication, which costs almost ~550 000 (10 times less!)
+ * So, solution is next:
+ * If you know point at the moment of compilation, you can precompute this table as same, then insert it as input.
+ * We should understand that it can be insecure, cause this table size (256 * 32 points of 512 bytes each -> 4kb) is too big to make it public input.
+ * Our decision is to make result public and input public, so you can check if result was calculated in right way anywhere else (on smart contracts, for example).
+ * This can prevent fake table adding.
+ * There is no problem of making result point output, but making input point public may cause other zk idea problems:
+ * For example, we want to verify ECDSA, and have message, signature and pubkey.
+ * If you do it with defauld scalar mult, it will take ~ 5 600 000 constraints, while if you use precomputed table - ~ 1 200 000.
+ * But you need to make pubkey public in this case.
+ * I you have no problem with it, use this one, and you will get 5 times less consraints verification.
+ * But pubkey reveal leads to other problem: it is zk now, and you can know who signer is.
+ * This can be crutial, so be careful with it.
+ * To generate table for input, use script located in "../helpers/generate_mult_input.py".
+ * Change lines 127..132 to get input.
+ * Note that Gx and Gy is your point, not generator (you can simply use generator multiplication without generating other table for generator).
+ */
 template EllipticCurveScalarPrecomputeMultiplicationNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     var STRIDE = 8;
     var parts = CHUNK_NUMBER * CHUNK_SIZE \ STRIDE;
@@ -1837,9 +1837,9 @@ template EllipticCurveScalarPrecomputeMultiplicationNonOptimised(CHUNK_SIZE, CHU
     }
 }
 
-/*
-* Here are autodetect templates, use them
-*/
+/**
+ * Here are autodetect templates, use them
+ */
 template PointOnCurve(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
     signal input in[2][CHUNK_NUMBER];
     signal input dummy;

@@ -7,24 +7,24 @@ include "./bigIntFunc.circom";
 include "../int/arithmetic.circom";
 include "./karatsuba.circom";
 
-/*
-* What BigInt in this lib means
-*
-* We represent big number as array of chunks with some shunk_size (will be explained later).
-* For this example we will use N for number, n for chunk size and k for chunk number: N[k];
-* Number can be calculated by this formula:
-* N = N[0] * 2 ** (0 * n) + N[1] * 2 ** (1 * n) + ... + N[k - 1] * 2 ** ((k-1) * n)
-* By overflow we mean situation where N[i] >= 2 ** n
-* Without overflow every number has one and only one representation.
-* To reduce overflow we must leave N[i] % 2 ** n for N[i] and add N[i] // 2 ** n to N[i + 1]
-*
-* In this file we have operations for  big int but we ignore overflow (a_i * 2 ** CHUNK_SIZE * i, here a_i can be greater than 2 ** CHUNK_SIZE)
-* you should use it for some operation in a row for better optimisation
-*/
+/**
+ * What BigInt in this lib means
+ *
+ * We represent big number as array of chunks with some shunk_size (will be explained later).
+ * For this example we will use N for number, n for chunk size and k for chunk number: N[k];
+ * Number can be calculated by this formula:
+ * N = N[0] * 2 ** (0 * n) + N[1] * 2 ** (1 * n) + ... + N[k - 1] * 2 ** ((k-1) * n)
+ * By overflow we mean situation where N[i] >= 2 ** n
+ * Without overflow every number has one and only one representation.
+ * To reduce overflow we must leave N[i] % 2 ** n for N[i] and add N[i] // 2 ** n to N[i + 1]
+ *
+ * In this file we have operations for  big int but we ignore overflow (a_i * 2 ** CHUNK_SIZE * i, here a_i can be greater than 2 ** CHUNK_SIZE)
+ * you should use it for some operation in a row for better optimisation
+ */
 
-/*
-* Sum of each chunks with same positions for equal chunk numbers.
-*/
+/**
+ * Sum of each chunks with same positions for equal chunk numbers.
+ */
 template BigAddOverflow(CHUNK_SIZE, CHUNK_NUMBER) {
     assert(CHUNK_SIZE <= 253);
     
@@ -40,9 +40,9 @@ template BigAddOverflow(CHUNK_SIZE, CHUNK_NUMBER) {
     }
 }
 
-/* 
-* Sum of each chunks with same positions for unequal chunk numbers.
-*/
+/** 
+ * Sum of each chunks with same positions for unequal chunk numbers.
+ */
 template BigAddNonEqualOverflow(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_LESS) {    
     signal input in1[CHUNK_NUMBER_GREATER];
     signal input in2[CHUNK_NUMBER_LESS];
@@ -59,11 +59,11 @@ template BigAddNonEqualOverflow(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_L
     }
 }
 
-/*
-* Multiplying 2 numbers with equal chunks ignoring overflows.
-* out is in chunk number * 2 - 1
-* use it if chunk number != 2 ** k
-*/
+/**
+ * Multiplying 2 numbers with equal chunks ignoring overflows.
+ * out is in chunk number * 2 - 1
+ * use it if chunk number != 2 ** k
+ */
 template BigMultOverflow(CHUNK_SIZE, CHUNK_NUMBER) {
     assert(CHUNK_SIZE <= 126);
     
@@ -119,11 +119,11 @@ template BigMultOverflow(CHUNK_SIZE, CHUNK_NUMBER) {
     }
 }
 
-/*
-* Multiplying 2 numbers with equal chunks ignoring overflows.
-* out is in chunk number * 2 - 1
-* use it if chunk number == 2 ** k
-*/
+/**
+ * Multiplying 2 numbers with equal chunks ignoring overflows.
+ * out is in chunk number * 2 - 1
+ * use it if chunk number == 2 ** k
+ */
 template BigMultOptimisedOverflow(CHUNK_SIZE, CHUNK_NUMBER) {    
     assert(CHUNK_SIZE <= 126);
     
@@ -141,10 +141,10 @@ template BigMultOptimisedOverflow(CHUNK_SIZE, CHUNK_NUMBER) {
     }
 }
 
-/*
-* Multiplying 2 numbers with unequal chunks ignoring overflows.
-* out is in chunk number * 2 - 1
-*/
+/**
+ * Multiplying 2 numbers with unequal chunks ignoring overflows.
+ * out is in chunk number * 2 - 1
+ */
 template BigMultNonEqualOverflow(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_LESS) {
     assert(CHUNK_NUMBER_GREATER + CHUNK_NUMBER_LESS <= 252);
     assert(CHUNK_NUMBER_GREATER >= CHUNK_NUMBER_LESS);
@@ -215,14 +215,14 @@ template BigMultNonEqualOverflow(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_
     }
 }
 
-/*
-* Get mod of number with CHUNK_NUMBER_BASE chunks by modulus with CHUNK_NUMBER_MODULUS chunks.
-* Overflow shift is number ofadditional chunks needed to split number with overflow, put here 254 \ CHUNK_SIZE
-* if you don`t know what you should put there.
-* Practically this is num of multiplications you did before, but it is better to use num of muls + 1 
-* because if you use at least one add or something similar to it too.
-* Will fall if modulus[-1] == 0.
-*/
+/**
+ * Get mod of number with CHUNK_NUMBER_BASE chunks by modulus with CHUNK_NUMBER_MODULUS chunks.
+ * Overflow shift is number ofadditional chunks needed to split number with overflow, put here 254 \ CHUNK_SIZE
+ * if you don`t know what you should put there.
+ * Practically this is num of multiplications you did before, but it is better to use num of muls + 1 
+ * because if you use at least one add or something similar to it too.
+ * Will fall if modulus[-1] == 0.
+ */
 template BigModOverflow(CHUNK_SIZE, CHUNK_NUMBER_BASE, CHUNK_NUMBER_MODULUS, OVERFLOW_SHIFT) {
     signal input base[CHUNK_NUMBER_BASE];
     signal input modulus[CHUNK_NUMBER_MODULUS];
@@ -244,10 +244,10 @@ template BigModOverflow(CHUNK_SIZE, CHUNK_NUMBER_BASE, CHUNK_NUMBER_MODULUS, OVE
     bigMod.div ==> div;
 }
 
-/*
-* Calculate mod inverse of base with CHUNK_NUMBER_BASE by CHUNK_NUMBER modulus.
-* Will fall if modulus[-1] == 0.
-*/
+/**
+ * Calculate mod inverse of base with CHUNK_NUMBER_BASE by CHUNK_NUMBER modulus.
+ * Will fall if modulus[-1] == 0.
+ */
 template BigModInvOverflow(CHUNK_SIZE, CHUNK_NUMBER_BASE, CHUNK_NUMBER) {
     assert(CHUNK_SIZE <= 252);
 
@@ -289,9 +289,9 @@ template BigModInvOverflow(CHUNK_SIZE, CHUNK_NUMBER_BASE, CHUNK_NUMBER) {
     }
 }
 
-/*
-* Multiplying number with CHUNK_NUMBER by scalar, ignoring overflow.
-*/
+/**
+ * Multiplying number with CHUNK_NUMBER by scalar, ignoring overflow.
+ */
 template ScalarMultOverflow(CHUNK_NUMBER) {
     signal input in[CHUNK_NUMBER];
     signal input scalar;
@@ -303,11 +303,11 @@ template ScalarMultOverflow(CHUNK_NUMBER) {
     }
 }
 
-/*
-* Removing overflow for CHUNK_NUMBER_OLD chunk number and get CHUNK_NUMBER_NEW number in out
-* even if CHUNK_NUMBER_NEW isn`t enought to get rid of all overflows, it puts all overflow only 
-* in the last chunk, always leaving numbers equal.
-*/
+/**
+ * Removing overflow for CHUNK_NUMBER_OLD chunk number and get CHUNK_NUMBER_NEW number in out
+ * even if CHUNK_NUMBER_NEW isn`t enought to get rid of all overflows, it puts all overflow only 
+ * in the last chunk, always leaving numbers equal.
+ */
 template RemoveOverflow(CHUNK_SIZE, CHUNK_NUMBER_OLD, CHUNK_NUMBER_NEW) {
     assert(CHUNK_SIZE <= 126);
     assert(CHUNK_NUMBER_OLD <= CHUNK_NUMBER_NEW);
@@ -369,11 +369,11 @@ template RemoveOverflow(CHUNK_SIZE, CHUNK_NUMBER_OLD, CHUNK_NUMBER_NEW) {
     }
 }
 
-/*
-* Computes modulus + in1 - in2 (WITHOUT % modulus!!!) with overflows, in1 and in2 shouldn`t 
-* have overflows and in1 < modulus, in2 < modulus!
-* Use only if you undestand what are you doing!!!
-*/
+/**
+ * Computes modulus + in1 - in2 (WITHOUT % modulus!!!) with overflows, in1 and in2 shouldn`t 
+ * have overflows and in1 < modulus, in2 < modulus!
+ * Use only if you undestand what are you doing!!!
+ */
 template BigSubModOverflow(CHUNK_SIZE, CHUNK_NUMBER) {
     signal input in1[CHUNK_NUMBER];
     signal input in2[CHUNK_NUMBER];
@@ -397,16 +397,16 @@ template BigSubModOverflow(CHUNK_SIZE, CHUNK_NUMBER) {
     }
 }
 
-/*
-* Comparators
-*/
+/**
+ * Comparators
+ */
 
-/*
-* Compare each chunk.
-* Can be optimised by log_2(n) multiplying results instead of n which is now, will be one later.
-* Use this for already redused inputs or in case you know that they don`t contain any overflow 
-* (any mod template output, for example).
-*/
+/**
+ * Compare each chunk.
+ * Can be optimised by log_2(n) multiplying results instead of n which is now, will be one later.
+ * Use this for already redused inputs or in case you know that they don`t contain any overflow 
+ * (any mod template output, for example).
+ */
 template ForceEqual(CHUNK_NUMBER) {
     signal input in[2][CHUNK_NUMBER];
     
@@ -431,9 +431,9 @@ template ForceEqual(CHUNK_NUMBER) {
 }
 
 
-/*
-* in1 already reduced, used for checks of function returns (they return correctly reduced).
-*/
+/**
+ * in1 already reduced, used for checks of function returns (they return correctly reduced).
+ */
 template ReducedEqual(CHUNK_SIZE, CHUNK_NUMBER_OLD, CHUNK_NUMBER_NEW) {
     signal input in1[CHUNK_NUMBER_NEW];
     signal input in2[CHUNK_NUMBER_OLD];
@@ -454,15 +454,15 @@ template ReducedEqual(CHUNK_SIZE, CHUNK_NUMBER_OLD, CHUNK_NUMBER_NEW) {
     out <== forceEqual.out;
 }
 
-/*
-* USE ONLY if you sure it will not affect your security, because it is possible to get 1 in out with non-equal inputs, be carefull with it!!!
-* This compares one chunk representation of nums, and if they are bigger than circom curve prime (~2**254), it will compare modulus by it.
-* It always uses 4 constraints and allows to always get 1 for equal inputs.
-* There is a way to get "collision" and get 1 for non equal chunks, however.
-* It almost impossible to get it randomly (almost the same as hash sha-256 collision), but it can be calculated.
-* It still doesn`t allowed to put anything that you want at witness and get valid proof, so it shouldn`t affect on security if it is one of
-* many cheks in your circuit.
-*/
+/**
+ * USE ONLY if you sure it will not affect your security, because it is possible to get 1 in out with non-equal inputs, be carefull with it!!!
+ * This compares one chunk representation of nums, and if they are bigger than circom curve prime (~2**254), it will compare modulus by it.
+ * It always uses 4 constraints and allows to always get 1 for equal inputs.
+ * There is a way to get "collision" and get 1 for non equal chunks, however.
+ * It almost impossible to get it randomly (almost the same as hash sha-256 collision), but it can be calculated.
+ * It still doesn`t allowed to put anything that you want at witness and get valid proof, so it shouldn`t affect on security if it is one of
+ * many cheks in your circuit.
+ */
 template SmartEqual(CHUNK_SIZE, CHUNK_NUMBER) {
 	signal input in[2][CHUNK_NUMBER];
 	signal input dummy;	

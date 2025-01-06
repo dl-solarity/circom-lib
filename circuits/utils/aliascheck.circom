@@ -3,8 +3,8 @@ pragma circom 2.1.6;
 include "./compconstant.circom";
 
 /**
-* Source: https://github.com/iden3/circomlib/blob/v2.0.5/circuits/aliascheck.circom
-*/
+ * Source: https://github.com/iden3/circomlib/blob/v2.0.5/circuits/aliascheck.circom
+ */
 template AliasCheck() {
     signal input in[254];
 

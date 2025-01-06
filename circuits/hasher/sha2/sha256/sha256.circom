@@ -94,8 +94,10 @@ template Sha256HashBits(LEN) {
     }
 }
 
-// execute `n` rounds of the SHA224 / SHA256 inner loop
-// NOTE: hash state is stored as 8 dwords, each little-endian
+/**
+ * execute `n` rounds of the SHA224 / SHA256 inner loop
+ * NOTE: hash state is stored as 8 dwords, each little-endian
+ */
 template Sha2_224_256Rounds(n) {    
     assert(n > 0);
     assert(n <= 64);
@@ -233,8 +235,10 @@ template Sha2_224_256Rounds(n) {
     }
 }
 
-// message schedule for SHA224 / SHA256
-// NOTE: the individual 64 bit words are in little-endian order 
+/**
+ * message schedule for SHA224 / SHA256
+ * NOTE: the individual 64 bit words are in little-endian order
+ */
 template Sha2_224_256Shedule() {
     signal input chunkBits[16][32];
     signal input dummy;
