@@ -11,10 +11,10 @@ import {
   MatrixScalarMult,
   MatrixTransposition,
 } from "@/generated-types/zkit";
-import { MatrixConvolution } from "@/generated-types/zkit/core/mock/matrix";
-import { MatrixMultiply } from "@/generated-types/zkit/core/mock/matrix/MatrixMultiply";
-import { MatrixMultiply as multiplyVec } from "@/generated-types/zkit/core/mock/matrix/multiplyVec.circom";
-import { MatrixConvolution as MatrixConvolution2 } from "@/generated-types/zkit/core/mock/matrix/convolution2.circom";
+import { MatrixConvolution } from "@/generated-types/zkit/core/main/matrix";
+import { MatrixMultiply } from "@/generated-types/zkit/core/main/matrix/MatrixMultiply";
+import { MatrixMultiply as multiplyVec } from "@/generated-types/zkit/core/main/matrix/multiplyVec.circom";
+import { MatrixConvolution as MatrixConvolution2 } from "@/generated-types/zkit/core/main/matrix/convolution2.circom";
 
 import {
   MatrixAdditionGroth16Verifier,
@@ -323,8 +323,8 @@ describe("Matrix convalution test", () => {
     verifier1 = await MockVerifier1.deploy();
     verifier2 = await MockVerifier2.deploy();
 
-    circuit1 = await zkit.getCircuit("circuits/mock/matrix/convolution.circom:MatrixConvolution");
-    circuit2 = await zkit.getCircuit("circuits/mock/matrix/convolution2.circom:MatrixConvolution");
+    circuit1 = await zkit.getCircuit("circuits/main/matrix/convolution.circom:MatrixConvolution");
+    circuit2 = await zkit.getCircuit("circuits/main/matrix/convolution2.circom:MatrixConvolution");
 
     await reverter.snapshot();
   });
@@ -470,7 +470,7 @@ describe("Matrix multiply test", () => {
     const MockVerifier = await ethers.getContractFactory("MatrixMultiply_4_4_4_4_Groth16Verifier");
 
     verifier = await MockVerifier.deploy();
-    circuit = await zkit.getCircuit("circuits/mock/matrix/multiply.circom:MatrixMultiply");
+    circuit = await zkit.getCircuit("circuits/main/matrix/multiply.circom:MatrixMultiply");
 
     await reverter.snapshot();
   });
@@ -528,7 +528,7 @@ describe("Matrix vector multiply test", () => {
     const MockVerifier = await ethers.getContractFactory("MatrixMultiply_4_4_4_1_Groth16Verifier");
 
     verifier = await MockVerifier.deploy();
-    circuit = await zkit.getCircuit("circuits/mock/matrix/multiplyVec.circom:MatrixMultiply");
+    circuit = await zkit.getCircuit("circuits/main/matrix/multiplyVec.circom:MatrixMultiply");
 
     await reverter.snapshot();
   });

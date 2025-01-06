@@ -19,20 +19,20 @@ import {
   ShaHashChunks_1_512_Groth16Verifier,
 } from "@/generated-types/ethers";
 
-import { ShaHashBits as hashBits160 } from "@/generated-types/zkit/core/mock/hasher/";
-import { ShaHashBits as hashBits224 } from "@/generated-types/zkit/core/mock/hasher/hashBits224.circom";
-import { ShaHashBits as hashBits256 } from "@/generated-types/zkit/core/mock/hasher/hashBits256.circom";
-import { ShaHashBits as hashBits384 } from "@/generated-types/zkit/core/mock/hasher/hashBits384.circom";
-import { ShaHashBits as hashBits512 } from "@/generated-types/zkit/core/mock/hasher/hashBits512.circom";
+import { ShaHashBits as hashBits160 } from "@/generated-types/zkit/core/main/hasher/";
+import { ShaHashBits as hashBits224 } from "@/generated-types/zkit/core/main/hasher/hashBits224.circom";
+import { ShaHashBits as hashBits256 } from "@/generated-types/zkit/core/main/hasher/hashBits256.circom";
+import { ShaHashBits as hashBits384 } from "@/generated-types/zkit/core/main/hasher/hashBits384.circom";
+import { ShaHashBits as hashBits512 } from "@/generated-types/zkit/core/main/hasher/hashBits512.circom";
 
-import { ShaHashChunks as hashChunks160 } from "@/generated-types/zkit/core/mock/hasher";
-import { ShaHashChunks as hashChunks224 } from "@/generated-types/zkit/core/mock/hasher/hashChunks224.circom";
-import { ShaHashChunks as hashChunks256 } from "@/generated-types/zkit/core/mock/hasher/hashChunks256.circom";
-import { ShaHashChunks as hashChunks384 } from "@/generated-types/zkit/core/mock/hasher/hashChunks384.circom";
-import { ShaHashChunks as hashChunks512 } from "@/generated-types/zkit/core/mock/hasher/hashChunks512.circom";
+import { ShaHashChunks as hashChunks160 } from "@/generated-types/zkit/core/main/hasher";
+import { ShaHashChunks as hashChunks224 } from "@/generated-types/zkit/core/main/hasher/hashChunks224.circom";
+import { ShaHashChunks as hashChunks256 } from "@/generated-types/zkit/core/main/hasher/hashChunks256.circom";
+import { ShaHashChunks as hashChunks384 } from "@/generated-types/zkit/core/main/hasher/hashChunks384.circom";
+import { ShaHashChunks as hashChunks512 } from "@/generated-types/zkit/core/main/hasher/hashChunks512.circom";
 
-import { PoseidonHash as poseidon1 } from "@/generated-types/zkit/core/mock/hasher";
-import { PoseidonHash as poseidon2 } from "@/generated-types/zkit/core/mock/hasher/poseidon2.circom";
+import { PoseidonHash as poseidon1 } from "@/generated-types/zkit/core/main/hasher";
+import { PoseidonHash as poseidon2 } from "@/generated-types/zkit/core/main/hasher/poseidon2.circom";
 
 function hexToBitArray(hexStr: string) {
   const bitArray = [];
@@ -364,8 +364,8 @@ describe("Hash 160 test", () => {
     verifierBits = await bitsMockVerifier.deploy();
     verifierChunks = await chunkMockVerifier.deploy();
 
-    circuitBits = await zkit.getCircuit("circuits/mock/hasher/hashBits160.circom:ShaHashBits");
-    circuitChunks = await zkit.getCircuit("circuits/mock/hasher/hashChunks160.circom:ShaHashChunks");
+    circuitBits = await zkit.getCircuit("circuits/main/hasher/hashBits160.circom:ShaHashBits");
+    circuitChunks = await zkit.getCircuit("circuits/main/hasher/hashChunks160.circom:ShaHashChunks");
 
     await reverter.snapshot();
   });
@@ -401,8 +401,8 @@ describe("Hash 224 test", () => {
     verifierBits = await bitsMockVerifier.deploy();
     verifierChunks = await chunkMockVerifier.deploy();
 
-    circuitBits = await zkit.getCircuit("circuits/mock/hasher/hashBits224.circom:ShaHashBits");
-    circuitChunks = await zkit.getCircuit("circuits/mock/hasher/hashChunks224.circom:ShaHashChunks");
+    circuitBits = await zkit.getCircuit("circuits/main/hasher/hashBits224.circom:ShaHashBits");
+    circuitChunks = await zkit.getCircuit("circuits/main/hasher/hashChunks224.circom:ShaHashChunks");
 
     await reverter.snapshot();
   });
@@ -438,8 +438,8 @@ describe("Hash 256 test", () => {
     verifierBits = await bitsMockVerifier.deploy();
     verifierChunks = await chunkMockVerifier.deploy();
 
-    circuitBits = await zkit.getCircuit("circuits/mock/hasher/hashBits256.circom:ShaHashBits");
-    circuitChunks = await zkit.getCircuit("circuits/mock/hasher/hashChunks256.circom:ShaHashChunks");
+    circuitBits = await zkit.getCircuit("circuits/main/hasher/hashBits256.circom:ShaHashBits");
+    circuitChunks = await zkit.getCircuit("circuits/main/hasher/hashChunks256.circom:ShaHashChunks");
 
     await reverter.snapshot();
   });
@@ -475,8 +475,8 @@ describe("Hash 384 test", () => {
     verifierBits = await bitsMockVerifier.deploy();
     verifierChunks = await chunkMockVerifier.deploy();
 
-    circuitBits = await zkit.getCircuit("circuits/mock/hasher/hashBits384.circom:ShaHashBits");
-    circuitChunks = await zkit.getCircuit("circuits/mock/hasher/hashChunks384.circom:ShaHashChunks");
+    circuitBits = await zkit.getCircuit("circuits/main/hasher/hashBits384.circom:ShaHashBits");
+    circuitChunks = await zkit.getCircuit("circuits/main/hasher/hashChunks384.circom:ShaHashChunks");
 
     await reverter.snapshot();
   });
@@ -512,8 +512,8 @@ describe("Hash 512 test", () => {
     verifierBits = await bitsMockVerifier.deploy();
     verifierChunks = await chunkMockVerifier.deploy();
 
-    circuitBits = await zkit.getCircuit("circuits/mock/hasher/hashBits512.circom:ShaHashBits");
-    circuitChunks = await zkit.getCircuit("circuits/mock/hasher/hashChunks512.circom:ShaHashChunks");
+    circuitBits = await zkit.getCircuit("circuits/main/hasher/hashBits512.circom:ShaHashBits");
+    circuitChunks = await zkit.getCircuit("circuits/main/hasher/hashChunks512.circom:ShaHashChunks");
 
     await reverter.snapshot();
   });
@@ -549,8 +549,8 @@ describe("Poseidon test", () => {
     verifier1 = await MockVerifier1.deploy();
     verifier2 = await MockVerifier2.deploy();
 
-    circuit1 = await zkit.getCircuit("circuits/mock/hasher/poseidon1.circom:PoseidonHash");
-    circuit2 = await zkit.getCircuit("circuits/mock/hasher/poseidon2.circom:PoseidonHash");
+    circuit1 = await zkit.getCircuit("circuits/main/hasher/poseidon1.circom:PoseidonHash");
+    circuit2 = await zkit.getCircuit("circuits/main/hasher/poseidon2.circom:PoseidonHash");
 
     await reverter.snapshot();
   });

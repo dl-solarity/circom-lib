@@ -11,10 +11,10 @@ import {
   EllipticCurvePippengerMult,
   EllipticCurveScalarGeneratorMultiplication,
   EllipticCurveScalarPrecomputeMultiplication,
-} from "@/generated-types/zkit/core/mock/ec";
-import { EllipticCurveScalarGeneratorMultiplication as generatorMultBrainpool } from "@/generated-types/zkit/core/mock/ec/generatorMultBrainpoolP256r1.circom";
-import { EllipticCurveScalarPrecomputeMultiplication as precomputeBrainpool } from "@/generated-types/zkit/core/mock/ec/precomputeMultBrainpoolP256r1.circom";
-import { EllipticCurvePippengerMult as pippengerMultBrainpool } from "@/generated-types/zkit/core/mock/ec/scalarMultBrainpoolP256r1.circom";
+} from "@/generated-types/zkit/core/main/ec";
+import { EllipticCurveScalarGeneratorMultiplication as generatorMultBrainpool } from "@/generated-types/zkit/core/main/ec/generatorMultBrainpoolP256r1.circom";
+import { EllipticCurveScalarPrecomputeMultiplication as precomputeBrainpool } from "@/generated-types/zkit/core/main/ec/precomputeMultBrainpoolP256r1.circom";
+import { EllipticCurvePippengerMult as pippengerMultBrainpool } from "@/generated-types/zkit/core/main/ec/scalarMultBrainpoolP256r1.circom";
 
 import {
   EllipticCurveScalarGeneratorMultiplication_64_4_0_0_0_0_7_0_0_0_18446744069414583343_18446744073709551615_18446744073709551615_18446744073709551615_Groth16Verifier,
@@ -194,7 +194,7 @@ describe("Secp256k1 generator multiplication test", function () {
     );
 
     verifier = await MockVerifier.deploy();
-    circuit = await zkit.getCircuit("circuits/mock/ec/generatorMult.circom:EllipticCurveScalarGeneratorMultiplication");
+    circuit = await zkit.getCircuit("circuits/main/ec/generatorMult.circom:EllipticCurveScalarGeneratorMultiplication");
 
     await reverter.snapshot();
   });
@@ -226,7 +226,7 @@ describe("BrainpoolP256r1 generator multiplication test", function () {
 
   before("setup", async () => {
     circuit = await zkit.getCircuit(
-      "circuits/mock/ec/generatorMultBrainpoolP256r1.circom:EllipticCurveScalarGeneratorMultiplication",
+      "circuits/main/ec/generatorMultBrainpoolP256r1.circom:EllipticCurveScalarGeneratorMultiplication",
     );
 
     await circuit.createVerifier("sol", "Brainpool");
@@ -267,7 +267,7 @@ describe("Scalar point multiplication test", function () {
   let circuit: EllipticCurvePippengerMult;
 
   before("setup", async () => {
-    circuit = await zkit.getCircuit("circuits/mock/ec/scalarMult.circom:EllipticCurvePippengerMult");
+    circuit = await zkit.getCircuit("circuits/main/ec/scalarMult.circom:EllipticCurvePippengerMult");
 
     await reverter.snapshot();
   });
@@ -302,7 +302,7 @@ describe("BrainpoolP256r1 scalar point multiplication test", function () {
   let circuit: pippengerMultBrainpool;
 
   before("setup", async () => {
-    circuit = await zkit.getCircuit("circuits/mock/ec/scalarMultBrainpoolP256r1.circom:EllipticCurvePippengerMult");
+    circuit = await zkit.getCircuit("circuits/main/ec/scalarMultBrainpoolP256r1.circom:EllipticCurvePippengerMult");
 
     await reverter.snapshot();
   });
@@ -334,7 +334,7 @@ describe("Precompute scalar point multiplication test", function () {
 
     verifier = await MockVerifier.deploy();
     circuit = await zkit.getCircuit(
-      "circuits/mock/ec/precomputeMult.circom:EllipticCurveScalarPrecomputeMultiplication",
+      "circuits/main/ec/precomputeMult.circom:EllipticCurveScalarPrecomputeMultiplication",
     );
 
     await reverter.snapshot();
@@ -364,7 +364,7 @@ describe("Precompute scalar point multiplication test BrainpoolP256r1", function
 
   before("setup", async () => {
     circuit = await zkit.getCircuit(
-      "circuits/mock/ec/precomputeMultBrainpoolP256r1.circom:EllipticCurveScalarPrecomputeMultiplication",
+      "circuits/main/ec/precomputeMultBrainpoolP256r1.circom:EllipticCurveScalarPrecomputeMultiplication",
     );
 
     await circuit.createVerifier("sol", "Brainpool");

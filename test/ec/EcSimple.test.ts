@@ -5,9 +5,9 @@ import { Reverter } from "../helpers/reverter";
 import { bigIntToArray, pointAdd, pointDouble } from "../helpers/helperFunctions";
 
 import { PointOnCurve } from "@/generated-types/zkit";
-import { EllipticCurveAdd, EllipticCurveDouble } from "@/generated-types/zkit/core/mock/ec";
-import { EllipticCurveDouble as doubleBrainpool } from "@/generated-types/zkit/core/mock/ec/doubleBrainpoolP256r1.circom";
-import { EllipticCurveAdd as addBrainpool } from "@/generated-types/zkit/core/mock/ec/addBrainpoolP256r1.circom";
+import { EllipticCurveAdd, EllipticCurveDouble } from "@/generated-types/zkit/core/main/ec";
+import { EllipticCurveDouble as doubleBrainpool } from "@/generated-types/zkit/core/main/ec/doubleBrainpoolP256r1.circom";
+import { EllipticCurveAdd as addBrainpool } from "@/generated-types/zkit/core/main/ec/addBrainpoolP256r1.circom";
 import {
   EllipticCurveAdd_64_4_0_0_0_0_7_0_0_0_18446744069414583343_18446744073709551615_18446744073709551615_18446744073709551615_Groth16Verifier,
   EllipticCurveDouble_64_4_0_0_0_0_7_0_0_0_18446744069414583343_18446744073709551615_18446744073709551615_18446744073709551615_Groth16Verifier,
@@ -165,7 +165,7 @@ describe("Secp256r1 Add test", () => {
     );
 
     verifier = await MockVerifier.deploy();
-    circuit = await zkit.getCircuit("circuits/mock/ec/add.circom:EllipticCurveAdd");
+    circuit = await zkit.getCircuit("circuits/main/ec/add.circom:EllipticCurveAdd");
 
     await reverter.snapshot();
   });
@@ -202,7 +202,7 @@ describe("Brainpool Add test", () => {
   let circuit: addBrainpool;
 
   before("setup", async () => {
-    circuit = await zkit.getCircuit("circuits/mock/ec/addBrainpoolP256r1.circom:EllipticCurveAdd");
+    circuit = await zkit.getCircuit("circuits/main/ec/addBrainpoolP256r1.circom:EllipticCurveAdd");
 
     await circuit.createVerifier("sol", "Brainpool");
     await run("compile");
@@ -240,7 +240,7 @@ describe("Secp256r1 Double test", () => {
     );
 
     verifier = await MockVerifier.deploy();
-    circuit = await zkit.getCircuit("circuits/mock/ec/double.circom:EllipticCurveDouble");
+    circuit = await zkit.getCircuit("circuits/main/ec/double.circom:EllipticCurveDouble");
 
     await reverter.snapshot();
   });
@@ -275,7 +275,7 @@ describe("Brainpool Double test", () => {
   let circuit: doubleBrainpool;
 
   before("setup", async () => {
-    circuit = await zkit.getCircuit("circuits/mock/ec/doubleBrainpoolP256r1.circom:EllipticCurveDouble");
+    circuit = await zkit.getCircuit("circuits/main/ec/doubleBrainpoolP256r1.circom:EllipticCurveDouble");
 
     await circuit.createVerifier("sol", "Brainpool");
     await run("compile");

@@ -11,8 +11,8 @@ import {
 } from "@/generated-types/ethers";
 
 import { VerifyRsaPssSigNonOptimised } from "@/generated-types/zkit";
-import { RsaVerifyPkcs1v15 as rsa } from "@/generated-types/zkit/core/mock/signatures/RsaVerifyPkcs1v15";
-import { RsaVerifyPkcs1v15 as rsaSha1 } from "@/generated-types/zkit/core/mock/signatures/rsaSha1.circom";
+import { RsaVerifyPkcs1v15 as rsa } from "@/generated-types/zkit/core/main/signatures/RsaVerifyPkcs1v15";
+import { RsaVerifyPkcs1v15 as rsaSha1 } from "@/generated-types/zkit/core/main/signatures/rsaSha1.circom";
 
 function stringArrToBigint(input: string[]): bigint[] {
   let intArr = [];
@@ -120,7 +120,7 @@ describe("Rsa test (Rsa4096)", function () {
     const MockVerifier = await ethers.getContractFactory("RsaVerifyPkcs1v15_64_64_65537_256_Groth16Verifier");
 
     verifier = await MockVerifier.deploy();
-    circuit = await zkit.getCircuit("circuits/mock/signatures/rsa.circom:RsaVerifyPkcs1v15");
+    circuit = await zkit.getCircuit("circuits/main/signatures/rsa.circom:RsaVerifyPkcs1v15");
 
     await reverter.snapshot();
   });
@@ -1238,7 +1238,7 @@ describe("Rsa test (Rsa2048Sha1)", function () {
     const MockVerifier = await ethers.getContractFactory("RsaVerifyPkcs1v15_64_32_65537_160_Groth16Verifier");
 
     verifier = await MockVerifier.deploy();
-    circuit = await zkit.getCircuit("circuits/mock/signatures/rsaSha1.circom:RsaVerifyPkcs1v15");
+    circuit = await zkit.getCircuit("circuits/main/signatures/rsaSha1.circom:RsaVerifyPkcs1v15");
 
     await reverter.snapshot();
   });
