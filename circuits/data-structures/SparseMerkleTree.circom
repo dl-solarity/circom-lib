@@ -1,9 +1,9 @@
 pragma circom 2.1.6;
 
-include "circomlib/circuits/poseidon.circom";
-include "circomlib/circuits/switcher.circom";
-include "circomlib/circuits/gates.circom";
-include "circomlib/circuits/bitify.circom";
+include "../bitify/bitGates.circom";
+include "../bitify/bitify.circom";
+include "../bitify/comparators.circom";
+include "../hasher/poseidon/poseidon.circom";
 
 function inverse(a) {
     return 1 - a;
@@ -15,12 +15,14 @@ function inverse(a) {
 template Hash2() {
     signal input a;
     signal input b;
+    signal input dummy;
 
     signal output out;
 
     component h = Poseidon(2);
-    h.inputs[0] <== a;
-    h.inputs[1] <== b;
+    h.in[0] <== a;
+    h.in[1] <== b;
+    h.dummy <== dummy;
 
     out <== h.out;
 }
@@ -32,18 +34,38 @@ template Hash2() {
 template Hash3() {
     signal input a;
     signal input b;
-    signal input c;
+    signal input c;    
+    signal input dummy;
 
     signal output out;
 
     c === 1;
 
     component h = Poseidon(3);
-    h.inputs[0] <== a;
-    h.inputs[1] <== b;
-    h.inputs[2] <== c;
+    h.in[0] <== a;
+    h.in[1] <== b;
+    h.in[2] <== c;
+    h.dummy <== dummy;
 
     out <== h.out;
+}
+
+/**
+* Source: https://github.com/iden3/circomlib/blob/v2.0.5/circuits/switcher.circom
+*/
+template Switcher() {
+    signal input sel;
+    signal input L;
+    signal input R;
+
+    signal output outL;
+    signal output outR;
+
+    signal aux;
+
+    aux <== (R - L) * sel;
+    outL <==  aux + L;
+    outR <== -aux + R;
 }
 
 /*
@@ -138,6 +160,8 @@ template DepthHasher() {
     signal input currentKeyBit;
     signal input child;
 
+    signal input dummy;
+
     signal output root;
 
     component switcher = Switcher();
@@ -149,6 +173,7 @@ template DepthHasher() {
     component proofHash = Hash2();
     proofHash.a <== switcher.outL;
     proofHash.b <== switcher.outR;
+    proofHash.dummy <== dummy;
 
     signal res[3];
     // hash of the middle node
@@ -165,7 +190,7 @@ template DepthHasher() {
 /*
  * Checks the sparse merkle proof against the given root
  */
-template SparseMerkleTreeVerifier(depth) {
+template SparseMerkleTree(depth) {
     // The root of the sparse merkle tree
     signal input root;
     // The siblings for each depth
@@ -182,10 +207,14 @@ template SparseMerkleTreeVerifier(depth) {
     // 1 if we are checking for exclusion, 0 if we are checking for inclusion
     signal input isExclusion;
 
+    signal input dummy;
+     
+    dummy * dummy === 0;
+
     // Check that the auxIsEmpty is 0 if we are checking for inclusion
     component exclusiveCase = AND();
-    exclusiveCase.a <== inverse(isExclusion);
-    exclusiveCase.b <== auxIsEmpty;
+    exclusiveCase.in[0] <== inverse(isExclusion);
+    exclusiveCase.in[1] <== auxIsEmpty;
     exclusiveCase.out === 0;
 
     // Check that the key != auxKey if we are checking for exclusion and the auxIsEmpty is 0
@@ -203,11 +232,13 @@ template SparseMerkleTreeVerifier(depth) {
     auxHash.a <== auxKey;
     auxHash.b <== auxValue;
     auxHash.c <== 1;
+    auxHash.dummy <== dummy;
 
     component hash = Hash3();
     hash.a <== key;
     hash.b <== value;
     hash.c <== 1;
+    hash.dummy <== dummy;
 
     component keyBits = Num2Bits_strict();
     keyBits.in <== key;
@@ -256,6 +287,8 @@ template SparseMerkleTreeVerifier(depth) {
         depthHash[i].leaf <== hash.out;
 
         depthHash[i].currentKeyBit <== keyBits.out[i];
+
+        depthHash[i].dummy <== dummy;
 
         if (i == depth - 1) {
             // The last depth has no child

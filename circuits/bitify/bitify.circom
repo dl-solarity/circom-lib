@@ -1,5 +1,7 @@
 pragma circom 2.1.6;
 
+include "../utils/aliascheck.circom";
+
 /*
 * Here is operation to convert number to bit array and bit array to number.
 * There are reasons for code to look so bad.
@@ -20,7 +22,7 @@ pragma circom 2.1.6;
 * We are checking if out[i] is a bit, so LEN + 1 constraints.
 */
 template Num2Bits(LEN) {
-    assert(LEN <= 253);
+    assert(LEN <= 254);
     assert(LEN > 0);
 
     signal input in;
@@ -41,12 +43,30 @@ template Num2Bits(LEN) {
     in === sum[LEN - 1];
 }
 
+/**
+* Source: https://github.com/iden3/circomlib/blob/v2.0.5/circuits/bitify.circom
+*/
+template Num2Bits_strict() {
+    signal input in;
+    signal output out[254];
+
+    component aliasCheck = AliasCheck();
+    component n2b = Num2Bits(254);
+    
+    in ==> n2b.in;
+
+    for (var i = 0; i < 254; i++) {
+        n2b.out[i] ==> out[i];
+        n2b.out[i] ==> aliasCheck.in[i];
+    }
+}
+
 /*
 * Here bit check is not present, use only with bits else error will appear!!!
 * No bit check so only 1 constraint.
 */
 template Bits2Num(LEN) {
-    assert(LEN <= 253);
+    assert(LEN <= 254);
     assert(LEN > 0);
 
     signal input in[LEN];

@@ -1,17 +1,19 @@
 pragma circom 2.1.6;
 
-include "circomlib/circuits/poseidon.circom";
+include "../hasher/poseidon/poseidon.circom";
 
 /*
  * Hash1 = Poseidon(nullifier)
  */
 template Hash1() {
     signal input a;
+    signal input dummy;
 
     signal output out;
 
     component h = Poseidon(1);
-    h.inputs[0] <== a;
+    h.in[0] <== a;
+    h.dummy <== dummy;
 
     out <== h.out;
 }
@@ -22,12 +24,14 @@ template Hash1() {
 template Hash2() {
     signal input a;
     signal input b;
+    signal input dummy;
 
     signal output out;
 
     component h = Poseidon(2);
-    h.inputs[0] <== a;
-    h.inputs[1] <== b;
+    h.in[0] <== a;
+    h.in[1] <== b;
+    h.dummy <== dummy;
 
     out <== h.out;
 }
@@ -39,18 +43,23 @@ template Hash2() {
 template CommitmentVerifier() {
     signal input nullifier;
     signal input secret;
+    signal input dummy;
 
     signal output commitment;
     signal output nullifierHash;
+    
+    dummy * dummy === 0;
 
     component commitmentHash = Hash2();
     commitmentHash.a <== nullifier;
     commitmentHash.b <== secret;
+    commitmentHash.dummy <== dummy;
 
     commitment <== commitmentHash.out;
 
     component nullifierHasher = Hash1();
     nullifierHasher.a <== nullifier;
+    nullifierHasher.dummy <== dummy;
 
     nullifierHash <== nullifierHasher.out;
 }
