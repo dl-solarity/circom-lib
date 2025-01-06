@@ -3,7 +3,7 @@ pragma circom 2.1.6;
 include "../bigInt/bigInt.circom";
 include "../bitify/bitGates.circom";
 include "../hasher/hash.circom";
-include "./utils/mgf1.circom";
+include "./mask/mgf1.circom";
 
 /*
 * Verification for RSAPSS signature.
