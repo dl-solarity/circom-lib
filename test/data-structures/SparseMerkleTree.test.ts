@@ -4,16 +4,16 @@ import { ethers, zkit } from "hardhat";
 import { deployPoseidonFacade } from "../helpers/poseidon/poseidon-deployer";
 import { Reverter } from "../helpers/reverter";
 
-import { SparseMerkleTreeMock, SparseMerkleTreeVerifierGroth16Verifier } from "@ethers-v6";
-import { SparseMerkleTreeVerifier } from "@zkit";
+import { SparseMerkleTreeMock, SparseMerkleTreeGroth16Verifier } from "@ethers-v6";
+import { SparseMerkleTree } from "@zkit";
 
 describe("SparseMerkleTree", () => {
   const reverter = new Reverter();
 
-  let smtCircuit: SparseMerkleTreeVerifier;
+  let circuit: SparseMerkleTree;
 
   let smtMock: SparseMerkleTreeMock;
-  let smtVerifier: SparseMerkleTreeVerifierGroth16Verifier;
+  let verifier: SparseMerkleTreeGroth16Verifier;
 
   const leaves: string[] = [];
   let nonExistentLeaf: string;
@@ -21,17 +21,17 @@ describe("SparseMerkleTree", () => {
   before("setup", async () => {
     const poseidonFacade = await deployPoseidonFacade();
 
-    const SparseMerkleTreeMockVerifier = await ethers.getContractFactory("SparseMerkleTreeVerifierGroth16Verifier");
+    const SparseMerkleTreeMockVerifier = await ethers.getContractFactory("SparseMerkleTreeGroth16Verifier");
     const SparseMerkleTreeMock = await ethers.getContractFactory("SparseMerkleTreeMock", {
       libraries: {
         PoseidonFacade: poseidonFacade,
       },
     });
 
-    smtVerifier = await SparseMerkleTreeMockVerifier.deploy();
+    verifier = await SparseMerkleTreeMockVerifier.deploy();
     smtMock = await SparseMerkleTreeMock.deploy();
 
-    smtCircuit = await zkit.getCircuit("SparseMerkleTreeVerifier");
+    circuit = await zkit.getCircuit("SparseMerkleTree");
 
     for (let i = 0; i < 10; i++) {
       let rand: string;
@@ -57,7 +57,7 @@ describe("SparseMerkleTree", () => {
 
     const merkleProof = await smtMock.getProof(ethers.toBeHex(leaves[5], 32));
 
-    const proofStruct = await smtCircuit.generateProof({
+    const proofStruct = await circuit.generateProof({
       root: BigInt(merkleProof.root),
       siblings: merkleProof.siblings.map((e) => BigInt(e)),
       key: BigInt(merkleProof.key),
@@ -66,9 +66,10 @@ describe("SparseMerkleTree", () => {
       auxValue: 0,
       auxIsEmpty: 0,
       isExclusion: 0,
+      dummy: 0,
     });
 
-    await expect(smtCircuit).to.useSolidityVerifier(smtVerifier).and.verifyProof(proofStruct);
+    await expect(circuit).to.useSolidityVerifier(verifier).and.verifyProof(proofStruct);
   });
 
   it("should prove the tree inclusion for each depth of bamboo", async () => {
@@ -79,7 +80,7 @@ describe("SparseMerkleTree", () => {
 
       const merkleProof = await smtMock.getProof(ethers.toBeHex(rand, 32));
 
-      const proofStruct = await smtCircuit.generateProof({
+      const proofStruct = await circuit.generateProof({
         root: BigInt(merkleProof.root),
         siblings: merkleProof.siblings.map((e) => BigInt(e)),
         key: BigInt(merkleProof.key),
@@ -88,9 +89,10 @@ describe("SparseMerkleTree", () => {
         auxValue: 0,
         auxIsEmpty: 0,
         isExclusion: 0,
+        dummy: 0,
       });
 
-      await expect(smtCircuit).to.useSolidityVerifier(smtVerifier).and.verifyProof(proofStruct);
+      await expect(circuit).to.useSolidityVerifier(verifier).and.verifyProof(proofStruct);
     }
   });
 
@@ -100,7 +102,7 @@ describe("SparseMerkleTree", () => {
 
     const merkleProof = await smtMock.getProof(ethers.toBeHex(511, 32));
 
-    const proofStruct = await smtCircuit.generateProof({
+    const proofStruct = await circuit.generateProof({
       root: BigInt(merkleProof.root),
       siblings: merkleProof.siblings.map((e) => BigInt(e)),
       key: BigInt(merkleProof.key),
@@ -109,9 +111,10 @@ describe("SparseMerkleTree", () => {
       auxValue: 0,
       auxIsEmpty: 0,
       isExclusion: 0,
+      dummy: 0,
     });
 
-    await expect(smtCircuit).to.useSolidityVerifier(smtVerifier).and.verifyProof(proofStruct);
+    await expect(circuit).to.useSolidityVerifier(verifier).and.verifyProof(proofStruct);
   });
 
   it("should prove the tree exclusion", async () => {
@@ -123,7 +126,7 @@ describe("SparseMerkleTree", () => {
 
     const auxIsEmpty = BigInt(merkleProof.auxKey) == 0n ? 1 : 0;
 
-    const proofStruct = await smtCircuit.generateProof({
+    const proofStruct = await circuit.generateProof({
       root: BigInt(merkleProof.root),
       siblings: merkleProof.siblings.map((e) => BigInt(e)),
       key: BigInt(merkleProof.key),
@@ -132,9 +135,10 @@ describe("SparseMerkleTree", () => {
       auxValue: BigInt(merkleProof.auxValue),
       auxIsEmpty: auxIsEmpty,
       isExclusion: 1,
+      dummy: 0,
     });
 
-    await expect(smtCircuit).to.useSolidityVerifier(smtVerifier).and.verifyProof(proofStruct);
+    await expect(circuit).to.useSolidityVerifier(verifier).and.verifyProof(proofStruct);
   });
 
   it("should prove the tree exclusion for each depth of bamboo", async () => {
@@ -147,7 +151,7 @@ describe("SparseMerkleTree", () => {
 
       const auxIsEmpty = BigInt(merkleProof.auxKey) == 0n ? 1 : 0;
 
-      const proofStruct = await smtCircuit.generateProof({
+      const proofStruct = await circuit.generateProof({
         root: BigInt(merkleProof.root),
         siblings: merkleProof.siblings.map((e) => BigInt(e)),
         key: BigInt(merkleProof.key),
@@ -156,9 +160,10 @@ describe("SparseMerkleTree", () => {
         auxValue: BigInt(merkleProof.auxValue),
         auxIsEmpty: auxIsEmpty,
         isExclusion: 1,
+        dummy: 0,
       });
 
-      await expect(smtCircuit).to.useSolidityVerifier(smtVerifier).and.verifyProof(proofStruct);
+      await expect(circuit).to.useSolidityVerifier(verifier).and.verifyProof(proofStruct);
     }
   });
 
@@ -167,7 +172,7 @@ describe("SparseMerkleTree", () => {
 
     const merkleProof = await smtMock.getProof(ethers.toBeHex(nonExistentLeaf, 32));
 
-    const proofStruct = await smtCircuit.generateProof({
+    const proofStruct = await circuit.generateProof({
       root: BigInt(merkleProof.root),
       siblings: merkleProof.siblings.map((e) => BigInt(e)),
       key: BigInt(merkleProof.key),
@@ -176,9 +181,10 @@ describe("SparseMerkleTree", () => {
       auxValue: BigInt(merkleProof.auxValue),
       auxIsEmpty: 1,
       isExclusion: 1,
+      dummy: 0,
     });
 
-    await expect(smtCircuit).to.useSolidityVerifier(smtVerifier).and.verifyProof(proofStruct);
+    await expect(circuit).to.useSolidityVerifier(verifier).and.verifyProof(proofStruct);
   });
 
   describe("when data is incorrect", () => {
@@ -201,7 +207,7 @@ describe("SparseMerkleTree", () => {
 
       const incorrectValue = merkleProof.value + 1n;
 
-      await expect(smtCircuit).to.not.generateProof({
+      await expect(circuit).to.not.generateProof({
         root: BigInt(merkleProof.root),
         siblings: merkleProof.siblings.map((e) => BigInt(e)),
         key: BigInt(merkleProof.key),
@@ -210,6 +216,7 @@ describe("SparseMerkleTree", () => {
         auxValue: 0,
         auxIsEmpty: 0,
         isExclusion: 0,
+        dummy: 0,
       });
     });
 
@@ -224,7 +231,7 @@ describe("SparseMerkleTree", () => {
 
       auxIsEmpty = auxIsEmpty == 0 ? 1 : 0;
 
-      await expect(smtCircuit).to.not.generateProof({
+      await expect(circuit).to.not.generateProof({
         root: BigInt(merkleProof.root),
         siblings: merkleProof.siblings.map((e) => BigInt(e)),
         key: BigInt(merkleProof.key),
@@ -233,6 +240,7 @@ describe("SparseMerkleTree", () => {
         auxValue: BigInt(merkleProof.auxValue),
         auxIsEmpty: auxIsEmpty,
         isExclusion: 1,
+        dummy: 0,
       });
     });
   });
