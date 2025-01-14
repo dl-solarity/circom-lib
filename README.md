@@ -1,3 +1,4 @@
+[![npm](https://img.shields.io/npm/v/@solarity/circom-lib.svg)](https://www.npmjs.com/package/@solarity/circom-lib)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # Circom Library by Distributed Lab
