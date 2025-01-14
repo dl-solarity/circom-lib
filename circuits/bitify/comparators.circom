@@ -47,6 +47,7 @@ template ForceEqualIfEnabled() {
     
     component isEqual = IsEqual();
     isEqual.in <== in;
+
     (1 - isEqual.out) * enabled === 0;
 }
 

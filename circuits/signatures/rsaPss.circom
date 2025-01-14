@@ -104,6 +104,7 @@ template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE) {
             dbMask[i] <== MGF1_256.out[i];
         }
     }
+
     if (HASH_TYPE == 384) {
         component MGF1_384 = Mgf1Sha384(HASH_LEN, DB_MASK_LEN);
         MGF1_384.dummy <== dummy;
@@ -139,6 +140,7 @@ template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE) {
     }
     
     signal mDash[1024];
+
     // adding 0s
     for (var i = 0; i < 64; i++) {
         mDash[i] <== 0;
@@ -409,6 +411,7 @@ template VerifyRsaPssSigNonOptimised(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HA
 
         hDash256.out === hash;
     }
+
     if (HASH_TYPE == 256 && SALT_LEN == 64) {
         for (var i = 833; i < 1014; i++) {
             mDash[i] <== 0;

@@ -7,7 +7,7 @@ pragma circom 2.1.6;
  * Other curves / chunking will be added later.
  */
 template EllipticCurveGetGenerator(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
-    assert (CHUNK_SIZE == 64);
+    assert(CHUNK_SIZE == 64);
     
     signal output gen[2][CHUNK_NUMBER];
 
@@ -50,11 +50,12 @@ template EllipticCurveGetGenerator(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
  * Dummy point = G * 2**256/
  */
 template EllipticCurveGetDummy(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
-    assert (CHUNK_SIZE == 64);
+    assert(CHUNK_SIZE == 64);
     
     signal output dummyPoint[2][CHUNK_NUMBER];
 
     if (CHUNK_NUMBER == 4) {
+        // secp256k1
         if (P[0] == 18446744069414583343 && P[1] == 18446744073709551615 && P[2] == 18446744073709551615 && P[3] == 18446744073709551615) {
             dummyPoint[0][0] <== 10590052641807177607;
             dummyPoint[0][1] <== 9925333800925632128;
@@ -66,6 +67,7 @@ template EllipticCurveGetDummy(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
             dummyPoint[1][3] <== 8797939803687366868;
         }
 
+        // brainpoolP256r1
         if (P[0] == 2311270323689771895 && P[1] == 7943213001558335528 && P[2] == 4496292894210231666 && P[3] == 12248480212390422972) {
             dummyPoint[0][0] <== 6780612927088034840;
             dummyPoint[0][1] <== 8014133780695468919;
@@ -77,6 +79,7 @@ template EllipticCurveGetDummy(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
             dummyPoint[1][3] <== 7930703671170472648;
         }
 
+        // secp256r1
         if (P[0] == 18446744073709551615 && P[1] == 4294967295 && P[2] == 0 && P[3] == 18446744069414584321) {
             dummyPoint[0][0] <== 4148137498610012746;
             dummyPoint[0][1] <== 51237685452122967;
@@ -94,6 +97,7 @@ template EllipticCurveGetDummy(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
 			dummyPoint[0] <== [3598307048231252138, 15741415447784811687, 1941052507991901335, 4155899906393519185, 2588150101175929229, 16695956721106145545];
 			dummyPoint[1] <== [11009719670661534612, 8023462911667119667, 9271010332898980309, 13524974403491980216, 12794233661752207269, 6511462203569285408];
 		}
+
         if (P[0] == 9747760000893709395 && P[1] == 12453481191562877553 && P[2] == 1347097566612230435 && P[3] == 1526563086152259252 && P[4] == 1107163671716839903 && P[5] == 10140169582434348328) {
             dummyPoint[0] <== [522720248942821492, 13227018843434759032, 17067096815187998133, 8957183796380674257, 7544165743263758981, 6159107397665645433];
             dummyPoint[1] <== [9174881270872499347, 7148726877058227897, 1584493337432922624, 1438582915076653591, 16161625210166602047, 946254366129831718];
@@ -105,19 +109,22 @@ template EllipticCurveGetDummy(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
  * Get order of elliptic curve
  */
 template EllipticCurveGetOrder(CHUNK_SIZE, CHUNK_NUMBER, A, B, P) {
-    assert (CHUNK_SIZE == 64);
+    assert(CHUNK_SIZE == 64);
     
     signal output order[CHUNK_NUMBER];
 
     if (CHUNK_NUMBER == 4) {
+        // secp256k1
         if (P[0] == 18446744069414583343 && P[1] == 18446744073709551615 && P[2] == 18446744073709551615 && P[3] == 18446744073709551615) {
             order <== [13822214165235122497, 13451932020343611451, 18446744073709551614, 18446744073709551615];
         }
 
+        // brainpoolP256r1
         if (P[0] == 2311270323689771895 && P[1] == 7943213001558335528 && P[2] == 4496292894210231666 && P[3] == 12248480212390422972) {
             order <== [10384753744809580199, 10104242082523752183, 4496292894210231665, 12248480212390422972];
         }
 
+        // secp256r1
         if (P[0] == 18446744073709551615 && P[1] == 4294967295 && P[2] == 0 && P[3] == 18446744069414584321) {
             order <== [17562291160714782033, 13611842547513532036, 18446744073709551615, 18446744069414584320];
         }

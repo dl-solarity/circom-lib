@@ -4,6 +4,10 @@ include "../bitify/bitify.circom";
 
 /**
  * Source: https://github.com/iden3/circomlib/blob/v2.0.5/circuits/compconstant.circom
+ *
+ * Check that `in` < `ct`
+ *
+ * Twice more efficient (constraint-wise) than LessThan
  */
 template CompConstant(ct) {
     signal input in[254];
@@ -17,7 +21,7 @@ template CompConstant(ct) {
     var slsb;
     var smsb;
 
-    var sum=0;
+    var sum = 0;
 
     var b = (1 << 128) - 1;
     var a = 1;

@@ -7,9 +7,9 @@ The library consists of circom circuits that extend the capabilities of [solarit
 ```md
 circuits
 ├── bigInt
-│   ├── bigInt - "BigInt implementation with all the necessary functions"
+│   ├── bigInt - "BigInt implementation with chunking"
+│   ├── bigIntOverflow — "BigInt implementation with chunk overflow"
 │   ├── bigIntFunc — "Additional functions to accommodate BigInt"
-│   ├── bigIntOverflow — "BigInt implementation with overflow functionality"
 │   └── karatsuba — "Karatsuba multiplication for BigInt"
 ├── bitify
 │   ├── bitGates — "Multiple binary gates"
@@ -20,9 +20,9 @@ circuits
 │   └── Commitment — "Commit/reveal scheme implementation"
 ├── data-structures    
 │   └── SparseMerkleTree — "SMT Merkle inclusion/exclusion proofs verification"
-├── ec  
-│   ├── curve — "Elliptic curve operations"
-│   ├── generator - "Generator point getters for supported elliptic curves"
+├── ec
+│   ├── curve — "Elliptic curve operations (secp256r1, secp256k1, brainpoolP256r1, brainpoolP384r1, secp384r1)"
+│   ├── get - "Generator point getters for supported elliptic curves"
 │   └── powers — "Precompute tables for supported elliptic curves"
 ├── hasher  
 │   ├── hash — "Hash functions (sha1, sha224, sha256, sha384, sha512, poseidon)"
@@ -32,15 +32,15 @@ circuits
 ├── int
 │   └── arithmetic - "Arithmetic operations over integers" 
 ├── matrix
-│   └── matrix — "Operations for NxM matrices"
+│   └── matrix — "Common operations for NxM matrices"
 ├── signatures
 │   ├── ecdsa - "ECDSA verification over supported curves"
 │   ├── rsa — "RSA-PKCS#1 v1.5 signature verification"
 │   ├── rsaPss — "RSASSA-PSS with MGF1 signature verification"
-│   └── mask - "Mask generation functions implemetation"
+│   └── mask - "Mask generation functions implementation"
 ├── utils
-│   ├── aliascheck — "Check the number fits the scalar size"
-│   └── compconstant — "Compare numbers in binary form"
+│   ├── aliascheck — "Check the number fits the scalar field size"
+│   └── compconstant — "Compare a number with a template parameter in a binary form"
 ├── main - "Main components for testing purposes"
 └── mock - "Mocks (logs) for testing purposes"
 ```

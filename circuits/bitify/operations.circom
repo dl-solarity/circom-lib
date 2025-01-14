@@ -7,7 +7,7 @@ include "./bitify.circom";
  * out is LEN + NUM - 1 LEN bit number.
  */
 template BinSum(NUM, LEN) {
-    assert (LEN + NUM - 1 <= 253);
+    assert(LEN + NUM - 1 <= 253);
 
     var OUT_LEN = LEN + NUM - 1;
 

@@ -15,6 +15,7 @@ include "./poseidon/poseidon.circom";
  * but you should do padding in off-circuit computations.
  * BLOCK_NUM or LEN is len in blocks or bits of message, algo is hash algo we should use (list below \/\/\/)
  * We don`t waste constraints for many hashers in one template because we know what algo will be at the moment of compilation.
+ *
  * List of ALGO:
  * Sha1:     160
  * Sha2-224: 224

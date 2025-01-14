@@ -4,6 +4,8 @@ include "./compconstant.circom";
 
 /**
  * Source: https://github.com/iden3/circomlib/blob/v2.0.5/circuits/aliascheck.circom
+ *
+ * Check that `in` < scalar field size
  */
 template AliasCheck() {
     signal input in[254];
