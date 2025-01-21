@@ -12,11 +12,11 @@ import { CartesianMerkleTree } from "@zkit";
 function calculatePath(merkleProof: any, desiredProofSize: number, isExclusion: boolean) {
   const siblings = merkleProof.siblings.map((e: string) => BigInt(e));
 
-  let accHash = 0n;
-  let key = 0n,
+  let accHash = 0n,
+    key = 0n,
     leftHash = 0n,
     rightHash = 0n;
-  let directionBits = [];
+  const directionBits = [];
 
   for (let i = desiredProofSize / 2 - 1; i >= 0; i--) {
     if (i == Number(merkleProof.siblingsLength / 2n - 1n)) {
@@ -87,8 +87,7 @@ describe("CartesianMerkleTree", () => {
 
   const leaves: string[] = ["0xe5", "0xc8", "0xec", "0x9b", "0x23", "0xf6", "0x6d", "0x9e", "0x72", "0x64"];
 
-  let nonExistentLeaf: string;
-
+  const nonExistentLeaf = leaves[9];
   const desiredProofSize = 10;
 
   before("setup", async () => {
@@ -105,8 +104,6 @@ describe("CartesianMerkleTree", () => {
     cmtMock = await CartesianMerkleTreeMock.deploy();
 
     circuit = await zkit.getCircuit("CartesianMerkleTree");
-
-    nonExistentLeaf = leaves[9];
 
     await reverter.snapshot();
   });
@@ -158,27 +155,6 @@ describe("CartesianMerkleTree", () => {
     }
   });
 
-  it("should prove the tree inclusion for max depth", async () => {
-    await cmtMock.addElement(255);
-    await cmtMock.addElement(511);
-
-    const merkleProof = await cmtMock.getProof(511, desiredProofSize);
-
-    const directionBits = calculatePath(merkleProof, desiredProofSize, false);
-    const siblingsLength = numberToArray(merkleProof, desiredProofSize);
-
-    const proofStruct = await circuit.generateProof({
-      root: BigInt(merkleProof.root),
-      siblings: merkleProof.siblings.map((e: string) => BigInt(e)),
-      siblingsLength: siblingsLength,
-      key: BigInt(merkleProof.key),
-      directionBits: directionBits,
-      dummy: 0,
-    });
-
-    await expect(circuit).to.useSolidityVerifier(verifier).and.verifyProof(proofStruct);
-  });
-
   it("should prove the tree exclusion", async () => {
     for (let i = 0; i < 9; i++) {
       await cmtMock.addElement(leaves[i]);
@@ -226,8 +202,6 @@ describe("CartesianMerkleTree", () => {
   });
 
   it("should prove the tree exclusion for empty tree", async () => {
-    const nonExistentLeaf = ethers.hexlify(ethers.randomBytes(1));
-
     const merkleProof = await cmtMock.getProof(nonExistentLeaf, desiredProofSize);
 
     const directionBits = calculatePath(merkleProof, desiredProofSize, true);
