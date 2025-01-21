@@ -1,7 +1,7 @@
 pragma circom 2.1.6;
 
 include "../hasher/poseidon/poseidon.circom";
-include "../bitify/comparators.circom";
+include "../utils/switcher.circom";
 
 function inverse(a) {
     return 1 - a;
@@ -25,24 +25,6 @@ template Hash3() {
     h.dummy <== dummy;
 
     out <== h.out;
-}
-
-/**
- * Source: https://github.com/iden3/circomlib/blob/v2.0.5/circuits/switcher.circom
- */
-template Switcher() {
-    signal input sel;
-    signal input L;
-    signal input R;
-
-    signal output outL;
-    signal output outR;
-
-    signal aux;
-
-    aux <== (R - L) * sel;
-    outL <== aux + L;
-    outR <== -aux + R;
 }
 
 /**
@@ -109,13 +91,13 @@ template DepthHasher() {
     middleHash.dummy <== dummy;
 
     signal res[2];
-    // hash of the leaf node
+    // Hash of the leaf node
     res[0] <== leafHash.out * isLeaf;
 
-    // hash of the middle node
+    // Hash of the middle node
     res[1] <== middleHash.out * isMiddle;
 
-    // only one of the following will be non-zero
+    // Only one of the following will be non-zero
     root <== res[0] + res[1];
 }
 
@@ -128,7 +110,7 @@ template CartesianMerkleTree(proofSize) {
     // siblingsLength[i] is 1 when i-th sibling exists, 0 otherwise
     signal input siblingsLength[maxDepth];
     signal input key;
-    // directionBits[i] is 0 when leftHash <= rightHash
+    // directionBits is 0 when leftHash <= rightHash
     signal input directionBits[maxDepth];  
 
     signal input dummy;

@@ -4,6 +4,7 @@ include "../bitify/bitGates.circom";
 include "../bitify/bitify.circom";
 include "../bitify/comparators.circom";
 include "../hasher/poseidon/poseidon.circom";
+include "../utils/switcher.circom";
 
 function inverse(a) {
     return 1 - a;
@@ -28,7 +29,7 @@ template Hash2() {
 }
 
 /**
- * Hash2 = Poseidon(key | value | 1)
+ * Hash3 = Poseidon(key | value | 1)
  * 1 is added to the end of the leaf value to make the hash unique
  */
 template Hash3() {
@@ -48,24 +49,6 @@ template Hash3() {
     h.dummy <== dummy;
 
     out <== h.out;
-}
-
-/**
- * Source: https://github.com/iden3/circomlib/blob/v2.0.5/circuits/switcher.circom
- */
-template Switcher() {
-    signal input sel;
-    signal input L;
-    signal input R;
-
-    signal output outL;
-    signal output outR;
-
-    signal aux;
-
-    aux <== (R - L) * sel;
-    outL <==  aux + L;
-    outR <== -aux + R;
 }
 
 /**
