@@ -29,6 +29,7 @@ template Hash3() {
 
 /**
  * Determines the type of the node
+ * A leaf here refers to a node with two known siblings, whereas a middle node has one sibling and an accumulated hash
  */
 template NodeTypeDeterminer() {
     // 1 if the node is at the desired depth, 0 otherwise
@@ -41,10 +42,11 @@ template NodeTypeDeterminer() {
     // 1 if the node is a leaf node, 0 otherwise
     signal output leaf;
 
-    // Determine the node as a leaf, when we are at the desired depth
+    // Determine the node as a leaf when we are at the desired depth
+    // and the previous node is neither a leaf nor a middle node
     leaf <== isDesiredDepth - previousLeaf - previousMiddle;
-    // Determine the node as a middle, when we are at the desired depth 
-    // and current node is not leaf
+    // Determine the node as a middle node when we are at the desired depth 
+    // and the current node is not a leaf
     middle <== isDesiredDepth * inverse(leaf);
 }
 
@@ -57,8 +59,9 @@ template DepthHasher() {
 
     signal input key;
     signal input sibling1;
+    //this is a key in case of middle node
     signal input sibling2;
-    // directionBit = 0 means that sibling1 <= sibling2
+
     signal input directionBit;
     signal input accHash;
 
@@ -69,7 +72,7 @@ template DepthHasher() {
     component leafSwitcher = Switcher();
     leafSwitcher.L <== sibling1;
     leafSwitcher.R <== sibling2;
-    // Based on the direction bit, we understand which order to use
+    // directionBit is 0 if sibling1 <= sibling2, 1 otherwise
     leafSwitcher.sel <== directionBit;
 
     component leafHash = Hash3();
@@ -81,7 +84,7 @@ template DepthHasher() {
     component middleSwitcher = Switcher();
     middleSwitcher.L <== accHash;
     middleSwitcher.R <== sibling1;
-    // directionBit is 0 when accHash <= sibling1
+    // directionBit is 0 if accHash <= sibling1, 1 otherwise
     middleSwitcher.sel <== directionBit;
 
     component middleHash = Hash3();
@@ -107,10 +110,9 @@ template CartesianMerkleTree(proofSize) {
 
     var maxDepth = proofSize / 2;
 
-    // siblingsLength[i] is 1 when i-th sibling exists, 0 otherwise
+    // siblingsLength[i] is 1 if i-th sibling exists, 0 otherwise
     signal input siblingsLength[maxDepth];
     signal input key;
-    // directionBits is 0 when leftHash <= rightHash
     signal input directionBits[maxDepth];  
 
     signal input dummy;
@@ -119,7 +121,7 @@ template CartesianMerkleTree(proofSize) {
 
     component nodeType[maxDepth];
 
-    // Start with the leaf node
+    // Start with the leaf
     for (var i = maxDepth - 1; i >= 0; i--) {
         nodeType[i] = NodeTypeDeterminer();
 
