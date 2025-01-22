@@ -6,10 +6,6 @@ include "../bitify/comparators.circom";
 include "../hasher/poseidon/poseidon.circom";
 include "../utils/switcher.circom";
 
-function inverse(a) {
-    return 1 - a;
-}
-
 /**
  * Hash2 = Poseidon(H_L | H_R)
  */
@@ -74,16 +70,16 @@ template DepthDeterminer(depth) {
     isZero[depth - 1].out === 1;
 
     // If there is a branch on the previous depth, then the current depth is the desired one
-    desiredDepth[depth - 1] <== inverse(isZero[depth - 2].out);
+    desiredDepth[depth - 1] <== 1 - isZero[depth - 2].out;
     done[depth - 2] <== desiredDepth[depth - 1];
 
     // desiredDepth will be `1` the first time we encounter non-zero branch on the previous depth
     for (var i = depth - 2; i > 0; i--) {
-        desiredDepth[i] <== inverse(done[i]) * inverse(isZero[i - 1].out);
+        desiredDepth[i] <== (1 - done[i]) * (1 - isZero[i - 1].out);
         done[i - 1] <== desiredDepth[i] + done[i];
     }
 
-    desiredDepth[0] <== inverse(done[0]);
+    desiredDepth[0] <== 1 - done[0];
 }
 
 /**
@@ -95,15 +91,10 @@ template NodeTypeDeterminer() {
     signal input isDesiredDepth;
     signal input isExclusion;
 
-    signal input previousMiddle;
-    signal input previousEmpty;
-    signal input previousAuxLeaf;
-    signal input previousLeaf;
+    signal input isPreviousMiddle;
 
     // 1 if the node is a middle node, 0 otherwise
     signal output middle;
-    // 1 if the node is an empty node, 0 otherwise
-    signal output empty;
     // 1 if the node is a leaf node for the exclusion proof, 0 otherwise
     signal output auxLeaf;
     // 1 if the node is a leaf node, 0 otherwise
@@ -113,19 +104,15 @@ template NodeTypeDeterminer() {
     signal leafForExclusionCheck <== isDesiredDepth * isExclusion;
 
     // Determine the node as a middle, until getting to the desired depth
-    middle <== previousMiddle - isDesiredDepth;
+    middle <== isPreviousMiddle - isDesiredDepth;
 
     // Determine the node as a leaf, when we are at the desired depth and
     // we check for inclusion
     leaf <== isDesiredDepth - leafForExclusionCheck;
 
     // Determine the node as an auxLeaf, when we are at the desired depth and
-    // we check for exclusion in a bamboo scenatrio
-    auxLeaf <== leafForExclusionCheck * inverse(auxIsEmpty);
-
-    // Determine the node as an empty, when we are at the desired depth and
-    // we check for exclusion with an empty node
-    empty <== isDesiredDepth * auxIsEmpty;
+    // we check for exclusion in a bamboo scenario
+    auxLeaf <== leafForExclusionCheck * (1 - auxIsEmpty);
 }
 
 /**
@@ -196,7 +183,7 @@ template SparseMerkleTree(depth) {
 
     // Check that the auxIsEmpty is 0 if we are checking for inclusion
     component exclusiveCase = AND();
-    exclusiveCase.in[0] <== inverse(isExclusion);
+    exclusiveCase.in[0] <== 1 - isExclusion;
     exclusiveCase.in[1] <== auxIsEmpty;
     exclusiveCase.out === 0;
 
@@ -207,7 +194,7 @@ template SparseMerkleTree(depth) {
 
     component keysOk = MultiAND(3);
     keysOk.in[0] <== isExclusion;
-    keysOk.in[1] <== inverse(auxIsEmpty);
+    keysOk.in[1] <== 1 - auxIsEmpty;
     keysOk.in[2] <== areKeyEquals.out;
     keysOk.out === 0;
 
@@ -239,15 +226,9 @@ template SparseMerkleTree(depth) {
         nodeType[i] = NodeTypeDeterminer();
 
         if (i == 0) {
-            nodeType[i].previousMiddle <== 1;
-            nodeType[i].previousEmpty <== 0;
-            nodeType[i].previousLeaf <== 0;
-            nodeType[i].previousAuxLeaf <== 0;
+            nodeType[i].isPreviousMiddle <== 1;
         } else {
-            nodeType[i].previousMiddle <== nodeType[i - 1].middle;
-            nodeType[i].previousEmpty <== nodeType[i - 1].empty;
-            nodeType[i].previousLeaf <== nodeType[i - 1].leaf;
-            nodeType[i].previousAuxLeaf <== nodeType[i - 1].auxLeaf;
+            nodeType[i].isPreviousMiddle <== nodeType[i - 1].middle;
         }
 
         nodeType[i].auxIsEmpty <== auxIsEmpty;
