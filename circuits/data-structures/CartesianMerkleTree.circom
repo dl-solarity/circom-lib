@@ -3,10 +3,6 @@ pragma circom 2.1.6;
 include "../hasher/poseidon/poseidon.circom";
 include "../utils/switcher.circom";
 
-function inverse(a) {
-    return 1 - a;
-}
-
 /**
  * Hash3 = Poseidon(key | left.merkleHash | right.merkleHash)
  */
@@ -34,8 +30,8 @@ template Hash3() {
 template NodeTypeDeterminer() {
     // 1 if the node is at the desired depth, 0 otherwise
     signal input isDesiredDepth;
-    signal input previousMiddle;
-    signal input previousLeaf;
+    signal input isPreviousMiddle;
+    signal input isPreviousLeaf;
 
     // 1 if the node is a middle node, 0 otherwise
     signal output middle;  
@@ -44,10 +40,10 @@ template NodeTypeDeterminer() {
 
     // Determine the node as a leaf when we are at the desired depth
     // and the previous node is neither a leaf nor a middle node
-    leaf <== isDesiredDepth - previousLeaf - previousMiddle;
+    leaf <== isDesiredDepth - isPreviousLeaf - isPreviousMiddle;
     // Determine the node as a middle node when we are at the desired depth 
     // and the current node is not a leaf
-    middle <== isDesiredDepth * inverse(leaf);
+    middle <== isDesiredDepth * (1 - leaf);
 }
 
 /**
@@ -126,11 +122,11 @@ template CartesianMerkleTree(proofSize) {
         nodeType[i] = NodeTypeDeterminer();
 
         if (i == maxDepth - 1) {
-            nodeType[i].previousMiddle <== 0;
-            nodeType[i].previousLeaf <== 0;
+            nodeType[i].isPreviousMiddle <== 0;
+            nodeType[i].isPreviousLeaf <== 0;
         } else {
-            nodeType[i].previousMiddle <== nodeType[i + 1].middle;
-            nodeType[i].previousLeaf <== nodeType[i + 1].leaf;
+            nodeType[i].isPreviousMiddle <== nodeType[i + 1].middle;
+            nodeType[i].isPreviousLeaf <== nodeType[i + 1].leaf;
         }
 
         nodeType[i].isDesiredDepth <== siblingsLength[i];
