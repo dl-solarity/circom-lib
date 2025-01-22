@@ -20,7 +20,8 @@ circuits
 ├── blinders
 │   └── Commitment — "Commit/reveal scheme implementation"
 ├── data-structures    
-│   └── SparseMerkleTree — "SMT Merkle inclusion/exclusion proofs verification"
+│   ├── SparseMerkleTree — "SMT Merkle inclusion/exclusion proofs verification"
+|   └── CartesianMerkleTree — "CMT Merkle inclusion/exclusion proofs verification"
 ├── ec
 │   ├── curve — "Elliptic curve operations (secp256r1, secp256k1, brainpoolP256r1, brainpoolP384r1, secp384r1)"
 │   ├── get - "Generator point getters for supported elliptic curves"
@@ -41,7 +42,8 @@ circuits
 │   └── mask - "Mask generation functions implementation"
 ├── utils
 │   ├── aliascheck — "Check the number fits the scalar field size"
-│   └── compconstant — "Compare a number with a template parameter in a binary form"
+│   ├── compconstant — "Compare a number with a template parameter in a binary form"
+|   └── switcher - "Select between two options"
 ├── main - "Main components for testing purposes"
 └── mock - "Mocks (logs) for testing purposes"
 ```
