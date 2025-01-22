@@ -269,5 +269,41 @@ describe("CartesianMerkleTree", () => {
         dummy: 0,
       });
     });
+
+    it("should revert with incorrect direction path", async () => {
+      for (let i = 0; i < 9; i++) {
+        await cmtMock.addElement(leaves[i]);
+      }
+
+      let merkleProof = await cmtMock.getProof(nonExistentLeaf, desiredProofSize);
+      let directionBits = calculatePath(merkleProof, desiredProofSize, true);
+      let siblingsLength = numberToArray(merkleProof, desiredProofSize);
+
+      let wrongPath = directionBits.map((e: number) => 1 - e);
+
+      await expect(circuit).to.not.generateProof({
+        root: BigInt(merkleProof.root),
+        siblings: merkleProof.siblings.map((e: string) => BigInt(e)),
+        siblingsLength: siblingsLength,
+        key: BigInt(merkleProof.nonExistenceKey),
+        directionBits: wrongPath,
+        dummy: 0,
+      });
+
+      merkleProof = await cmtMock.getProof(leaves[2], desiredProofSize);
+      directionBits = calculatePath(merkleProof, desiredProofSize, false);
+      siblingsLength = numberToArray(merkleProof, desiredProofSize);
+
+      wrongPath = directionBits.map((e: number) => 1 - e);
+
+      await expect(circuit).to.not.generateProof({
+        root: BigInt(merkleProof.root),
+        siblings: merkleProof.siblings.map((e: string) => BigInt(e)),
+        siblingsLength: siblingsLength,
+        key: BigInt(merkleProof.key),
+        directionBits: wrongPath,
+        dummy: 0,
+      });
+    });
   });
 });
