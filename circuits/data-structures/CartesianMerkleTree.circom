@@ -110,7 +110,7 @@ template CartesianMerkleTree(proofSize) {
 
     var maxDepth = proofSize / 2;
 
-    // siblingsLength[i] is 1 if i-th sibling exists, 0 otherwise
+    // "siblingsLength[i] is 1 if the i-th pair of siblings exists, 0 otherwise
     signal input siblingsLength[maxDepth];
     signal input key;
     signal input directionBits[maxDepth];  
