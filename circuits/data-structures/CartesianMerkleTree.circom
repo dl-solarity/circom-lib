@@ -41,7 +41,7 @@ template NodeTypeDeterminer() {
     // Determine the node as a leaf when we are at the desired depth
     // and the previous node is neither a leaf nor a middle node
     leaf <== isDesiredDepth - isPreviousLeaf - isPreviousMiddle;
-    // Determine the node as a middle node when we are at the desired depth 
+    // Determine the node is a middle node when we are at the desired depth 
     // and the current node is not a leaf
     middle <== isDesiredDepth * (1 - leaf);
 }
@@ -55,7 +55,7 @@ template DepthHasher() {
 
     signal input key;
     signal input sibling1;
-    //this is a key in case of middle node
+    // this is a key in case of middle node
     signal input sibling2;
 
     signal input directionBit;
@@ -135,7 +135,7 @@ template CartesianMerkleTree(proofSize) {
     component depthHash[maxDepth];
 
     // Hash up the elements in the reverse order
-    for (var i = maxDepth - 1; i >= 0; i -= 1) {
+    for (var i = maxDepth - 1; i >= 0; i--) {
         depthHash[i] = DepthHasher();
 
         depthHash[i].isMiddle <== nodeType[i].middle;
