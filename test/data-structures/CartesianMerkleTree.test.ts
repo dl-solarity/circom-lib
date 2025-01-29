@@ -22,16 +22,16 @@ function calculatePath(merkleProof: any, desiredProofSize: number, isExclusion: 
     if (i == Number(merkleProof.siblingsLength / 2n - 1n)) {
       key = isExclusion ? BigInt(merkleProof.nonExistenceKey) : BigInt(merkleProof.key);
 
-      if (siblings[2 * i + 1] <= siblings[2 * i]) {
+      if (siblings[2 * i] <= siblings[2 * i + 1]) {
         directionBits[i] = 0;
-
-        leftHash = BigInt(siblings[2 * i + 1]);
-        rightHash = BigInt(siblings[2 * i]);
-      } else {
-        directionBits[i] = 1;
 
         leftHash = BigInt(siblings[2 * i]);
         rightHash = BigInt(siblings[2 * i + 1]);
+      } else {
+        directionBits[i] = 1;
+
+        leftHash = BigInt(siblings[2 * i + 1]);
+        rightHash = BigInt(siblings[2 * i]);
       }
     }
 

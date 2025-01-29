@@ -54,8 +54,8 @@ template DepthHasher() {
     signal input isLeaf;
 
     signal input key;
-    signal input sibling1;
     // this is a key in case of middle node
+    signal input sibling1;
     signal input sibling2;
 
     signal input directionBit;
@@ -79,12 +79,12 @@ template DepthHasher() {
 
     component middleSwitcher = Switcher();
     middleSwitcher.L <== accHash;
-    middleSwitcher.R <== sibling1;
-    // directionBit is 0 if accHash <= sibling1, 1 otherwise
+    middleSwitcher.R <== sibling2;
+    // directionBit is 0 if accHash <= sibling2, 1 otherwise
     middleSwitcher.sel <== directionBit;
 
     component middleHash = Hash3();
-    middleHash.a <== sibling2;
+    middleHash.a <== sibling1;
     middleHash.b <== middleSwitcher.outL;
     middleHash.c <== middleSwitcher.outR;
     middleHash.dummy <== dummy;
@@ -142,8 +142,8 @@ template CartesianMerkleTree(proofSize) {
         depthHash[i].isLeaf <== nodeType[i].leaf;
 
         depthHash[i].key <== key;
-        depthHash[i].sibling1 <== siblings[2 * i + 1];
-        depthHash[i].sibling2 <== siblings[2 * i];
+        depthHash[i].sibling1 <== siblings[2 * i];
+        depthHash[i].sibling2 <== siblings[2 * i + 1];
         depthHash[i].directionBit <== directionBits[i];
 
         depthHash[i].dummy <== dummy;
