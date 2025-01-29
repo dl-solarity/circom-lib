@@ -1,65 +1,32 @@
 import { expect } from "chai";
 import { ethers, zkit } from "hardhat";
 
-import { Poseidon } from "@iden3/js-crypto";
-
 import { deployPoseidonFacade } from "../helpers/poseidon/poseidon-deployer";
 import { Reverter } from "../helpers/reverter";
 
 import { CartesianMerkleTreeGroth16Verifier, CartesianMerkleTreeMock } from "@ethers-v6";
 import { CartesianMerkleTree } from "@zkit";
 
-function calculatePath(merkleProof: any, desiredProofSize: number, isExclusion: boolean) {
-  const siblings = merkleProof.siblings.map((e: string) => BigInt(e));
+function parseNumberToBitsArray(num: bigint, pathLength: bigint, desiredProofSize: number): number[] {
+  const binary = num.toString(2);
+  const resultArr: number[] = [];
 
-  let accHash = 0n,
-    key = 0n,
-    leftHash = 0n,
-    rightHash = 0n;
-  const directionBits = [];
-
-  for (let i = desiredProofSize / 2 - 1; i >= 0; i--) {
-    if (i == Number(merkleProof.siblingsLength / 2n - 1n)) {
-      key = isExclusion ? BigInt(merkleProof.nonExistenceKey) : BigInt(merkleProof.key);
-
-      if (siblings[2 * i] <= siblings[2 * i + 1]) {
-        directionBits[i] = 0;
-
-        leftHash = BigInt(siblings[2 * i]);
-        rightHash = BigInt(siblings[2 * i + 1]);
-      } else {
-        directionBits[i] = 1;
-
-        leftHash = BigInt(siblings[2 * i + 1]);
-        rightHash = BigInt(siblings[2 * i]);
-      }
-    }
-
-    if (i < merkleProof.siblingsLength / 2n - 1n) {
-      key = BigInt(siblings[2 * i]);
-
-      if (accHash <= siblings[2 * i + 1]) {
-        directionBits[i] = 0;
-
-        leftHash = BigInt(accHash);
-        rightHash = BigInt(siblings[2 * i + 1]);
-      } else {
-        directionBits[i] = 1;
-
-        leftHash = BigInt(siblings[2 * i + 1]);
-        rightHash = BigInt(accHash);
-      }
-    }
-
-    accHash = Poseidon.hash([key, leftHash, rightHash]);
-
-    if (i > merkleProof.siblingsLength / 2n - 1n) {
-      directionBits[i] = 0;
-      accHash = 0n;
-    }
+  //padding leading zeroes, missed at the begining in binary representation
+  for (let i = 0; i < pathLength - BigInt(binary.length); i++) {
+    resultArr.push(0);
   }
 
-  return directionBits;
+  for (let i = 0; i < binary.length; i++) {
+    resultArr.push(Number(binary[i]));
+  }
+
+  const currentLength = resultArr.length;
+  //circuit expects directionBits to be the length of desiredProofSize/2, so adding 0 to the end
+  for (let i = 0; i < desiredProofSize / 2 - currentLength; i++) {
+    resultArr.push(0);
+  }
+
+  return resultArr;
 }
 
 function numberToArray(merkleProof: any, desiredProofSize: number) {
@@ -116,7 +83,12 @@ describe("CartesianMerkleTree", () => {
     }
 
     const merkleProof = await cmtMock.getProof(leaves[5], desiredProofSize);
-    const directionBits = calculatePath(merkleProof, desiredProofSize, false);
+
+    const directionBits = parseNumberToBitsArray(
+      merkleProof.directionBits,
+      merkleProof.siblingsLength / 2n,
+      desiredProofSize,
+    );
     const siblingsLength = numberToArray(merkleProof, desiredProofSize);
 
     const proofStruct = await circuit.generateProof({
@@ -139,7 +111,11 @@ describe("CartesianMerkleTree", () => {
 
       const merkleProof = await cmtMock.getProof(rand, desiredProofSize);
 
-      const directionBits = calculatePath(merkleProof, desiredProofSize, false);
+      const directionBits = parseNumberToBitsArray(
+        merkleProof.directionBits,
+        merkleProof.siblingsLength / 2n,
+        desiredProofSize,
+      );
       const siblingsLength = numberToArray(merkleProof, desiredProofSize);
 
       const proofStruct = await circuit.generateProof({
@@ -161,7 +137,12 @@ describe("CartesianMerkleTree", () => {
     }
 
     const merkleProof = await cmtMock.getProof(nonExistentLeaf, desiredProofSize);
-    const directionBits = calculatePath(merkleProof, desiredProofSize, true);
+
+    const directionBits = parseNumberToBitsArray(
+      merkleProof.directionBits,
+      merkleProof.siblingsLength / 2n,
+      desiredProofSize,
+    );
     const siblingsLength = numberToArray(merkleProof, desiredProofSize);
 
     const proofStruct = await circuit.generateProof({
@@ -184,7 +165,11 @@ describe("CartesianMerkleTree", () => {
 
       const merkleProof = await cmtMock.getProof(nonExistentLeaf, desiredProofSize);
 
-      const directionBits = calculatePath(merkleProof, desiredProofSize, true);
+      const directionBits = parseNumberToBitsArray(
+        merkleProof.directionBits,
+        merkleProof.siblingsLength / 2n,
+        desiredProofSize,
+      );
       const siblingsLength = numberToArray(merkleProof, desiredProofSize);
 
       const proofStruct = await circuit.generateProof({
@@ -204,7 +189,11 @@ describe("CartesianMerkleTree", () => {
   it("should prove the tree exclusion for empty tree", async () => {
     const merkleProof = await cmtMock.getProof(nonExistentLeaf, desiredProofSize);
 
-    const directionBits = calculatePath(merkleProof, desiredProofSize, true);
+    const directionBits = parseNumberToBitsArray(
+      merkleProof.directionBits,
+      merkleProof.siblingsLength / 2n,
+      desiredProofSize,
+    );
     const siblingsLength = numberToArray(merkleProof, desiredProofSize);
 
     const proofStruct = await circuit.generateProof({
@@ -236,7 +225,12 @@ describe("CartesianMerkleTree", () => {
       }
 
       const merkleProof = await cmtMock.getProof(leaves[5], desiredProofSize);
-      const directionBits = calculatePath(merkleProof, desiredProofSize, false);
+
+      const directionBits = parseNumberToBitsArray(
+        merkleProof.directionBits,
+        merkleProof.siblingsLength / 2n,
+        desiredProofSize,
+      );
       const siblingsLength = numberToArray(merkleProof, desiredProofSize);
 
       const incorrectKey = merkleProof.key + 1n;
@@ -257,7 +251,12 @@ describe("CartesianMerkleTree", () => {
       }
 
       const merkleProof = await cmtMock.getProof(nonExistentLeaf, desiredProofSize);
-      const directionBits = calculatePath(merkleProof, desiredProofSize, true);
+
+      const directionBits = parseNumberToBitsArray(
+        merkleProof.directionBits,
+        merkleProof.siblingsLength / 2n,
+        desiredProofSize,
+      );
       const siblingsLength = numberToArray(merkleProof, desiredProofSize);
 
       await expect(circuit).to.not.generateProof({
@@ -276,7 +275,12 @@ describe("CartesianMerkleTree", () => {
       }
 
       let merkleProof = await cmtMock.getProof(nonExistentLeaf, desiredProofSize);
-      let directionBits = calculatePath(merkleProof, desiredProofSize, true);
+
+      let directionBits = parseNumberToBitsArray(
+        merkleProof.directionBits,
+        merkleProof.siblingsLength / 2n,
+        desiredProofSize,
+      );
       let siblingsLength = numberToArray(merkleProof, desiredProofSize);
 
       let wrongPath = directionBits.map((e: number) => 1 - e);
@@ -291,7 +295,12 @@ describe("CartesianMerkleTree", () => {
       });
 
       merkleProof = await cmtMock.getProof(leaves[2], desiredProofSize);
-      directionBits = calculatePath(merkleProof, desiredProofSize, false);
+
+      directionBits = parseNumberToBitsArray(
+        merkleProof.directionBits,
+        merkleProof.siblingsLength / 2n,
+        desiredProofSize,
+      );
       siblingsLength = numberToArray(merkleProof, desiredProofSize);
 
       wrongPath = directionBits.map((e: number) => 1 - e);
