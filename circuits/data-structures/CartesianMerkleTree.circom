@@ -52,8 +52,12 @@ template NodeTypeDeterminer() {
 template DepthHasher() {
     signal input isMiddle;
     signal input isLeaf;
+    // 0 if looking for inclusion, 1 otherwise
+    signal input isAuxLeaf;
 
     signal input key;
+    signal input nonExistenceKey;
+
     // this is a key in case of middle node
     signal input sibling1;
     signal input sibling2;
@@ -65,6 +69,11 @@ template DepthHasher() {
 
     signal output root;
 
+    component keySwitcher = Switcher();
+    keySwitcher.L <== key;
+    keySwitcher.R <== nonExistenceKey;
+    keySwitcher.sel <== isAuxLeaf;
+
     component leafSwitcher = Switcher();
     leafSwitcher.L <== sibling1;
     leafSwitcher.R <== sibling2;
@@ -72,7 +81,7 @@ template DepthHasher() {
     leafSwitcher.sel <== directionBit;
 
     component leafHash = Hash3();
-    leafHash.a <== key;
+    leafHash.a <== keySwitcher.outL;
     leafHash.b <== leafSwitcher.outL;
     leafHash.c <== leafSwitcher.outR;
     leafHash.dummy <== dummy;
@@ -106,10 +115,14 @@ template CartesianMerkleTree(proofSize) {
 
     var maxDepth = proofSize / 2;
 
-    // "siblingsLength[i] is 1 if the i-th pair of siblings exists, 0 otherwise
+    // siblingsLength[i] is 1 if the i-th pair of siblings exists, 0 otherwise
     signal input siblingsLength[maxDepth];
+    signal input directionBits[maxDepth];
+
     signal input key;
-    signal input directionBits[maxDepth];  
+    signal input nonExistenceKey;
+
+    signal input isExclusion;
 
     signal input dummy;
      
@@ -140,8 +153,10 @@ template CartesianMerkleTree(proofSize) {
 
         depthHash[i].isMiddle <== nodeType[i].middle;
         depthHash[i].isLeaf <== nodeType[i].leaf;
+        depthHash[i].isAuxLeaf <== isExclusion;
 
         depthHash[i].key <== key;
+        depthHash[i].nonExistenceKey <== nonExistenceKey;
         depthHash[i].sibling1 <== siblings[2 * i];
         depthHash[i].sibling2 <== siblings[2 * i + 1];
         depthHash[i].directionBit <== directionBits[i];

@@ -95,8 +95,10 @@ describe("CartesianMerkleTree", () => {
       root: BigInt(merkleProof.root),
       siblings: merkleProof.siblings.map((e: string) => BigInt(e)),
       siblingsLength: siblingsLength,
-      key: BigInt(merkleProof.key),
       directionBits: directionBits,
+      key: BigInt(merkleProof.key),
+      nonExistenceKey: BigInt(merkleProof.nonExistenceKey),
+      isExclusion: merkleProof.existence ? 0 : 1,
       dummy: 0,
     });
 
@@ -122,8 +124,10 @@ describe("CartesianMerkleTree", () => {
         root: BigInt(merkleProof.root),
         siblings: merkleProof.siblings.map((e: string) => BigInt(e)),
         siblingsLength: siblingsLength,
-        key: BigInt(merkleProof.key),
         directionBits: directionBits,
+        key: BigInt(merkleProof.key),
+        nonExistenceKey: BigInt(merkleProof.nonExistenceKey),
+        isExclusion: merkleProof.existence ? 0 : 1,
         dummy: 0,
       });
 
@@ -149,8 +153,10 @@ describe("CartesianMerkleTree", () => {
       root: BigInt(merkleProof.root),
       siblings: merkleProof.siblings.map((e: string) => BigInt(e)),
       siblingsLength: siblingsLength,
-      key: BigInt(merkleProof.nonExistenceKey),
       directionBits: directionBits,
+      key: BigInt(merkleProof.key),
+      nonExistenceKey: BigInt(merkleProof.nonExistenceKey),
+      isExclusion: merkleProof.existence ? 0 : 1,
       dummy: 0,
     });
 
@@ -176,9 +182,10 @@ describe("CartesianMerkleTree", () => {
         root: BigInt(merkleProof.root),
         siblings: merkleProof.siblings.map((e: string) => BigInt(e)),
         siblingsLength: siblingsLength,
-        key: BigInt(merkleProof.nonExistenceKey),
         directionBits: directionBits,
-
+        key: BigInt(merkleProof.key),
+        nonExistenceKey: BigInt(merkleProof.nonExistenceKey),
+        isExclusion: merkleProof.existence ? 0 : 1,
         dummy: 0,
       });
 
@@ -200,8 +207,10 @@ describe("CartesianMerkleTree", () => {
       root: BigInt(merkleProof.root),
       siblings: merkleProof.siblings.map((e: string) => BigInt(e)),
       siblingsLength: siblingsLength,
-      key: BigInt(merkleProof.nonExistenceKey),
       directionBits: directionBits,
+      key: BigInt(merkleProof.key),
+      nonExistenceKey: BigInt(merkleProof.nonExistenceKey),
+      isExclusion: merkleProof.existence ? 0 : 1,
       dummy: 0,
     });
 
@@ -239,8 +248,10 @@ describe("CartesianMerkleTree", () => {
         root: BigInt(merkleProof.root),
         siblings: merkleProof.siblings.map((e: string) => BigInt(e)),
         siblingsLength: siblingsLength,
-        key: incorrectKey,
         directionBits: directionBits,
+        key: incorrectKey,
+        nonExistenceKey: BigInt(merkleProof.nonExistenceKey),
+        isExclusion: 0,
         dummy: 0,
       });
     });
@@ -263,8 +274,10 @@ describe("CartesianMerkleTree", () => {
         root: BigInt(merkleProof.root),
         siblings: merkleProof.siblings.map((e: string) => BigInt(e)),
         siblingsLength: siblingsLength,
-        key: BigInt(merkleProof.key),
         directionBits: directionBits,
+        key: BigInt(merkleProof.key),
+        nonExistenceKey: 0n,
+        isExclusion: 1,
         dummy: 0,
       });
     });
@@ -289,8 +302,10 @@ describe("CartesianMerkleTree", () => {
         root: BigInt(merkleProof.root),
         siblings: merkleProof.siblings.map((e: string) => BigInt(e)),
         siblingsLength: siblingsLength,
-        key: BigInt(merkleProof.nonExistenceKey),
         directionBits: wrongPath,
+        key: BigInt(merkleProof.key),
+        nonExistenceKey: BigInt(merkleProof.nonExistenceKey),
+        isExclusion: merkleProof.existence ? 0 : 1,
         dummy: 0,
       });
 
@@ -309,8 +324,56 @@ describe("CartesianMerkleTree", () => {
         root: BigInt(merkleProof.root),
         siblings: merkleProof.siblings.map((e: string) => BigInt(e)),
         siblingsLength: siblingsLength,
-        key: BigInt(merkleProof.key),
         directionBits: wrongPath,
+        key: BigInt(merkleProof.key),
+        nonExistenceKey: BigInt(merkleProof.nonExistenceKey),
+        isExclusion: merkleProof.existence ? 0 : 1,
+        dummy: 0,
+      });
+    });
+
+    it("should revert while checking exclusion with an inclusion proof and vice versa", async () => {
+      for (let i = 0; i < 9; i++) {
+        await cmtMock.addElement(leaves[i]);
+      }
+
+      const inclusionProof = await cmtMock.getProof(leaves[5], desiredProofSize);
+
+      let directionBits = parseNumberToBitsArray(
+        inclusionProof.directionBits,
+        inclusionProof.siblingsLength / 2n,
+        desiredProofSize,
+      );
+      let siblingsLength = numberToArray(inclusionProof, desiredProofSize);
+
+      await expect(circuit).to.not.generateProof({
+        root: BigInt(inclusionProof.root),
+        siblings: inclusionProof.siblings.map((e: string) => BigInt(e)),
+        siblingsLength: siblingsLength,
+        directionBits: directionBits,
+        key: inclusionProof.key,
+        nonExistenceKey: BigInt(inclusionProof.nonExistenceKey),
+        isExclusion: 1,
+        dummy: 0,
+      });
+
+      const exclusionProof = await cmtMock.getProof(nonExistentLeaf, desiredProofSize);
+
+      directionBits = parseNumberToBitsArray(
+        exclusionProof.directionBits,
+        exclusionProof.siblingsLength / 2n,
+        desiredProofSize,
+      );
+      siblingsLength = numberToArray(exclusionProof, desiredProofSize);
+
+      await expect(circuit).to.not.generateProof({
+        root: BigInt(exclusionProof.root),
+        siblings: exclusionProof.siblings.map((e: string) => BigInt(e)),
+        siblingsLength: siblingsLength,
+        directionBits: directionBits,
+        key: exclusionProof.key,
+        nonExistenceKey: BigInt(exclusionProof.nonExistenceKey),
+        isExclusion: 0,
         dummy: 0,
       });
     });
