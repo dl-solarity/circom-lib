@@ -7,38 +7,29 @@ import { Reverter } from "../helpers/reverter";
 import { CartesianMerkleTreeGroth16Verifier, CartesianMerkleTreeMock } from "@ethers-v6";
 import { CartesianMerkleTree } from "@zkit";
 
-function parseNumberToBitsArray(num: bigint, pathLength: bigint, desiredProofSize: number): number[] {
+function parseNumberToBitsArray(num: bigint, expectedPathLen: bigint, desiredProofSize: number): number[] {
   const binary = num.toString(2);
-  const resultArr: number[] = [];
 
-  //padding leading zeroes, missed at the begining in binary representation
-  for (let i = 0; i < pathLength - BigInt(binary.length); i++) {
-    resultArr.push(0);
-  }
+  // circuit expects directionBits to be the length of desiredProofSize/2
+  let resultArr = Array<number>(desiredProofSize / 2).fill(0);
 
-  for (let i = 0; i < binary.length; i++) {
-    resultArr.push(Number(binary[i]));
-  }
+  let j = 0;
+  // expectedPathLen is needed because a path may have leading zeroes,
+  // whereas the number derived from binary doesn't
+  for (let i = Math.abs(Number(expectedPathLen) - binary.length); i < Number(expectedPathLen); i++) {
+    resultArr[i] = Number(binary[j]);
 
-  const currentLength = resultArr.length;
-  //circuit expects directionBits to be the length of desiredProofSize/2, so adding 0 to the end
-  for (let i = 0; i < desiredProofSize / 2 - currentLength; i++) {
-    resultArr.push(0);
+    j++;
   }
 
   return resultArr;
 }
 
 function numberToArray(merkleProof: any, desiredProofSize: number) {
-  const siblingsLength = [];
-  let i = 0;
+  let siblingsLength = Array<number>(desiredProofSize / 2).fill(0);
 
-  for (i; i < merkleProof.siblingsLength / 2n; i++) {
+  for (let i = 0; i < merkleProof.siblingsLength / 2n; i++) {
     siblingsLength[i] = 1;
-  }
-
-  for (i; i < desiredProofSize / 2; i++) {
-    siblingsLength[i] = 0;
   }
 
   return siblingsLength;
