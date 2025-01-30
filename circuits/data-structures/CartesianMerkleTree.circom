@@ -53,7 +53,7 @@ template DepthHasher() {
     signal input isMiddle;
     signal input isLeaf;
     // 0 if looking for inclusion, 1 otherwise
-    signal input isAuxLeaf;
+    signal input isExclusionLeaf;
 
     signal input key;
     signal input nonExistenceKey;
@@ -72,7 +72,7 @@ template DepthHasher() {
     component keySwitcher = Switcher();
     keySwitcher.L <== key;
     keySwitcher.R <== nonExistenceKey;
-    keySwitcher.sel <== isAuxLeaf;
+    keySwitcher.sel <== isExclusionLeaf;
 
     component leafSwitcher = Switcher();
     leafSwitcher.L <== sibling1;
@@ -125,7 +125,7 @@ template CartesianMerkleTree(proofSize) {
     signal input isExclusion;
 
     signal input dummy;
-     
+
     dummy * dummy === 0;
 
     component nodeType[maxDepth];
@@ -153,7 +153,7 @@ template CartesianMerkleTree(proofSize) {
 
         depthHash[i].isMiddle <== nodeType[i].middle;
         depthHash[i].isLeaf <== nodeType[i].leaf;
-        depthHash[i].isAuxLeaf <== isExclusion;
+        depthHash[i].isExclusionLeaf <== isExclusion;
 
         depthHash[i].key <== key;
         depthHash[i].nonExistenceKey <== nonExistenceKey;
