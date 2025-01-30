@@ -1,6 +1,6 @@
 {
   "name": "@solarity/circom-lib",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "license": "MIT",
   "author": "Distributed Lab",
   "readme": "README.md",
@@ -44,7 +44,7 @@
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@solarity/chai-zkit": "^0.3.0",
     "@solarity/hardhat-zkit": "^0.5.10",
-    "@solarity/solidity-lib": "^2.7.15",
+    "@solarity/solidity-lib": "^2.7.17",
     "@typechain/ethers-v6": "^0.5.1",
     "@types/chai": "^4.3.14",
     "@types/mocha": "^10.0.9",
