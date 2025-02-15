@@ -20,8 +20,9 @@ circuits
 ├── blinders
 │   └── Commitment — "Commit/reveal scheme implementation"
 ├── data-structures    
-│   ├── SparseMerkleTree — "SMT Merkle inclusion/exclusion proofs verification"
-│   └── CartesianMerkleTree — "CMT Merkle inclusion/exclusion proofs verification"
+│   ├── CartesianMerkleTree — "CMT Merkle inclusion/exclusion proofs verification"
+│   ├── IncrementalMerkleTree - "IMT Merkle inclusion proofs verification"
+│   └── SparseMerkleTree — "SMT Merkle inclusion/exclusion proofs verification"
 ├── ec
 │   ├── curve — "Elliptic curve operations (secp256r1, secp256k1, brainpoolP256r1, brainpoolP384r1, secp384r1)"
 │   ├── get - "Generator point getters for supported elliptic curves"
