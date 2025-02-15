@@ -1,6 +1,6 @@
 {
   "name": "@solarity/circom-lib",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "license": "MIT",
   "author": "Distributed Lab",
   "readme": "README.md",
@@ -56,6 +56,7 @@
     "ethers": "^6.13.4",
     "hardhat": "^2.22.0",
     "husky": "^9.1.6",
+    "merkletreejs": "^0.4.1",
     "mocha": "^10.3.0",
     "path": "^0.12.7",
     "prettier": "^3.3.3",

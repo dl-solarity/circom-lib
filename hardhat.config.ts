@@ -27,6 +27,11 @@ const config: HardhatUserConfig = {
       },
     ],
   },
+  zkit: {
+    compilationSettings: {
+      onlyFiles: [],
+    },
+  },
   gasReporter: {
     currency: "USD",
     gasPrice: 50,
