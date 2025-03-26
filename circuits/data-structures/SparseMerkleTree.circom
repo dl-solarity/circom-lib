@@ -12,14 +12,12 @@ include "../utils/switcher.circom";
 template Hash2() {
     signal input a;
     signal input b;
-    signal input dummy;
 
     signal output out;
 
     component h = Poseidon(2);
     h.in[0] <== a;
     h.in[1] <== b;
-    h.dummy <== dummy;
 
     out <== h.out;
 }
@@ -32,7 +30,6 @@ template Hash3() {
     signal input a;
     signal input b;
     signal input c;    
-    signal input dummy;
 
     signal output out;
 
@@ -42,7 +39,6 @@ template Hash3() {
     h.in[0] <== a;
     h.in[1] <== b;
     h.in[2] <== c;
-    h.dummy <== dummy;
 
     out <== h.out;
 }
@@ -130,20 +126,17 @@ template DepthHasher() {
     signal input currentKeyBit;
     signal input child;
 
-    signal input dummy;
-
     signal output root;
 
     component switcher = Switcher();
-    switcher.L <== child;
-    switcher.R <== sibling;
+    switcher.in[0] <== child;
+    switcher.in[1] <== sibling;
     // Based on the current key bit, we understand which order to use
-    switcher.sel <== currentKeyBit;
+    switcher.bool <== currentKeyBit;
 
     component proofHash = Hash2();
-    proofHash.a <== switcher.outL;
-    proofHash.b <== switcher.outR;
-    proofHash.dummy <== dummy;
+    proofHash.a <== switcher.out[0];
+    proofHash.b <== switcher.out[1];
 
     signal res[3];
     // hash of the middle node
@@ -177,10 +170,6 @@ template SparseMerkleTree(depth) {
     // 1 if we are checking for exclusion, 0 if we are checking for inclusion
     signal input isExclusion;
 
-    signal input dummy;
-     
-    dummy * dummy === 0;
-
     // Check that the auxIsEmpty is 0 if we are checking for inclusion
     component exclusiveCase = AND();
     exclusiveCase.in[0] <== 1 - isExclusion;
@@ -202,13 +191,11 @@ template SparseMerkleTree(depth) {
     auxHash.a <== auxKey;
     auxHash.b <== auxValue;
     auxHash.c <== 1;
-    auxHash.dummy <== dummy;
 
     component hash = Hash3();
     hash.a <== key;
     hash.b <== value;
     hash.c <== 1;
-    hash.dummy <== dummy;
 
     component keyBits = Num2Bits_strict();
     keyBits.in <== key;
@@ -251,8 +238,6 @@ template SparseMerkleTree(depth) {
         depthHash[i].leaf <== hash.out;
 
         depthHash[i].currentKeyBit <== keyBits.out[i];
-
-        depthHash[i].dummy <== dummy;
 
         if (i == depth - 1) {
             // The last depth has no child

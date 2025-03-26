@@ -3,17 +3,12 @@ pragma circom 2.1.6;
 include "./poseidonConstants.circom";
 include "../../int/arithmetic.circom";
 
-/**
- * Poseidon hash for less than 16 inputs
- */
-
-/**
- * Next templates are helpers, don`t use them not in poseidon hash without understanding what are you doing!
- * Use Poseidon() below to get poseidon hash!
- */
+// Poseidon hash for less than 16 inputs
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+// Next templates are helpers, don`t use them not in poseidon hash without understanding what are u doing!
+// Use Poseidon() below to get poseidon hash!
 template Sigma() {
     signal input in;
-
     signal output out;
     
     signal in2;
@@ -27,7 +22,6 @@ template Sigma() {
 
 template Ark(t, C, r) {
     signal input in[t];
-
     signal output out[t];
 
     for (var i = 0; i < t; i++) {
@@ -37,81 +31,66 @@ template Ark(t, C, r) {
 
 template Mix(t, M) {
     signal input in[t];
-    signal input dummy;
+    
     
     signal output out[t];
-
-    dummy * dummy === 0;
     
     component sum[t];
 
     for (var i = 0; i < t; i++) {
         sum[i] = GetSumOfNElements(t);
-        sum[i].dummy <== dummy;
-
         for (var j = 0; j < t; j++) {
             sum[i].in[j] <== M[j][i] * in[j];
         }
-
         out[i] <== sum[i].out;
     }
 }
 
 template MixLast(t, M, s) {
     signal input in[t];
-    signal input dummy;
+    
     
     signal output out;
     
-    dummy * dummy === 0;
-    
     component sum = GetSumOfNElements(t);
-    sum.dummy <== dummy;
-
     for (var j = 0; j < t; j++) {
-        sum.in[j] <== M[j][s] * in[j];
+        sum.in[j] <==  M[j][s] * in[j];
     }
-
     out <== sum.out;
 }
 
 template MixS(t, S, r) {
     signal input in[t];
-    signal input dummy;
-
+    
+    
     signal output out[t];
     
-    dummy * dummy === 0;
     
     component sum = GetSumOfNElements(t);
-    sum.dummy <== dummy;
-
     for (var i = 0; i < t; i++) {
         sum.in[i] <== S[(t * 2 - 1) * r + i] * in[i];
     }
-
     out[0] <== sum.out;
 
     for (var i = 1; i < t; i++) {
-        out[i] <== in[i] + in[0] * S[(t * 2 - 1) * r + t + i - 1] + dummy * dummy;
+        out[i] <== in[i] + in[0] * S[(t * 2 - 1) * r + t + i - 1];
     }
 }
 
 template PoseidonEx(nInputs, nOuts) {
     signal input inputs[nInputs];
     signal input initialState;
-    signal input dummy;
     
+    
+
     signal output out[nOuts];
-
-    dummy * dummy === 0;
-
+    
     var N_ROUNDS_P[16] = [56, 57, 56, 60, 60, 63, 64, 63, 60, 66, 60, 65, 70, 60, 64, 68];
     var t = nInputs + 1;
     var nRoundsF = 8;
     var nRoundsP = N_ROUNDS_P[t - 2];
     var C[t * nRoundsF + nRoundsP] = POSEIDON_C(t);
-    var S[N_ROUNDS_P[t - 2] * (t * 2 - 1)] = POSEIDON_S(t);
+    var S[  N_ROUNDS_P[t - 2] * (t * 2 - 1)  ] = POSEIDON_S(t);
     var M[t][t] = POSEIDON_M(t);
     var P[t][t] = POSEIDON_P(t);
     
@@ -122,8 +101,8 @@ template PoseidonEx(nInputs, nOuts) {
     component mixS[nRoundsP];
     component mixLast[nOuts];
     
+    
     ark[0] = Ark(t, C, 0);
-
     for (var j = 0; j < t; j++) {
         if (j > 0) {
             ark[0].in[j] <== inputs[j - 1];
@@ -135,7 +114,6 @@ template PoseidonEx(nInputs, nOuts) {
     for (var r = 0; r < nRoundsF \ 2 - 1; r++) {
         for (var j = 0; j < t; j++) {
             sigmaF[r][j] = Sigma();
-
             if (r == 0) {
                 sigmaF[r][j].in <== ark[0].out[j];
             } else {
@@ -144,14 +122,11 @@ template PoseidonEx(nInputs, nOuts) {
         }
         
         ark[r + 1] = Ark(t, C, (r + 1) * t);
-
         for (var j = 0; j < t; j++) {
             ark[r + 1].in[j] <== sigmaF[r][j].out;
         }
         
         mix[r] = Mix(t,M);
-        mix[r].dummy <== dummy;
-
         for (var j = 0; j < t; j++) {
             mix[r].in[j] <== ark[r + 1].out[j];
         }
@@ -164,21 +139,18 @@ template PoseidonEx(nInputs, nOuts) {
     }
     
     ark[nRoundsF \ 2] = Ark(t, C, (nRoundsF \ 2) * t);
-
     for (var j = 0; j < t; j++) {
         ark[nRoundsF \ 2].in[j] <== sigmaF[nRoundsF \ 2 - 1][j].out;
     }
     
     mix[nRoundsF \ 2 - 1] = Mix(t,P);
-    mix[nRoundsF \ 2 - 1].dummy <== dummy;
-
     for (var j = 0; j < t; j++) {
         mix[nRoundsF \ 2 - 1].in[j] <== ark[nRoundsF \ 2].out[j];
     }
     
+    
     for (var r = 0; r < nRoundsP; r++) {
         sigmaP[r] = Sigma();
-
         if (r == 0) {
             sigmaP[r].in <== mix[nRoundsF \ 2 - 1].out[0];
         } else {
@@ -186,8 +158,6 @@ template PoseidonEx(nInputs, nOuts) {
         }
         
         mixS[r] = MixS(t, S, r);
-        mixS[r].dummy <== dummy;
-
         for (var j = 0; j < t; j++) {
             if (j == 0) {
                 mixS[r].in[j] <== sigmaP[r].out + C[(nRoundsF \ 2 + 1) * t + r];
@@ -204,7 +174,6 @@ template PoseidonEx(nInputs, nOuts) {
     for (var r = 0; r < nRoundsF \ 2 - 1; r++) {
         for (var j = 0; j < t; j++) {
             sigmaF[nRoundsF \ 2 + r][j] = Sigma();
-
             if (r == 0) {
                 sigmaF[nRoundsF \ 2 + r][j].in <== mixS[nRoundsP - 1].out[j];
             } else {
@@ -212,18 +181,16 @@ template PoseidonEx(nInputs, nOuts) {
             }
         }
         
-        ark[nRoundsF \ 2 + r + 1] = Ark(t, C,  (nRoundsF \ 2 + 1) * t + nRoundsP + r * t);
-
+        ark[ nRoundsF \ 2 + r + 1] = Ark(t, C,  (nRoundsF \ 2 + 1) * t + nRoundsP + r * t);
         for (var j = 0; j < t; j++) {
             ark[nRoundsF \ 2 + r + 1].in[j] <== sigmaF[nRoundsF \ 2 + r][j].out;
         }
         
         mix[nRoundsF \ 2 + r] = Mix(t,M);
-        mix[nRoundsF \ 2 + r].dummy <== dummy;
-
         for (var j = 0; j < t; j++) {
             mix[nRoundsF \ 2 + r].in[j] <== ark[nRoundsF \ 2 + r + 1].out[j];
-        }  
+        }
+        
     }
     
     for (var j = 0; j < t; j++) {
@@ -233,35 +200,27 @@ template PoseidonEx(nInputs, nOuts) {
     
     for (var i = 0; i < nOuts; i++) {
         mixLast[i] = MixLast(t,M,i);
-        mixLast[i].dummy <== dummy;
-
         for (var j = 0; j < t; j++) {
             mixLast[i].in[j] <== sigmaF[nRoundsF - 1][j].out;
         }
-
         out[i] <== mixLast[i].out;
-    }   
+    }
+    
 }
 
-/**
- * Secured version of Poseidon hash circomlib implementation.
- * Use this template to calculate to calculate Poseidon hash of your vector (1 elememnt array for one num).
- */
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+// Secured version of Poseidon hash circomlib implementation
+// Use this template to calculate to calculate Poseidon hash of your vector (1 elememnt array for one num)
 template Poseidon(nInputs) {
     signal input in[nInputs];
-    signal input dummy;
-
+    
+    
     signal output out;
-
-    dummy * dummy === 0;
     
     component pEx = PoseidonEx(nInputs, 1);
-    pEx.dummy <== dummy;
     pEx.initialState <== 0;
-
     for (var i = 0; i < nInputs; i++) {
         pEx.inputs[i] <== in[i];
     }
-
     out <== pEx.out[0];
 }

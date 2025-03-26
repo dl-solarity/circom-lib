@@ -7,13 +7,11 @@ include "../hasher/poseidon/poseidon.circom";
  */
 template Hash1() {
     signal input a;
-    signal input dummy;
 
     signal output out;
 
     component h = Poseidon(1);
     h.in[0] <== a;
-    h.dummy <== dummy;
 
     out <== h.out;
 }
@@ -24,14 +22,12 @@ template Hash1() {
 template Hash2() {
     signal input a;
     signal input b;
-    signal input dummy;
 
     signal output out;
 
     component h = Poseidon(2);
     h.in[0] <== a;
     h.in[1] <== b;
-    h.dummy <== dummy;
 
     out <== h.out;
 }
@@ -43,7 +39,6 @@ template Hash2() {
 template Commitment() {
     signal input nullifier;
     signal input secret;
-    signal input dummy;
 
     signal output commitment;
     signal output nullifierHash;
@@ -53,13 +48,11 @@ template Commitment() {
     component commitmentHash = Hash2();
     commitmentHash.a <== nullifier;
     commitmentHash.b <== secret;
-    commitmentHash.dummy <== dummy;
 
     commitment <== commitmentHash.out;
 
     component nullifierHasher = Hash1();
     nullifierHasher.a <== nullifier;
-    nullifierHasher.dummy <== dummy;
 
     nullifierHash <== nullifierHasher.out;
 }

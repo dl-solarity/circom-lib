@@ -1,8 +1,7 @@
 pragma circom 2.1.6;
 
-function getGPowStride8TableP256(n, k) {
+function get_g_pow_stride8_table_p256(n, k) {
     assert(n == 64 && k == 4);
-    
     var powers[32][256][2][4];
 
     powers[0][0][0][0] = 0;

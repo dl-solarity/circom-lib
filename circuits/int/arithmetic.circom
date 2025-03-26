@@ -135,13 +135,43 @@ template Log2Ceil(RANGE) {
     out <== sum[RANGE - 1];
 }
 
-/**
- * Computes last bit of num with any bit len for 2 constraints.
- * Returns bit (0 or 1) and div = num \ 2.
- */
-template GetLastBit() {
+// computes last bit of num with any bit len for 2 constraints
+// returns bit (0 or 1) and div = num \ 2
+// To get last bit we have to take 2 last bits
+// This is because we work in field:
+// for example, lets take sammer field p = 17
+// in = 5
+// There are 2 options:
+// bit = 1, div = 2, which is correct and intuitive
+// but we calculate it with var, so anything can be put
+// and if we put bit = 0, and div = 11:
+// 11 * 2 + 0 = 22
+// we work in field => 22 = 22 % 17 = 5;
+// 5 === 5, pass will check
+// THIS IS UNSECURE VERSION, NEVER (NEVER!!!!!!!!!!!!!) USE IT IN PRODUCTION!!!!
+template GetLastBit(){
     signal input in;
+    signal output bit;
+    signal output div;
+    
+    component getLastBits[2];
+    getLastBits[0] = GetLastBitUnsecure();
+    getLastBits[0].in <== in;
+    getLastBits[1] = GetLastBitUnsecure();
+    getLastBits[1].in <==  getLastBits[0].div;
 
+    getLastBits[1].div * 4 + getLastBits[1].bit * 2 + getLastBits[0].bit === in;
+
+    div <== getLastBits[0].div;
+    bit <== getLastBits[0].bit;
+}
+
+// computes last bit of num with any bit len for 2 constraints
+// returns bit (0 or 1) and div = num \ 2
+// HAS NO CHECK FOR CHANGING DIV = (p + in) / 2 FLOORED CHANGED!!!! (look explanation for previous template)
+// THIS IS UNSECURE VERSION, NEVER (NEVER!!!!!!!!!!!!!) USE IT IN PRODUCTION!!!!
+template GetLastBitUnsecure(){
+    signal input in;
     signal output bit;
     signal output div;
     
@@ -152,22 +182,21 @@ template GetLastBit() {
     div * 2 + bit * bit === in;
 }
 
-/**
- * Computes last n bits of any num, returns array of bits and div.
- * In fact, this is also just a div for (2 ** N).
- * For now, this is only one secured div that can be used.
- */
-template GetLastNBits(N) {
+// computes last n bits of any num
+// returns array of bits and div
+// in fact, this is also just a div for (2 ** N)
+// for now, this is only one secured div that can be used
+// THIS IS UNSECURE VERSION, NEVER (NEVER!!!!!!!!!!!!!) USE IT IN PRODUCTION!!!!
+template GetLastNBits(N){
+    assert (N >= 2);
     signal input in;
-    
     signal output div;
     signal output out[N];
     
     component getLastBit[N];
-
-    for (var i = 0; i < N; i++) {
-        getLastBit[i] = GetLastBit();
-        if (i == 0) {
+    for (var i = 0; i < N; i++){
+        getLastBit[i] = GetLastBitUnsecure();
+        if (i == 0){
             getLastBit[i].in <== in;
         } else {
             getLastBit[i].in <== getLastBit[i - 1].div;
@@ -176,33 +205,33 @@ template GetLastNBits(N) {
     }
     
     div <== getLastBit[N - 1].div;
+
+    signal check[N];
+    check[0] <== out[0] * out[0];
+    for (var i = 1; i < N; i ++){
+        check[i] <== check[i - 1] + out[i] * (2 ** i);
+    }
+
+    check[N - 1] + div * (2 ** N) === in;
 }
 
-/**
- * Get sum of N elements with 1 constraint.
- * Use this instead of a + b + ... + c;
- * Circom will drop linear constaraint because of optimisation.
- * This one adds dummy * dummy (0) to make it quadratic.
- */
-template GetSumOfNElements(N) { 
+
+// Get sum of N elements with 1 constraint.
+// Use this instead of a + b + ... + c;
+template GetSumOfNElements(N){ 
     assert (N >= 2);
     
     signal input in[N];
-    signal input dummy;
-    
     signal output out;
-
-	dummy * dummy === 0;
     
     signal sum[N - 1];
     
-    for (var i = 0; i < N - 1; i++) {
-        if (i == 0) {
+    for (var i = 0; i < N - 1; i++){
+        if (i == 0){
             sum[i] <== in[i] + in[i + 1];
         } else {
             sum[i] <== sum[i - 1] + in[i + 1];
         }
     }
-
-    out <== sum[N - 2] + dummy * dummy;
+    out <== sum[N - 2];
 }

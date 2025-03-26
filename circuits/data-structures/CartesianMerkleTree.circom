@@ -10,7 +10,6 @@ template Hash3() {
     signal input a;
     signal input b;
     signal input c;    
-    signal input dummy;
 
     signal output out;
 
@@ -18,7 +17,6 @@ template Hash3() {
     h.in[0] <== a;
     h.in[1] <== b;
     h.in[2] <== c;
-    h.dummy <== dummy;
 
     out <== h.out;
 }
@@ -65,38 +63,34 @@ template DepthHasher() {
     signal input directionBit;
     signal input accHash;
 
-    signal input dummy;
-
     signal output root;
 
     component keySwitcher = Switcher();
-    keySwitcher.L <== key;
-    keySwitcher.R <== nonExistenceKey;
-    keySwitcher.sel <== isExclusionLeaf;
+    keySwitcher.in[0] <== key;
+    keySwitcher.in[1] <== nonExistenceKey;
+    keySwitcher.bool <== isExclusionLeaf;
 
     component leafSwitcher = Switcher();
-    leafSwitcher.L <== sibling1;
-    leafSwitcher.R <== sibling2;
+    leafSwitcher.in[0] <== sibling1;
+    leafSwitcher.in[1] <== sibling2;
     // directionBit is 0 if sibling1 <= sibling2, 1 otherwise
-    leafSwitcher.sel <== directionBit;
+    leafSwitcher.bool <== directionBit;
 
     component leafHash = Hash3();
-    leafHash.a <== keySwitcher.outL;
-    leafHash.b <== leafSwitcher.outL;
-    leafHash.c <== leafSwitcher.outR;
-    leafHash.dummy <== dummy;
+    leafHash.a <== keySwitcher.out[0];
+    leafHash.b <== leafSwitcher.out[0];
+    leafHash.c <== leafSwitcher.out[1];
 
     component middleSwitcher = Switcher();
-    middleSwitcher.L <== accHash;
-    middleSwitcher.R <== sibling2;
+    middleSwitcher.in[0] <== accHash;
+    middleSwitcher.in[1] <== sibling2;
     // directionBit is 0 if accHash <= sibling2, 1 otherwise
-    middleSwitcher.sel <== directionBit;
+    middleSwitcher.bool <== directionBit;
 
     component middleHash = Hash3();
     middleHash.a <== sibling1;
-    middleHash.b <== middleSwitcher.outL;
-    middleHash.c <== middleSwitcher.outR;
-    middleHash.dummy <== dummy;
+    middleHash.b <== middleSwitcher.out[0];
+    middleHash.c <== middleSwitcher.out[1];
 
     signal res[2];
     // Hash of the leaf node
@@ -123,10 +117,6 @@ template CartesianMerkleTree(proofSize) {
     signal input nonExistenceKey;
 
     signal input isExclusion;
-
-    signal input dummy;
-
-    dummy * dummy === 0;
 
     component nodeType[maxDepth];
 
@@ -160,8 +150,6 @@ template CartesianMerkleTree(proofSize) {
         depthHash[i].sibling1 <== siblings[2 * i];
         depthHash[i].sibling2 <== siblings[2 * i + 1];
         depthHash[i].directionBit <== directionBits[i];
-
-        depthHash[i].dummy <== dummy;
 
         if (i != maxDepth - 1) {
             // The accHash of the current depth is the root of the previous depth
